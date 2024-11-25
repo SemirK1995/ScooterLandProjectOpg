@@ -1,0 +1,117 @@
+﻿@page "/opretkunde"
+@using ScooterLandProjectOpg.Shared.Models
+@inject HttpClient Http
+
+<h3>Opret Kunde</h3>
+
+<EditForm Model="nyKunde" OnValidSubmit="VisBekræftelsesDialog">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <label for="navn">Navn:</label>
+        <InputText @bind-Value="nyKunde.Navn" id="navn" class="form-control" placeholder="Indtast navn" />
+    </div>
+    <div class="mb-3">
+        <label for="email">Email:</label>
+        <InputText @bind-Value="nyKunde.Email" id="email" class="form-control" placeholder="Indtast email" />
+    </div>
+    <div class="mb-3">
+        <label for="telefon">Telefon:</label>
+        <InputNumber @bind-Value="nyKunde.Telefonnummer" id="telefon" class="form-control" placeholder="Indtast telefonnummer" />
+    </div>
+    <div class="mb-3">
+        <label for="adresse">Adresse:</label>
+        <InputText @bind-Value="nyKunde.Adresse" id="adresse" class="form-control" placeholder="Indtast adresse" />
+    </div>
+    <div class="mb-3">
+        <label for="scooterMaerke">Scooter Mærke:</label>
+        <InputText @bind-Value="nyKunde.ScooterMaerke" id="scooterMaerke" class="form-control" placeholder="Indtast scooter mærke" />
+    </div>
+    <button type="submit" class="btn btn-primary">Opret Kunde</button>
+</EditForm>
+
+<!-- Bekræftelsesdialog -->
+@if (visBekræftelse)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bekræft Oprettelse</h5>
+                    <button type="button" class="btn-close" @onclick="AnnullerBekræftelse"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på, at du vil oprette følgende kunde?</p>
+                    <ul>
+                        <li><strong>Navn:</strong> @nyKunde.Navn</li>
+                        <li><strong>Email:</strong> @nyKunde.Email</li>
+                        <li><strong>Telefon:</strong> @nyKunde.Telefonnummer</li>
+                        <li><strong>Adresse:</strong> @nyKunde.Adresse</li>
+                        <li><strong>Scooter Mærke:</strong> @nyKunde.ScooterMaerke</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" @onclick="OpretEnKunde">Ja, opret</button>
+                    <button class="btn btn-secondary" @onclick="AnnullerBekræftelse">Annuller</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (fejlbesked != null)
+{
+    <div class="alert alert-danger mt-3">@fejlbesked</div>
+}
+
+@if (succesbesked != null)
+{
+    <div class="alert alert-success mt-3">@succesbesked</div>
+}
+
+@code {
+    private Kunde nyKunde = new();
+    private bool visBekræftelse = false;
+    private string? fejlbesked;
+    private string? succesbesked;
+
+    private void VisBekræftelsesDialog()
+    {
+        // Reset fejl- og succesbeskeder
+        fejlbesked = null;
+        succesbesked = null;
+
+        // Vis bekræftelsesdialog
+        visBekræftelse = true;
+    }
+
+    private void AnnullerBekræftelse()
+    {
+        visBekræftelse = false;
+    }
+
+    private async Task OpretEnKunde()
+    {
+        try
+        {
+            visBekræftelse = false; // Luk bekræftelsesdialog
+            var response = await Http.PostAsJsonAsync("api/Kunde", nyKunde);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Ryd formularen og vis succesbesked
+                nyKunde = new Kunde();
+                succesbesked = "Kunden blev oprettet med succes!";
+            }
+            else
+            {
+                // Håndter fejl
+                fejlbesked = "Der opstod en fejl under oprettelse af kunden.";
+            }
+        }
+        catch (Exception ex)
+        {
+            fejlbesked = $"Fejl: {ex.Message}";
+        }
+    }
+}
+

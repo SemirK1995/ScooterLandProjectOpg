@@ -1,0 +1,219 @@
+﻿@page "/mekanikercatalog"
+@using ScooterLandProjectOpg.Shared.Models
+@inject HttpClient Http
+
+<h3>Mekaniker Katalog</h3>
+
+@if (mekanikere == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <button class="btn btn-success mb-3" @onclick="VisOpretModal">Opret Mekaniker</button>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Navn</th>
+                <th>Speciale</th>
+                <th>Telefonnummer</th>
+                <th>Handlinger</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var mekaniker in mekanikere)
+            {
+                <tr>
+                    <td>@mekaniker.MekanikerId</td>
+                    <td>@mekaniker.Navn</td>
+                    <td>@mekaniker.Speciale</td>
+                    <td>@mekaniker.Telefonnummer</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => VisRedigerModal(mekaniker)">Rediger</button>
+                        <button class="btn btn-danger" @onclick="() => VisSletModal(mekaniker)">Slet</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- Modal for oprettelse/redigering -->
+@if (visModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@modalTitel</h5>
+                    <button type="button" class="btn-close" @onclick="LukModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="valgtMekaniker" OnValidSubmit="VisBekræftModal">
+                        <DataAnnotationsValidator />
+                        <div>
+                            <label>Navn:</label>
+                            <InputText @bind-Value="valgtMekaniker.Navn" class="form-control" />
+                        </div>
+                        <div>
+                            <label>Speciale:</label>
+                            <InputText @bind-Value="valgtMekaniker.Speciale" class="form-control" />
+                        </div>
+                        <div>
+                            <label>Telefonnummer:</label>
+                            <InputNumber @bind-Value="valgtMekaniker.Telefonnummer" class="form-control" />
+                        </div>
+                    </EditForm>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" @onclick="VisBekræftModal">Gem</button>
+                    <button class="btn btn-secondary" @onclick="LukModal">Annuller</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Bekræftelsesmodal for oprettelse -->
+@if (visBekræftModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bekræftelse</h5>
+                    <button type="button" class="btn-close" @onclick="LukBekræftModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på, at du vil ændre mekanikeren "@valgtMekaniker.Navn" med speciale i @valgtMekaniker.Speciale?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" @onclick="GemMekaniker">Ja, Opret</button>
+                    <button class="btn btn-secondary" @onclick="LukBekræftModal">Annuller</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal for sletning -->
+@if (visSletModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bekræft sletning</h5>
+                    <button type="button" class="btn-close" @onclick="LukSletModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på, at du vil slette mekanikeren "@mekanikerTilSletning.Navn"?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" @onclick="SletBekræftetMekaniker">Ja, Slet</button>
+                    <button class="btn btn-secondary" @onclick="LukSletModal">Annuller</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Mekaniker>? mekanikere = new List<Mekaniker>();
+    private Mekaniker valgtMekaniker = new Mekaniker();
+    private Mekaniker mekanikerTilSletning = new Mekaniker();
+    private bool visModal = false;
+    private bool visBekræftModal = false;
+    private bool visSletModal = false;
+    private string modalTitel = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await HentAlleMekanikere();
+    }
+
+    private async Task HentAlleMekanikere()
+    {
+        mekanikere = await Http.GetFromJsonAsync<List<Mekaniker>>("api/Mekaniker");
+    }
+
+    private void VisOpretModal()
+    {
+        valgtMekaniker = new Mekaniker(); // Ny mekaniker
+        modalTitel = "Opret Mekaniker";
+        visModal = true;
+    }
+
+    private void VisRedigerModal(Mekaniker mekaniker)
+    {
+        valgtMekaniker = new Mekaniker
+            {
+                MekanikerId = mekaniker.MekanikerId,
+                Navn = mekaniker.Navn,
+                Speciale = mekaniker.Speciale,
+                Telefonnummer = mekaniker.Telefonnummer
+            };
+        modalTitel = "Rediger Mekaniker";
+        visModal = true;
+    }
+
+    private void VisBekræftModal()
+    {
+        visBekræftModal = true;
+    }
+
+    private async Task GemMekaniker()
+    {
+        if (valgtMekaniker.MekanikerId == 0)
+        {
+            var response = await Http.PostAsJsonAsync("api/Mekaniker", valgtMekaniker);
+            if (response.IsSuccessStatusCode)
+            {
+                await HentAlleMekanikere();
+            }
+        }
+        else
+        {
+            var response = await Http.PutAsJsonAsync($"api/Mekaniker/{valgtMekaniker.MekanikerId}", valgtMekaniker);
+            if (response.IsSuccessStatusCode)
+            {
+                await HentAlleMekanikere();
+            }
+        }
+        LukModal();
+        LukBekræftModal();
+    }
+
+    private void LukModal()
+    {
+        visModal = false;
+    }
+
+    private void LukBekræftModal()
+    {
+        visBekræftModal = false;
+    }
+
+    private void VisSletModal(Mekaniker mekaniker)
+    {
+        mekanikerTilSletning = mekaniker;
+        visSletModal = true;
+    }
+
+    private async Task SletBekræftetMekaniker()
+    {
+        var response = await Http.DeleteAsync($"api/Mekaniker/{mekanikerTilSletning.MekanikerId}");
+        if (response.IsSuccessStatusCode)
+        {
+            await HentAlleMekanikere();
+        }
+        LukSletModal();
+    }
+
+    private void LukSletModal()
+    {
+        visSletModal = false;
+    }
+}

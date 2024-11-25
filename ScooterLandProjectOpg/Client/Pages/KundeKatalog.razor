@@ -1,0 +1,286 @@
+﻿@page "/kundekatalog"
+@using ScooterLandProjectOpg.Shared.Models
+@inject HttpClient Http
+@using System.Text.Json
+
+<h3>Kunde Katalog</h3>
+
+@if (kunder == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <button class="btn btn-success mb-3" @onclick="VisOpretModal">Opret Kunde</button>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Navn</th>
+                <th>Email</th>
+                <th>Telefon</th>
+                <th>Adresse</th>
+                <th>Handlinger</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var kunde in kunder)
+            {
+                <tr>
+                    <td>@kunde.KundeId</td>
+                    <td>@kunde.Navn</td>
+                    <td>@kunde.Email</td>
+                    <td>@kunde.Telefonnummer</td>
+                    <td>@kunde.Adresse</td>
+                    <td>
+                        <button class="btn btn-info" @onclick="() => ÅbnSidePanel(kunde.KundeId)">Se Ordrer</button>
+                        <button class="btn btn-primary" @onclick="() => VisRedigerModal(kunde)">Rediger</button>
+                        <button class="btn btn-danger" @onclick="() => VisSletModal(kunde)">Slet</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+<!-- Sidepanel -->
+@if (visSidePanel)
+{
+    <div class="sidepanel">
+        <div class="sidepanel-header">
+            <h4>Kundeoplysninger</h4>
+            <button class="btn-close" @onclick="LukSidePanel">X</button>
+        </div>
+        <div class="sidepanel-body">
+            @if (søgeResultatKunde != null)
+            {
+                <p><strong>Kunde ID:</strong> @søgeResultatKunde.KundeId</p>
+                <p><strong>Navn:</strong> @søgeResultatKunde.Navn</p>
+                <p><strong>Email:</strong> @søgeResultatKunde.Email</p>
+                <p><strong>Telefon:</strong> @søgeResultatKunde.Telefonnummer</p>
+                <p><strong>Adresse:</strong> @søgeResultatKunde.Adresse</p>
+                <p><strong>Scooter Mærke:</strong> @søgeResultatKunde.ScooterMaerke</p>
+
+                <h5>Ordrer:</h5>
+                @if (søgeResultatKunde.Ordre != null && søgeResultatKunde.Ordre.Any())
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Ordre ID</th>
+                                <th>Dato</th>
+                                <th>Total Pris</th>
+                                <th>Status</th>
+                                <th>Ydelser</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ordre in søgeResultatKunde.Ordre)
+                            {
+                                <tr>
+                                    <td>@ordre.OrdreId</td>
+                                    <td>@(ordre.Dato.HasValue ? ordre.Dato.Value.ToString("dd-MM-yyyy") : "N/A")</td>
+                                    <td>@ordre.TotalPris?.ToString("F2") kr.</td>
+                                    <td>@(ordre.Status?.ToString() ?? "N/A")</td>
+                                    <td>
+                                        <ul>
+                                            @foreach (var ydelse in ordre.OrdreYdelse)
+                                            {
+                                                <li>@ydelse.Ydelse?.Navn - @ydelse.AftaltPris kr.</li>
+                                            }
+                                        </ul>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>Kunden har ingen ordrer.</p>
+                }
+            }
+            else
+            {
+                <p>Indlæser kundeoplysninger...</p>
+            }
+        </div>
+    </div>
+}
+
+<!-- Modal for oprettelse/redigering -->
+@if (visModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@modalTitel</h5>
+                    <button type="button" class="btn-close" @onclick="LukModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="valgtKunde" OnValidSubmit="GemKunde">
+                        <DataAnnotationsValidator />
+                        <div>
+                            <label>Navn:</label>
+                            <InputText @bind-Value="valgtKunde.Navn" class="form-control" />
+                        </div>
+                        <div>
+                            <label>Email:</label>
+                            <InputText @bind-Value="valgtKunde.Email" class="form-control" />
+                        </div>
+                        <div>
+                            <label>Telefon:</label>
+                            <InputNumber @bind-Value="valgtKunde.Telefonnummer" class="form-control" />
+                        </div>
+                        <div>
+                            <label>Adresse:</label>
+                            <InputText @bind-Value="valgtKunde.Adresse" class="form-control" />
+                        </div>
+                        <div>
+                            <label>Scooter Mærke:</label>
+                            <InputText @bind-Value="valgtKunde.ScooterMaerke" class="form-control" />
+                        </div>
+                        <button class="btn btn-primary" type="submit">Gem</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal for sletning -->
+@if (visSletModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bekræft Sletning</h5>
+                    <button type="button" class="btn-close" @onclick="LukSletModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på, at du vil slette kunden "@kundeTilSletning.Navn"?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" @onclick="SletBekræftetKunde">Ja, Slet</button>
+                    <button class="btn btn-secondary" @onclick="LukSletModal">Annuller</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .sidepanel {
+        position: fixed;
+        right: 0;
+        top: 0;
+        height: 100%;
+        width: 400px;
+        background-color: #f8f9fa;
+        box-shadow: -3px 0px 10px rgba(0, 0, 0, 0.3);
+        overflow-y: auto;
+        padding: 20px;
+        z-index: 1050;
+    }
+</style>
+
+@code {
+    private List<Kunde> kunder = new();
+    private Kunde valgtKunde = new();
+    private Kunde kundeTilSletning = new();
+    private Kunde søgeResultatKunde = new();
+    private bool visModal = false;
+    private bool visSidePanel = false;
+    private bool visSletModal = false;
+    private string modalTitel = "";
+    private int søgeKundeId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await HentAlleKunder();
+    }
+
+    private async Task HentAlleKunder()
+    {
+        kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
+    }
+
+    private async Task ÅbnSidePanel(int kundeId)
+    {
+        søgeKundeId = kundeId;
+        visSidePanel = true;
+        await HentKundeOgOrdrer();
+    }
+
+    private async Task HentKundeOgOrdrer()
+    {
+        var response = await Http.GetAsync($"api/Kunde/{søgeKundeId}/ordrer");
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadAsStringAsync();
+            var ordrer = JsonSerializer.Deserialize<List<Ordre>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            søgeResultatKunde = ordrer?.FirstOrDefault()?.Kunde;
+            if (søgeResultatKunde != null) søgeResultatKunde.Ordre = ordrer;
+        }
+    }
+
+    private void LukSidePanel()
+    {
+        visSidePanel = false;
+    }
+
+    private void VisOpretModal()
+    {
+        valgtKunde = new Kunde();
+        modalTitel = "Opret Kunde";
+        visModal = true;
+    }
+
+    private void VisRedigerModal(Kunde kunde)
+    {
+        valgtKunde = kunde;
+        modalTitel = "Rediger Kunde";
+        visModal = true;
+    }
+
+    private async Task GemKunde()
+    {
+        if (valgtKunde.KundeId == 0)
+        {
+            await Http.PostAsJsonAsync("api/Kunde", valgtKunde);
+        }
+        else
+        {
+            await Http.PutAsJsonAsync($"api/Kunde/{valgtKunde.KundeId}", valgtKunde);
+        }
+        await HentAlleKunder();
+        LukModal();
+    }
+
+    private void LukModal()
+    {
+        visModal = false;
+    }
+
+    private void VisSletModal(Kunde kunde)
+    {
+        kundeTilSletning = kunde;
+        visSletModal = true;
+    }
+
+    private async Task SletBekræftetKunde()
+    {
+        await Http.DeleteAsync($"api/Kunde/{kundeTilSletning.KundeId}");
+        await HentAlleKunder();
+        LukSletModal();
+    }
+
+    private void LukSletModal()
+    {
+        visSletModal = false;
+    }
+}
