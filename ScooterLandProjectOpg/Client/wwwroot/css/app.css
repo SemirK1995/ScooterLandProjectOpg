@@ -99,3 +99,33 @@ a, .btn-link {
     .loading-progress-text:after {
         content: var(--blazor-load-percentage-text, "Loading");
     }
+
+
+
+.footer-box {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #f9f9f9; /* Lys baggrund for kontrast */
+    border: 1px solid #cccccc; /* Diskret grå kant */
+    padding: 10px; /* Tæt padding for et kompakt udseende */
+    border-radius: 8px; /* Rundede hjørner */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Let skygge */
+    font-size: 0.85em; /* Mindre skriftstørrelse */
+    text-align: left;
+    z-index: 1000;
+    max-width: 200px; /* Begræns bredden på boksen */
+}
+
+    .footer-box p {
+        margin: 4px 0; /* Mindre mellemrum mellem linjer */
+        line-height: 1.2; /* Tættere linjeafstand */
+    }
+
+        .footer-box p:first-child {
+            font-size: 1em; /* Gør første linje lidt større */
+            font-weight: bold; /* Fed skrift til "Scooterland" */
+            color: #007bff; /* Blå farve for at fremhæve */
+            margin-bottom: 6px; /* Lidt mere afstand under første linje */
+        }
+
