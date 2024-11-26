@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ScooterLandProjectOpg.Server.Context;
 
@@ -11,9 +12,11 @@ using ScooterLandProjectOpg.Server.Context;
 namespace ScooterLandProjectOpg.Server.Migrations
 {
     [DbContext(typeof(ScooterLandContext))]
-    partial class ScooterLandContextModelSnapshot : ModelSnapshot
+    [Migration("20241125143635_tilfoejetekstratilLejeAftale")]
+    partial class tilfoejetekstratilLejeAftale
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,21 +154,13 @@ namespace ScooterLandProjectOpg.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LejeScooterId"));
 
-                    b.Property<bool>("ErTilgængelig")
-                        .HasColumnType("bit");
-
                     b.Property<int>("LejeId")
                         .HasColumnType("int");
 
-                    b.Property<string>("RegistreringsNummer")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ScooterMaerke")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ScooterModel")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("SlutDato")

@@ -1,0 +1,210 @@
+﻿@page "/opretordre"
+@using ScooterLandProjectOpg.Shared.DTO
+@using ScooterLandProjectOpg.Shared.Models
+@inject HttpClient Http
+
+<h3>Opret Ordre</h3>
+
+<div class="form-group">
+    <label for="kunde">Vælg Kunde:</label>
+    <select id="kunde" class="form-control" @bind="valgtKundeId">
+        <option value="">-- Vælg en kunde --</option>
+        @foreach (var kunde in kunder)
+        {
+            <option value="@kunde.KundeId">@kunde.Navn</option>
+        }
+    </select>
+</div>
+
+@if (valgtKundeId > 0)
+{
+    <div>
+        <h5>Tilgængelige Ydelser:</h5>
+        @if (alleYdelser != null && alleYdelser.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ydelse</th>
+                        <th>Standard Pris</th>
+                        <th>Handlinger</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ydelse in alleYdelser)
+                    {
+                        <tr>
+                            <td>@ydelse.Navn</td>
+                            <td>@ydelse.StandardPris?.ToString("F2") kr.</td>
+                            <td>
+                                <button class="btn btn-success" @onclick="() => TilføjYdelse(ydelse)">Tilføj</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>Ingen ydelser tilgængelige.</p>
+        }
+    </div>
+
+    <div class="mt-3">
+        <h5>Valgte Ydelser:</h5>
+        @if (valgteOrdreYdelser.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ydelse</th>
+                        <th>Standard Pris</th>
+                        <th>Aftalt Pris</th>
+                        <th>Handlinger</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ordreYdelse in valgteOrdreYdelser)
+                    {
+                        <tr>
+                            <td>@ordreYdelse.Ydelse.Navn</td>
+                            <td>@ordreYdelse.Ydelse.StandardPris?.ToString("F2") kr.</td>
+                            <td>
+                                <InputNumber @bind-Value="ordreYdelse.AftaltPris" class="form-control" />
+                            </td>
+                            <td>
+                                <button class="btn btn-danger" @onclick="() => FjernYdelse(ordreYdelse)">Fjern</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <h5>Totalpris: @TotalPris kr.</h5>
+        }
+        else
+        {
+            <p>Ingen ydelser er valgt.</p>
+        }
+
+        <button class="btn btn-primary mt-3" @onclick="VisBekræftelse">Gem Ordre</button>
+    </div>
+}
+else
+{
+    <p>Vælg en kunde for at se tilgængelige ydelser.</p>
+}
+
+<!-- Bekræftelsesmodal -->
+@if (visBekræftelsesModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bekræft Oprettelse</h5>
+                    <button type="button" class="btn-close" @onclick="LukBekræftelsesModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på, at du vil oprette denne ordre?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" @onclick="LukBekræftelsesModal">Annuller</button>
+                    <button class="btn btn-primary" @onclick="BekræftOprettelse">Bekræft</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Besked om succes -->
+@if (visSuccesBesked)
+{
+    <div class="alert alert-success mt-3">
+        Ordren blev oprettet succesfuldt!
+    </div>
+}
+
+@code {
+    private List<Kunde> kunder = new();
+    private List<Ydelse> alleYdelser = new();
+    private List<Ydelse> valgteYdelser = new();
+    private List<OrdreYdelse> valgteOrdreYdelser = new List<OrdreYdelse>();
+
+    private int valgtKundeId;
+    private bool visBekræftelsesModal = false;
+    private bool visSuccesBesked = false;
+
+    private double TotalPris => valgteOrdreYdelser.Sum(oy => oy.AftaltPris ?? oy.Ydelse.StandardPris ?? 0);
+
+    protected override async Task OnInitializedAsync()
+    {
+        kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
+
+        alleYdelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
+    }
+
+    private void TilføjYdelse(Ydelse ydelse)
+    {
+        if (!valgteOrdreYdelser.Any(oy => oy.Ydelse.YdelseId == ydelse.YdelseId))
+        {
+            valgteOrdreYdelser.Add(new OrdreYdelse
+                {
+                    Ydelse = ydelse,
+                    AftaltPris = null,
+                    Dato = DateTime.Now
+                });
+        }
+    }
+
+    private void FjernYdelse(OrdreYdelse ordreydelse)
+    {
+        valgteOrdreYdelser.Remove(ordreydelse);
+    }
+
+    private void VisBekræftelse()
+    {
+        visBekræftelsesModal = true;
+    }
+
+    private void LukBekræftelsesModal()
+    {
+        visBekræftelsesModal = false;
+    }
+
+    private async Task BekræftOprettelse()
+    {
+        visBekræftelsesModal = false;
+
+        if (valgtKundeId == 0 || !valgteOrdreYdelser.Any())
+        {
+            Console.WriteLine("Vælg en kunde og mindst én ydelse.");
+            return;
+        }
+
+        var ordreDTO = new CreateOrdreDto
+            {
+                KundeId = valgtKundeId,
+                Dato = DateTime.Now,
+                TotalPris = valgteOrdreYdelser.Sum(oy => oy.AftaltPris ?? oy.Ydelse.StandardPris ?? 0),
+                OrdreYdelser = valgteOrdreYdelser.Select(oy => new CreateOrdreYdelseDto
+                {
+                    YdelseId = oy.Ydelse.YdelseId,
+                    AftaltPris = oy.AftaltPris,
+                    Dato = DateTime.Now
+                }).ToList()
+            };
+
+        var response = await Http.PostAsJsonAsync("api/ordre", ordreDTO);
+        if (response.IsSuccessStatusCode)
+        {
+            visSuccesBesked = true;
+            valgteOrdreYdelser.Clear();
+            valgtKundeId = 0;
+        }
+        else
+        {
+            Console.WriteLine("Fejl ved oprettelse af ordre.");
+        }
+    }
+}

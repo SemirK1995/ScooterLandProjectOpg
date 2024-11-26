@@ -16,7 +16,7 @@ namespace ScooterLandProjectOpg.Server.Controllers
             _ydelseRepository = ydelseRepository;
         }
 
-        // GET: api/ydelser
+        // GET: api/Ydelse
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Ydelse>>> GetAll()
         {
