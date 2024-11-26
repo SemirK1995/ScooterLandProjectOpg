@@ -15,11 +15,11 @@ namespace ScooterLandProjectOpg.Shared.Models
 		public int LejeScooterId { get; set; }
 
 		// Foreign Key
-		public int LejeId { get; set; }
+		public int? LejeId { get; set; }
 
 		// Navigation property
 		[ForeignKey("LejeId")]
-		public LejeAftale LejeAftale { get; set; }
+		public LejeAftale? LejeAftale { get; set; }
 
 		public string ScooterModel { get; set; }
 		public string ScooterMaerke { get; set; }

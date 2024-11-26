@@ -59,7 +59,7 @@ namespace ScooterLandProjectOpg.Shared.Models
         }
 
         // Navigation property til en liste af LejeScooter
-        public List<LejeScooter>? LejeScooter { get; set; } = new List<LejeScooter>();
+        public List<LejeScooter>? LejeScooter { get; set; }
 
         //Null constructor til EF
         public LejeAftale()

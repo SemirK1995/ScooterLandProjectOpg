@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ScooterLandProjectOpg.Server.Interfaces;
 using ScooterLandProjectOpg.Shared.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ScooterLandProjectOpg.Server.Controllers
 {
@@ -9,78 +10,37 @@ namespace ScooterLandProjectOpg.Server.Controllers
     [ApiController]
     public class LejeScooterController : ControllerBase
     {
-        private readonly IRepository<LejeScooter> _lejeScooterRepository;
+        private readonly ILejeScooterRepository _lejeScooterRepository;
 
-        public LejeScooterController(IRepository<LejeScooter> lejeScooterRepository)
+        public LejeScooterController(ILejeScooterRepository lejeScooterRepository)
         {
             _lejeScooterRepository = lejeScooterRepository;
         }
-
-        // GET: api/lejescootere
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<LejeScooter>>> GetAll()
+        
+        [HttpGet("available")]
+        public async Task<ActionResult<IEnumerable<LejeScooter>>> GetAvailableScooters()
         {
-            var lejeScootere = await _lejeScooterRepository.GetAllAsync();
-            return Ok(lejeScootere);
+            var availableScooters = await _lejeScooterRepository.GetScootersAvailableAsync();
+            if (availableScooters == null || !availableScooters.Any())
+            {
+                return NotFound("Ingen ledige scootere fundet.");
+            }
+            return Ok(availableScooters);
         }
 
-        // GET: api/lejescootere/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<LejeScooter>> GetById(int id)
+        [HttpPut("{id}/assign")]
+        public async Task<IActionResult> AssignScooterToLeje(int id, [FromBody] int lejeId)
         {
-            var lejeScooter = await _lejeScooterRepository.GetByIdAsync(id);
-            if (lejeScooter == null)
+            try
             {
-                return NotFound($"LejeScooter with ID {id} not found.");
+                await _lejeScooterRepository.UpdateScooterLejeIdAsync(id, lejeId);
+                return NoContent();
             }
-
-            return Ok(lejeScooter);
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        // POST: api/lejescootere
-        [HttpPost]
-        public async Task<ActionResult<LejeScooter>> Add([FromBody] LejeScooter lejeScooter)
-        {
-            if (lejeScooter == null)
-            {
-                return BadRequest("LejeScooter data is null.");
-            }
-
-            var createdLejeScooter = await _lejeScooterRepository.AddAsync(lejeScooter);
-            return CreatedAtAction(nameof(GetById), new { id = createdLejeScooter.LejeScooterId }, createdLejeScooter);
-        }
-
-        // PUT: api/lejescootere/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] LejeScooter lejeScooter)
-        {
-            if (lejeScooter == null || lejeScooter.LejeScooterId != id)
-            {
-                return BadRequest("LejeScooter ID mismatch.");
-            }
-
-            var existingLejeScooter = await _lejeScooterRepository.GetByIdAsync(id);
-            if (existingLejeScooter == null)
-            {
-                return NotFound($"LejeScooter with ID {id} not found.");
-            }
-
-            await _lejeScooterRepository.UpdateAsync(lejeScooter);
-            return NoContent();
-        }
-
-        // DELETE: api/lejescootere/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var existingLejeScooter = await _lejeScooterRepository.GetByIdAsync(id);
-            if (existingLejeScooter == null)
-            {
-                return NotFound($"LejeScooter with ID {id} not found.");
-            }
-
-            await _lejeScooterRepository.DeleteAsync(id);
-            return NoContent();
-        }
     }
 }

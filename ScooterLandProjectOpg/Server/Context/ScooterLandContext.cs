@@ -20,5 +20,20 @@ namespace ScooterLandProjectOpg.Server.Context
 		public DbSet<Ordre> Ordrer { get; set; }
 		public DbSet<OrdreYdelse> OrdreYdelser { get; set; }
 		public DbSet<Ydelse> Ydelser { get; set; }
-	}
+
+
+        // Konfiguration af relationer mellem modeller
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Definer relationen mellem LejeScooter og LejeAftale
+            modelBuilder.Entity<LejeScooter>()
+                .HasOne(ls => ls.LejeAftale) // LejeScooter har en LejeAftale
+                .WithMany(la => la.LejeScooter) // LejeAftale kan have mange LejeScooter
+                .HasForeignKey(ls => ls.LejeId) // Foreign Key er LejeId i LejeScooter
+                .OnDelete(DeleteBehavior.Restrict); // Restriktiv sletning, så scootere ikke slettes automatisk
+        }
+
+    }
 }
