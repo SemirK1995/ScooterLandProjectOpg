@@ -11,7 +11,7 @@ namespace ScooterLandProjectOpg.Shared.DTO
         public int KundeId { get; set; }
         public DateTime Dato { get; set; } = DateTime.Now;
         public double TotalPris { get; set; }
-        public List<CreateOrdreYdelseDto> OrdreYdelser { get; set; }
+        public List<CreateOrdreYdelseDto> OrdreYdelser { get; set; } = new();
 
         // Valgfri lejeaftale
         public CreateLejeAftaleDto? LejeAftale { get; set; } // Valgfri

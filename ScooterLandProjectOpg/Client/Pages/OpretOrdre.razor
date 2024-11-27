@@ -201,6 +201,7 @@
 
 	private double TotalPris => valgteOrdreYdelser.Sum(oy => oy.AftaltPris ?? oy.Ydelse.StandardPris ?? 0) + BeregnLejeAftaleTotalPris();
 
+
 	protected override async Task OnInitializedAsync()
 	{
 		kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
@@ -210,18 +211,20 @@
 
 	private double BeregnLejeAftaleTotalPris()
 	{
-		if (lejeaftale.StartDato != null && lejeaftale.SlutDato != null && lejeaftale.DagligLeje != null)
+		if (lejeaftale == null || !lejeaftale.StartDato.HasValue || !lejeaftale.SlutDato.HasValue || lejeaftale.DagligLeje <= 0)
 		{
-			var dage = (lejeaftale.SlutDato.Value - lejeaftale.StartDato.Value).Days;
-			var kilometerOmkostning = lejeaftale.KortKilometer.HasValue
-				? lejeaftale.KilometerPris * lejeaftale.KortKilometer.Value
-				: 0;
-			var forsikringsPris = lejeaftale.Forsikring ? lejeaftale.Selvrisiko : 0;
-
-			return (lejeaftale.DagligLeje * dage) + kilometerOmkostning + forsikringsPris;
+			return 0; // Returner 0, hvis noget mangler
 		}
-		return 0;
+
+		var dage = (lejeaftale.SlutDato.Value - lejeaftale.StartDato.Value).Days;
+		var kilometerOmkostning = lejeaftale.KortKilometer.HasValue
+			? lejeaftale.KilometerPris * lejeaftale.KortKilometer.Value
+			: 0;
+		var forsikringsPris = lejeaftale.Forsikring ? lejeaftale.Selvrisiko : 0;
+
+		return (lejeaftale.DagligLeje * dage) + kilometerOmkostning + forsikringsPris;
 	}
+
 
 	private void AktivTabSkift(string tab) => aktivTab = tab;
 
@@ -257,15 +260,20 @@
 	{
 		visBekræftelsesModal = false;
 
-		if (valgtKundeId == 0 || (!valgteOrdreYdelser.Any() && (lejeaftale == null || lejeaftale.StartDato == default || lejeaftale.SlutDato == default)))
+		if (valgtKundeId == 0 || (!valgteOrdreYdelser.Any() && lejeaftale == null))
 		{
 			Console.WriteLine("Vælg en kunde og tilføj mindst én ydelse eller udfyld lejeaftaledetaljer.");
 			return;
 		}
 
+		// Tilføj kun lejeaftale, hvis der er en scooter valgt
 		if (valgtScooterId.HasValue)
 		{
 			lejeaftale.LejeScooterId = valgtScooterId.Value;
+		}
+		else
+		{
+			lejeaftale = null; // Ingen lejeaftale
 		}
 
 		var ordreDTO = new CreateOrdreDto
@@ -282,18 +290,27 @@
 				LejeAftale = lejeaftale
 			};
 
-		var response = await Http.PostAsJsonAsync("api/ordre", ordreDTO);
-		if (response.IsSuccessStatusCode)
+		try
 		{
-			visSuccesBesked = true;
-			valgteOrdreYdelser.Clear();
-			valgtKundeId = 0;
-			valgtScooterId = null;
-			lejeaftale = new CreateLejeAftaleDto();
+			var response = await Http.PostAsJsonAsync("api/ordre", ordreDTO);
+			if (response.IsSuccessStatusCode)
+			{
+				visSuccesBesked = true;
+				valgteOrdreYdelser.Clear();
+				valgtKundeId = 0;
+				valgtScooterId = null;
+				lejeaftale = new CreateLejeAftaleDto();
+			}
+			else
+			{
+				Console.WriteLine("Fejl ved oprettelse af ordre.");
+			}
 		}
-		else
+		catch (Exception ex)
 		{
-			Console.WriteLine("Fejl ved oprettelse af ordre.");
+			Console.WriteLine($"En undtagelse opstod: {ex.Message}");
 		}
 	}
+
 }
+

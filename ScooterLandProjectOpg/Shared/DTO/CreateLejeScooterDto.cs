@@ -9,7 +9,9 @@ namespace ScooterLandProjectOpg.Shared.DTO
 {
     public class CreateLejeScooterDto
     {
-        [Required(ErrorMessage = "Scootermodel er påkrævet.")]
+		public int LejeScooterId { get; set; }
+
+		[Required(ErrorMessage = "Scootermodel er påkrævet.")]
         public string ScooterModel { get; set; }
 
         [Required(ErrorMessage = "Scootermærke er påkrævet.")]
@@ -17,14 +19,12 @@ namespace ScooterLandProjectOpg.Shared.DTO
 
         public string? RegistreringsNummer { get; set; }
 
-        [Required(ErrorMessage = "Startdato for leje af scooter er påkrævet.")]
         public DateTime? StartDato { get; set; }
 
-        [Required(ErrorMessage = "Slutdato for leje af scooter er påkrævet.")]
         public DateTime? SlutDato { get; set; }
 
         public bool ErTilgængelig { get; set; } = true; // Standard: Tilgængelig
 
-        public int LejeScooterId { get; set; }
+        
     }
 }
