@@ -19,6 +19,8 @@ namespace ScooterLandProjectOpg.Server.Services
 			return await _context.Set<OrdreYdelse>()
 				.Include(o => o.Ordre)  // Include the associated Ordre
 				.Include(o => o.Ydelse) // Include the associated Ydelse
+				.Include(o =>o.Scooter)
+				.ThenInclude(s => s.Kunde)
 				.ToListAsync();
 		}
 
@@ -30,5 +32,7 @@ namespace ScooterLandProjectOpg.Server.Services
 				.Include(o => o.Ydelse) // Include the associated Ydelse
 				.FirstOrDefaultAsync(o => o.OrdreYdelseId == id);
 		}
+
+
 	}
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ScooterLandProjectOpg.Server.Context;
 
@@ -11,9 +12,11 @@ using ScooterLandProjectOpg.Server.Context;
 namespace ScooterLandProjectOpg.Server.Migrations
 {
     [DbContext(typeof(ScooterLandContext))]
-    partial class ScooterLandContextModelSnapshot : ModelSnapshot
+    [Migration("20241128094553_MekanikerYdelseEntitetFjernet")]
+    partial class MekanikerYdelseEntitetFjernet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -258,12 +261,6 @@ namespace ScooterLandProjectOpg.Server.Migrations
 
                     b.Property<int?>("ScooterId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("SlutDato")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("StartDato")
-                        .HasColumnType("datetime2");
 
                     b.Property<double?>("Timer")
                         .HasColumnType("float");

@@ -18,9 +18,6 @@ namespace ScooterLandProjectOpg.Shared.Models
 		public double? StandardPris { get; set; }
 
 
-		// Navigation property til en liste af MekanikerYdelse
-		public List<MekanikerYdelse>? MekanikerYdelse { get; set; } = new List<MekanikerYdelse>();
-
 		// Navigation property til en liste af OrdreYdelse
 		public List<OrdreYdelse>? OrdreYdelse { get; set; } = new List<OrdreYdelse>();
 

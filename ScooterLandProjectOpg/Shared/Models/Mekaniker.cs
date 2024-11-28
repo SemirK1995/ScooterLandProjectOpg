@@ -19,9 +19,6 @@ namespace ScooterLandProjectOpg.Shared.Models
 		public string? Speciale { get; set; }
 
 
-		// Navigation property til en liste af MekanikerYdelse
-		public List<MekanikerYdelse>? MekanikerYdelse { get; set; } = new List<MekanikerYdelse>();
-
 		//Null constructor
 		public Mekaniker()
 		{

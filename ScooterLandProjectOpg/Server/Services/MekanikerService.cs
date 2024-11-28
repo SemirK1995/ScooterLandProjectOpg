@@ -27,14 +27,6 @@ namespace ScooterLandProjectOpg.Server.Services
 				.FirstOrDefaultAsync(m => m.MekanikerId == id);
 		}
 
-		// Hent alle mekanikere med deres ydelser
-		public async Task<IEnumerable<Mekaniker>> GetAllWithYdelserAsync()
-		{
-			return await _context.Mekanikere
-				.Include(m => m.MekanikerYdelse) // Inkluder relaterede ydelser
-				.ToListAsync();
-		}
-
 		// Tilføj ny mekaniker
 		public async Task<Mekaniker> AddAsync(Mekaniker mekaniker)
 		{

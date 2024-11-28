@@ -6,7 +6,6 @@ namespace ScooterLandProjectOpg.Server.Interfaces
 	{
 		Task<IEnumerable<Mekaniker>> GetAllAsync(); // Hent alle mekanikere
 		Task<Mekaniker> GetByIdAsync(int id); // Hent mekaniker ved id
-		Task<IEnumerable<Mekaniker>> GetAllWithYdelserAsync(); // Hent mekanikere med deres ydelser
 		Task<Mekaniker> AddAsync(Mekaniker mekaniker); // Tilføj ny mekaniker
 		Task UpdateAsync(Mekaniker mekaniker); // Opdater eksisterende mekaniker
 		Task DeleteAsync(int id); // Slet mekaniker

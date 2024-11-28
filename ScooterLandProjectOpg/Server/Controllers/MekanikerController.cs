@@ -24,14 +24,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
             return Ok(mekanikere);
         }
 
-        // GET: api/Mekaniker/with-ydelser
-        [HttpGet("with-ydelser")]
-        public async Task<ActionResult<IEnumerable<Mekaniker>>> GetAllWithYdelser()
-        {
-            var mekanikere = await _mekanikerRepository.GetAllWithYdelserAsync();
-            return Ok(mekanikere);
-        }
-
         // GET: api/Mekaniker/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Mekaniker>> GetById(int id)

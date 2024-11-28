@@ -21,7 +21,6 @@ builder.Services.AddScoped<IKundeScooterRepository, KundeScooterService>();
 builder.Services.AddScoped<ILejeAftaleRepository, LejeAftaleService>();
 builder.Services.AddScoped<ILejeScooterRepository, LejeScooterService>();
 builder.Services.AddScoped<IMekanikerRepository, MekanikerService>();
-builder.Services.AddScoped<IMekanikerYdelseRepository, MekanikerYdelseService>();
 builder.Services.AddScoped<IOrdreRepository, OrdreService>();
 builder.Services.AddScoped<IOrdreYdelseRepository, OrdreYdelseService>();
 builder.Services.AddScoped<IYdelseRepository, YdelseService>();
