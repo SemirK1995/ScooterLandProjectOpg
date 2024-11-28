@@ -22,11 +22,43 @@
         <label for="adresse">Adresse:</label>
         <InputText @bind-Value="nyKunde.Adresse" id="adresse" class="form-control" placeholder="Indtast adresse" />
     </div>
-    <div class="mb-3">
-        <label for="scooterMaerke">Scooter Mærke:</label>
-        <InputText @bind-Value="nyKunde.ScooterMaerke" id="scooterMaerke" class="form-control" placeholder="Indtast scooter mærke" />
+
+    <h4>Tilføj Scootere</h4>
+    @if (scootere.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Mærke</th>
+                    <th>Model</th>
+                    <th>Registreringsnummer</th>
+                    <th>Produktionsår</th>
+                    <th>Handling</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var scooter in scootere)
+                {
+                    <tr>
+                        <td><InputText @bind-Value="scooter.Maerke" class="form-control" /></td>
+                        <td><InputText @bind-Value="scooter.Model" class="form-control" /></td>
+                        <td><InputText @bind-Value="scooter.RegistreringsNummer" class="form-control" /></td>
+                        <td><InputNumber @bind-Value="scooter.ProduktionsAar" class="form-control" /></td>
+                        <td><button class="btn btn-danger" @onclick="() => FjernScooter(scooter)">Fjern</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>Ingen scootere tilføjet endnu.</p>
+    }
+    <div class="d-flex mt-3">
+        <button type="button" class="btn btn-secondary me-2" @onclick="TilføjScooter">Tilføj Scooter</button>
+        <button type="submit" class="btn btn-primary ms-2">Opret Kunde</button>
     </div>
-    <button type="submit" class="btn btn-primary">Opret Kunde</button>
+    
 </EditForm>
 
 <!-- Bekræftelsesdialog -->
@@ -46,7 +78,6 @@
                         <li><strong>Email:</strong> @nyKunde.Email</li>
                         <li><strong>Telefon:</strong> @nyKunde.Telefonnummer</li>
                         <li><strong>Adresse:</strong> @nyKunde.Adresse</li>
-                        <li><strong>Scooter Mærke:</strong> @nyKunde.ScooterMaerke</li>
                     </ul>
                 </div>
                 <div class="modal-footer">
@@ -67,30 +98,28 @@
 {
     <div class="alert alert-success mt-3">@succesbesked</div>
 }
-<div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 150px;">
-    <div class="alert alert-light border rounded-3 shadow-sm text-center"
-         style="max-width: 600px; width: 90%; padding: 15px; margin-bottom: 0;">
-        <h6 class="text-primary fw-bold mb-2">Scooterland</h6>
-        <p class="mb-1"><strong>Adresse:</strong> Hovedgade 123, 4000 Roskilde</p>
-        <p class="mb-1"><strong>Telefon:</strong> 12 34 56 78</p>
-        <p class="mb-1"><strong>Email:</strong> kontakt@scooterland.dk</p>
-        <p class="mb-0"><strong>Dags dato:</strong> @DateTime.Now.ToString("dd-MM-yyyy")</p>
-    </div>
-</div>
 
 @code {
     private Kunde nyKunde = new();
+    private List<KundeScooter> scootere = new();
     private bool visBekræftelse = false;
     private string? fejlbesked;
     private string? succesbesked;
 
+    private void TilføjScooter()
+    {
+        scootere.Add(new KundeScooter());
+    }
+
+    private void FjernScooter(KundeScooter scooter)
+    {
+        scootere.Remove(scooter);
+    }
+
     private void VisBekræftelsesDialog()
     {
-        // Reset fejl- og succesbeskeder
         fejlbesked = null;
         succesbesked = null;
-
-        // Vis bekræftelsesdialog
         visBekræftelse = true;
     }
 
@@ -103,18 +132,25 @@
     {
         try
         {
-            visBekræftelse = false; // Luk bekræftelsesdialog
+            visBekræftelse = false;
             var response = await Http.PostAsJsonAsync("api/Kunde", nyKunde);
 
             if (response.IsSuccessStatusCode)
             {
-                // Ryd formularen og vis succesbesked
+                var oprettetKunde = await response.Content.ReadFromJsonAsync<Kunde>();
+
+                foreach (var scooter in scootere)
+                {
+                    scooter.KundeId = oprettetKunde.KundeId;
+                    await Http.PostAsJsonAsync($"api/KundeScooter/{oprettetKunde.KundeId}/add-scooter", scooter);
+                }
+
                 nyKunde = new Kunde();
-                succesbesked = "Kunden blev oprettet med succes!";
+                scootere.Clear();
+                succesbesked = "Kunden og scootere blev oprettet med succes!";
             }
             else
             {
-                // Håndter fejl
                 fejlbesked = "Der opstod en fejl under oprettelse af kunden.";
             }
         }
@@ -124,4 +160,3 @@
         }
     }
 }
-

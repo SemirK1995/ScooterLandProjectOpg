@@ -27,10 +27,6 @@ namespace ScooterLandProjectOpg.Shared.Models
 		[EmailAddress(ErrorMessage = "Indtast en gyldig email-adresse.")]
 		public string? Email { get; set; }
 
-		
-		public string? ScooterMaerke { get; set; }
-
-
 
 		// Navigation property til en liste af KundeScooter
 		public List<KundeScooter>? KundeScooter { get; set; } = new List<KundeScooter>();

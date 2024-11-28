@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScooterLandProjectOpg.Clien
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScooterLandProjectOpg.Shared", "ScooterLandProjectOpg\Shared\ScooterLandProjectOpg.Shared.csproj", "{602E870D-8A42-4A24-8F72-9D89E69785EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScooterLandProjectOpgNUnitTests", "NUnitTests\ScooterLandProjectOpgNUnitTests.csproj", "{CDFA5BD6-9AC1-499B-A1D5-00FE7C069BCA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScooterLandProjectOpgNUnitTests", "NUnitTests\ScooterLandProjectOpgNUnitTests.csproj", "{CDFA5BD6-9AC1-499B-A1D5-00FE7C069BCA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

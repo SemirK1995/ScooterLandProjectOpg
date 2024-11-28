@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ScooterLandProjectOpg.Server.Context;
 
@@ -11,9 +12,11 @@ using ScooterLandProjectOpg.Server.Context;
 namespace ScooterLandProjectOpg.Server.Migrations
 {
     [DbContext(typeof(ScooterLandContext))]
-    partial class ScooterLandContextModelSnapshot : ModelSnapshot
+    [Migration("20241127201847_aendretpåkundescooter")]
+    partial class aendretpåkundescooter
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -282,9 +285,6 @@ namespace ScooterLandProjectOpg.Server.Migrations
                     b.Property<int>("OrdreId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ScooterId")
-                        .HasColumnType("int");
-
                     b.Property<double?>("Timer")
                         .HasColumnType("float");
 
@@ -294,8 +294,6 @@ namespace ScooterLandProjectOpg.Server.Migrations
                     b.HasKey("OrdreYdelseId");
 
                     b.HasIndex("OrdreId");
-
-                    b.HasIndex("ScooterId");
 
                     b.HasIndex("YdelseId");
 
@@ -402,10 +400,6 @@ namespace ScooterLandProjectOpg.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.KundeScooter", "Scooter")
-                        .WithMany()
-                        .HasForeignKey("ScooterId");
-
                     b.HasOne("ScooterLandProjectOpg.Shared.Models.Ydelse", "Ydelse")
                         .WithMany("OrdreYdelse")
                         .HasForeignKey("YdelseId")
@@ -413,8 +407,6 @@ namespace ScooterLandProjectOpg.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("Ordre");
-
-                    b.Navigation("Scooter");
 
                     b.Navigation("Ydelse");
                 });

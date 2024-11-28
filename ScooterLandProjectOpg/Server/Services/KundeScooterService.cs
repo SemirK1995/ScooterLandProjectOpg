@@ -22,13 +22,29 @@ namespace ScooterLandProjectOpg.Server.Services
 				.ToListAsync();
 		}
 
-		// Retrieve a specific KundeScooter with its related Kunde
-		public async Task<KundeScooter> GetScooterWithKundeByIdAsync(int id)
-		{
-			return await _context.Set<KundeScooter>()
-				.Include(ks => ks.Kunde) // Include the related Kunde entity
-				.FirstOrDefaultAsync(ks => ks.ScooterId == id);
-		}
+		
+        // Denne metode er designet til at hente en specifik scooter baseret på dens ScooterId. Den inkluderer også kundeoplysningerne via
+        public async Task<KundeScooter> AddScooterAsync(KundeScooter scooter)
+        {
+            _context.KunderScootere.Add(scooter); 
+            await _context.SaveChangesAsync(); 
+            return scooter; 
+        }
+        // Denne metode henter alle scootere relateret til en bestemt kunde baseret på KundeId
+        public async Task<List<KundeScooter>> GetScootersByKundeIdAsync(int kundeId)
+        {
+            return await _context.KunderScootere
+                .Where(ks => ks.KundeId == kundeId)
+                .ToListAsync();
+        }
+        public async Task<KundeScooter> GetScooterWithKundeByIdAsync(int id)
+        {
+            // Implementering af den manglende metode
+            return await _context.KunderScootere
+                .Include(ks => ks.Kunde) // Hent relateret Kunde-data
+                .FirstOrDefaultAsync(ks => ks.ScooterId == id); // Find scooter med det givne id
+        }
 
-	}
+
+    }
 }

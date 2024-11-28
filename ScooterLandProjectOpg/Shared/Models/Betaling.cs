@@ -26,6 +26,9 @@ namespace ScooterLandProjectOpg.Shared.Models
 		public DateTime? BetalingsDato { get; set; }
 		public double? Beløb { get; set; }
 		public BetalingsMetodeStatus? BetalingsMetode { get; set; }
+		public bool Betalt { get; set; } = false;
+
+
 
 		//Null constructor til EF
 		public Betaling()

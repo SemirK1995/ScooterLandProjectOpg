@@ -1,0 +1,158 @@
+﻿@* @page "/ordrehaandtering"
+@using ScooterLandProjectOpg.Shared.Models
+@using ScooterLandProjectOpg.Shared.DTO
+@inject HttpClient Http
+
+<h3>Ordre Håndtering</h3>
+
+@if (viserDetaljer)
+{
+    <div>
+        <h4>Ordre Detaljer</h4>
+
+        <div>
+            <p><strong>Kunde:</strong> @valgtOrdre?.Kunde?.Navn</p>
+            <p><strong>Dato:</strong> @valgtOrdre?.Dato.ToString("dd/MM/yyyy")</p>
+            <p><strong>Totalpris:</strong> @valgtOrdre?.TotalPris?.ToString("F2") kr.</p>
+            <p><strong>Status:</strong> @valgtOrdre?.Status</p>
+        </div>
+
+        <h5>Ydelser</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ydelse</th>
+                    <th>Pris</th>
+                    <th>Mekaniker</th>
+                    <th>Handlinger</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (valgtOrdre?.OrdreYdelse != null)
+                {
+                    @foreach (var ydelse in valgtOrdre.OrdreYdelse)
+                    {
+                        <tr>
+                            <td>@ydelse.Ydelse?.Navn</td>
+                            <td>@ydelse.AftaltPris?.ToString("F2") kr.</td>
+                            <td>
+                                @if (ydelse.Mekaniker != null)
+                                {
+                                    @ydelse.Mekaniker.Navn
+                                }
+                                else
+                                {
+                                    <span>Ikke tildelt</span>
+                                }
+                            </td>
+                            <td>
+                                <select class="form-control" @bind="ydelse.MekanikerId">
+                                    <option value="">-- Vælg Mekaniker --</option>
+                                    @foreach (var mekaniker in mekanikere)
+                                    {
+                                        <option value="@mekaniker.MekanikerId">@mekaniker.Navn</option>
+                                    }
+                                </select>
+                                <button class="btn btn-success mt-2" @onclick="() => TildelMekaniker(ydelse)">Tildel</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <button class="btn btn-secondary" @onclick="VisOversigt">Tilbage til oversigt</button>
+    </div>
+}
+else
+{
+    <div>
+        <h4>Oversigt over Ordrer</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ordre ID</th>
+                    <th>Kunde</th>
+                    <th>Dato</th>
+                    <th>Totalpris</th>
+                    <th>Status</th>
+                    <th>Handlinger</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (ordrer != null)
+                {
+                    @foreach (var ordre in ordrer)
+                    {
+                        <tr>
+                            <td>@ordre.OrdreId</td>
+                            <td>@ordre.Kunde?.Navn</td>
+                            <td>@ordre.Dato.("dd/MM/yyyy")</td>
+                            <td>@ordre.TotalPris?.ToString("F2") kr.</td>
+                            <td>@ordre.Status</td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="() => VisDetaljer(ordre.OrdreId)">Se detaljer</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<Ordre> ordrer;
+    private Ordre valgtOrdre;
+    private List<Mekaniker> mekanikere;
+
+    private bool viserDetaljer = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await HentOrdrer();
+        await HentMekanikere();
+    }
+
+    private async Task HentOrdrer()
+    {
+        ordrer = await Http.GetFromJsonAsync<List<Ordre>>("api/ordre");
+    }
+
+    private async Task HentMekanikere()
+    {
+        mekanikere = await Http.GetFromJsonAsync<List<Mekaniker>>("api/mekaniker");
+    }
+
+    private async Task VisDetaljer(int ordreId)
+    {
+        valgtOrdre = await Http.GetFromJsonAsync<Ordre>($"api/ordre/{ordreId}");
+        viserDetaljer = true;
+    }
+
+    private void VisOversigt()
+    {
+        valgtOrdre = null;
+        viserDetaljer = false;
+    }
+
+    private async Task TildelMekaniker(OrdreYdelse ydelse, int mekanikerYdelseId)
+    {
+        if (mekanikerYdelseId > 0)
+        {
+            // Send opdatering til backend
+            await Http.PostAsJsonAsync($"api/ordreydelse/{ydelse.OrdreYdelseId}/tildel-mekaniker", mekanikerYdelseId);
+
+            // Find den tilknyttede MekanikerYdelse i lokal listen og opdater UI
+            var mekanikerYdelse = ydelse.Ydelse.MekanikerYdelse?.FirstOrDefault(my => my.MekanikerYdelseId == mekanikerYdelseId);
+            if (mekanikerYdelse != null)
+            {
+                ydelse.Mekaniker = mekanikerYdelse.Mekaniker;
+            }
+        }
+    }
+
+
+
+}
+ *@

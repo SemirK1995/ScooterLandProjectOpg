@@ -19,11 +19,15 @@ namespace ScooterLandProjectOpg.Shared.Models
 
 		// Navigation property
 		[ForeignKey("KundeId")]
-		public Kunde Kunde { get; set; }
+		public Kunde? Kunde { get; set; }
 
 		//Attributter
 		public string? Maerke { get; set; }
 		public string? Model { get; set; }
+
+		public string? RegistreringsNummer { get; set; }
+		public int? ProduktionsAar { get; set; }
+	
 
 		//Null constructor til EF
 		public KundeScooter()

@@ -34,8 +34,15 @@ namespace ScooterLandProjectOpg.Server.Controllers
 
 			return Ok(ordre); // Returner ordredetaljerne
 		}
+        // GET: api/Mekaniker
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Ordre>>> GetAll()
+        {
+            var ordre = await _ordreRepository.GetAllAsync();
+            return Ok(ordre);
+        }
 
-		[HttpPost]
+        [HttpPost]
 		public async Task<ActionResult<Ordre>> Add([FromBody] CreateOrdreDto ordreDTO)
 		{
 			if (ordreDTO == null || ordreDTO.KundeId == 0)
@@ -55,7 +62,8 @@ namespace ScooterLandProjectOpg.Server.Controllers
 					{
 						YdelseId = oy.YdelseId,
 						AftaltPris = oy.AftaltPris ?? 0,
-						Dato = oy.Dato ?? DateTime.Now
+						Dato = oy.Dato ?? DateTime.Now,
+						ScooterId = oy.ScooterId
 					}).ToList()
 				};
 

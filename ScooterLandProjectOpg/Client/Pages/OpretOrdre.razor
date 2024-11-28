@@ -26,7 +26,7 @@
 		<div>
 			<div class="form-group">
 				<label for="kunde">Vælg Kunde:</label>
-				<select id="kunde" class="form-control" @bind="valgtKundeId">
+				<select id="kunde" class="form-control" @bind ="valgtKundeId" @bind:event ="oninput" @onchange="HentScootereForKunde">
 					<option value="">-- Vælg en kunde --</option>
 					@foreach (var kunde in kunder)
 					{
@@ -34,6 +34,24 @@
 					}
 				</select>
 			</div>
+			@if (kundeScootere != null && kundeScootere.Any())
+			{
+				<div>
+					<label for="scooter">Vælg en scooter:</label>
+					<select id="scooter" class="form-control" @bind="valgtKundeScooterId">
+						<option value="">-- Vælg en scooter --</option>
+						@foreach (var scooter in kundeScootere)
+						{
+							<option value="@scooter.ScooterId">@($"{scooter.Maerke} {scooter.Model} - {scooter.RegistreringsNummer}")</option>
+						}
+					</select>
+				</div>
+			}
+			else if (valgtKundeId > 0)
+			{
+				<p>Kunden har ingen scootere registreret.</p>
+			}
+
 
 			@if (valgtKundeId > 0)
 			{
@@ -92,6 +110,15 @@
 											<InputNumber @bind-Value="ordreYdelse.AftaltPris" class="form-control" />
 										</td>
 										<td>
+											<select class="form-control" @bind="ordreYdelse.ScooterId">
+												<option value="">-- Vælg en scooter --</option>
+												@foreach (var scooter in kundeScootere) // KundeScootere skal være tilgængelig
+												{
+													<option value="@scooter.ScooterId">@($"{scooter.Maerke} {scooter.Model}")</option>
+												}
+											</select>
+										</td>
+										<td>
 											<button class="btn btn-danger" @onclick="() => FjernYdelse(ordreYdelse)">Fjern</button>
 										</td>
 									</tr>
@@ -143,7 +170,7 @@
 
 			<div class="form-group mt-3">
 				<label for="scooter">Vælg en ledig scooter:</label>
-				<select id="scooter" class="form-control" @bind="valgtScooterId">
+				<select id="scooter" class="form-control" @bind="valgtLejeScooterId">
 					<option value="">-- Vælg en scooter --</option>
 					@foreach (var scooter in ledigeScootere)
 					{
@@ -192,9 +219,10 @@
 	private List<LejeScooter> ledigeScootere = new();
 	private List<OrdreYdelse> valgteOrdreYdelser = new List<OrdreYdelse>();
 	private CreateLejeAftaleDto lejeaftale = new();
-
+	private List<KundeScooter> kundeScootere = new();
 	private int valgtKundeId;
-	private int? valgtScooterId;
+	private int? valgtLejeScooterId;
+	private int? valgtKundeScooterId;
 	private string aktivTab = "ordre";
 	private bool visBekræftelsesModal = false;
 	private bool visSuccesBesked = false;
@@ -207,6 +235,27 @@
 		kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
 		alleYdelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
 		ledigeScootere = await Http.GetFromJsonAsync<List<LejeScooter>>("api/lejescooter/available");
+	}
+	private async Task HentScootereForKunde(ChangeEventArgs e)
+	{
+		if (int.TryParse(e.Value.ToString(), out int kundeId) && kundeId > 0)
+		{
+			try
+			{
+				valgtKundeId = kundeId;
+				var response = await Http.GetFromJsonAsync<List<KundeScooter>>($"api/KundeScooter/{kundeId}/scootere");
+				kundeScootere = response ?? new List<KundeScooter>();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Fejl ved hentning af scootere: {ex.Message}");
+				kundeScootere = new List<KundeScooter>();
+			}
+		}
+		else
+		{
+			kundeScootere = new List<KundeScooter>(); // Tøm listen, hvis ingen kunde er valgt
+		}
 	}
 
 	private double BeregnLejeAftaleTotalPris()
@@ -227,6 +276,8 @@
 
 
 	private void AktivTabSkift(string tab) => aktivTab = tab;
+	
+
 
 	private void TilføjYdelse(Ydelse ydelse)
 	{
@@ -267,9 +318,9 @@
 		}
 
 		// Tilføj kun lejeaftale, hvis der er en scooter valgt
-		if (valgtScooterId.HasValue)
+		if (valgtLejeScooterId.HasValue)
 		{
-			lejeaftale.LejeScooterId = valgtScooterId.Value;
+			lejeaftale.LejeScooterId = valgtLejeScooterId.Value;
 		}
 		else
 		{
@@ -285,7 +336,8 @@
 				{
 					YdelseId = oy.Ydelse.YdelseId,
 					AftaltPris = oy.AftaltPris,
-					Dato = DateTime.Now
+					Dato = DateTime.Now,
+					ScooterId = valgtKundeScooterId
 				}).ToList(),
 				LejeAftale = lejeaftale
 			};
@@ -298,7 +350,7 @@
 				visSuccesBesked = true;
 				valgteOrdreYdelser.Clear();
 				valgtKundeId = 0;
-				valgtScooterId = null;
+				valgtLejeScooterId = null;
 				lejeaftale = new CreateLejeAftaleDto();
 			}
 			else

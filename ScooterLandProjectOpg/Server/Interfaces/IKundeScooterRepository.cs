@@ -6,5 +6,9 @@ namespace ScooterLandProjectOpg.Server.Interfaces
 	{
 		Task<IEnumerable<KundeScooter>> GetScootersWithKundeAsync();
 		Task<KundeScooter> GetScooterWithKundeByIdAsync(int id);
-	}
+
+        Task<KundeScooter> AddScooterAsync(KundeScooter scooter);
+
+		Task<List<KundeScooter>> GetScootersByKundeIdAsync(int kundeId);
+    }
 }

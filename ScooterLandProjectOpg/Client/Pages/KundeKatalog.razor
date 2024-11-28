@@ -37,12 +37,49 @@ else
                         <button class="btn btn-info" @onclick="() => ÅbnSidePanel(kunde.KundeId)">Se Ordrer</button>
                         <button class="btn btn-primary" @onclick="() => VisRedigerModal(kunde)">Rediger</button>
                         <button class="btn btn-danger" @onclick="() => VisSletModal(kunde)">Slet</button>
+                        <button class="btn btn-secondary" @onclick="() => VisTilføjScooterModal(kunde)">Tilføj Scooter</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 }
+@if (visTilføjScooterModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tilføj Scooter til @valgtKunde.Navn</h5>
+                    <button type="button" class="btn-close" @onclick="LukTilføjScooterModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="nyScooter" OnValidSubmit="TilføjScooter">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label for="maerke">Mærke:</label>
+                            <InputText @bind-Value="nyScooter.Maerke" id="maerke" class="form-control" placeholder="Indtast mærke" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="model">Model:</label>
+                            <InputText @bind-Value="nyScooter.Model" id="model" class="form-control" placeholder="Indtast model" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="registreringsNummer">Registreringsnummer:</label>
+                            <InputText @bind-Value="nyScooter.RegistreringsNummer" id="registreringsNummer" class="form-control" placeholder="Indtast registreringsnummer" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="produktionsAar">Produktionsår:</label>
+                            <InputNumber @bind-Value="nyScooter.ProduktionsAar" id="produktionsAar" class="form-control" placeholder="Indtast produktionsår" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Tilføj Scooter</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 
 
 <!-- Sidepanel -->
@@ -61,7 +98,7 @@ else
                 <p><strong>Email:</strong> @søgeResultatKunde.Email</p>
                 <p><strong>Telefon:</strong> @søgeResultatKunde.Telefonnummer</p>
                 <p><strong>Adresse:</strong> @søgeResultatKunde.Adresse</p>
-                <p><strong>Scooter Mærke:</strong> @søgeResultatKunde.ScooterMaerke</p>
+                
 
                 <h5>Ordrer:</h5>
                 @if (søgeResultatKunde.Ordre != null && søgeResultatKunde.Ordre.Any())
@@ -140,8 +177,7 @@ else
                             <InputText @bind-Value="valgtKunde.Adresse" class="form-control" />
                         </div>
                         <div>
-                            <label>Scooter Mærke:</label>
-                            <InputText @bind-Value="valgtKunde.ScooterMaerke" class="form-control" />
+                         
                         </div>
                         <button class="btn btn-primary" type="submit">Gem</button>
                     </EditForm>
@@ -203,6 +239,8 @@ else
     private Kunde valgtKunde = new();
     private Kunde kundeTilSletning = new();
     private Kunde søgeResultatKunde = new();
+    private KundeScooter nyScooter = new();
+    private bool visTilføjScooterModal = false;
     private bool visModal = false;
     private bool visSidePanel = false;
     private bool visSletModal = false;
@@ -235,6 +273,43 @@ else
             var ordrer = JsonSerializer.Deserialize<List<Ordre>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             søgeResultatKunde = ordrer?.FirstOrDefault()?.Kunde;
             if (søgeResultatKunde != null) søgeResultatKunde.Ordre = ordrer;
+        }
+    }
+    private void VisTilføjScooterModal(Kunde kunde)
+    {
+        valgtKunde = kunde; // Indstil den valgte kunde
+        nyScooter = new KundeScooter(); // Nulstil scooterdetaljer
+        visTilføjScooterModal = true; // Vis modalvindue
+    }
+    private void LukTilføjScooterModal()
+    {
+        visTilføjScooterModal = false; // Skjul modalvindue
+    }
+    private async Task TilføjScooter()
+    {
+        try
+        {
+            // Indstil kundeId til scooteren
+            nyScooter.KundeId = valgtKunde.KundeId;
+
+            // Send scooter til API'et
+            var response = await Http.PostAsJsonAsync($"api/KundeScooter/{valgtKunde.KundeId}/add-scooter", nyScooter);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Vis succesbesked eller opdater data
+                await HentAlleKunder();
+                LukTilføjScooterModal();
+            }
+            else
+            {
+                // Håndter fejl
+                Console.WriteLine("Fejl ved oprettelse af scooter.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"En fejl opstod: {ex.Message}");
         }
     }
 

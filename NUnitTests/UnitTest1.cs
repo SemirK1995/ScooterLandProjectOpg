@@ -69,7 +69,6 @@ namespace ScooterLandProjectOpgNUnitTests.NUnitTests
                 Navn = "Test Kunde",
                 Adresse = "Testvej 123",
                 Email = "test@test.dk",
-                ScooterMaerke = "Yamaha",
                 Telefonnummer = 12345678,
                 KundeScooter = new List<KundeScooter>
         {

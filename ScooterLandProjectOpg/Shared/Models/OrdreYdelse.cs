@@ -25,11 +25,17 @@ namespace ScooterLandProjectOpg.Shared.Models
 		// Navigation property
 		[ForeignKey("YdelseId")]
 		public Ydelse Ydelse { get; set; }
-		
-		//Attributter
-		public double? Timer { get; set; }
+
+        // Foreign Key 
+        public int? ScooterId { get; set; }
+        [ForeignKey("ScooterId")]
+        public KundeScooter? Scooter { get; set; }
+
+        //Attributter
+        public double? Timer { get; set; }
 		public DateTime? Dato { get; set; }
 		public double? AftaltPris { get; set; }
+
 
 		//Null constructor
 		public OrdreYdelse()

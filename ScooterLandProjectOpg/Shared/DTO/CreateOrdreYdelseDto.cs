@@ -11,5 +11,6 @@ namespace ScooterLandProjectOpg.Shared.DTO
         public int YdelseId { get; set; }
         public double? AftaltPris { get; set; }
         public DateTime? Dato { get; set; } = DateTime.Now;
+        public int? ScooterId { get; set; } // Relation til en specifik KundeScooter
     }
 }
