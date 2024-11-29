@@ -23,10 +23,8 @@ namespace ScooterLandProjectOpg.Shared.DTO
         [Required(ErrorMessage = "Daglig leje er påkrævet.")]
         [Range(0, double.MaxValue, ErrorMessage = "Daglig leje skal være et positivt beløb.")]
         public double DagligLeje { get; set; }
-
-        public double KilometerPris { get; set; } = 0.53;
-        public double Selvrisiko { get; set; } = 1000; // Standardværdi
-        public bool Forsikring { get; set; } // Valg af forsikring (true/false)
+		public double ForsikringsPris { get; set; } = 50;
+		public double KilometerPris { get; set; } = 0.53;
         public int? KortKilometer { get; set; } // Antal kilometer inkluderet i lejen
 
         // Ikke nødvendig at inkludere TotalPris, da den kan beregnes dynamisk på backend

@@ -82,10 +82,10 @@ namespace ScooterLandProjectOpg.Server.Controllers
 						StartDato = ordreDTO.LejeAftale.StartDato,
 						SlutDato = ordreDTO.LejeAftale.SlutDato,
 						DagligLeje = ordreDTO.LejeAftale.DagligLeje,
-						Forsikring = ordreDTO.LejeAftale.Forsikring,
+						ForsikringsPris = ordreDTO.LejeAftale.ForsikringsPris,
 						KilometerPris = ordreDTO.LejeAftale.KilometerPris,
-						Selvrisiko = ordreDTO.LejeAftale.Selvrisiko,
-						KortKilometer = ordreDTO.LejeAftale.KortKilometer,
+						Selvrisiko = 0,
+						KortKilometer = ordreDTO.LejeAftale.KortKilometer
 					};
 
 					// Tilføj lejeaftalen til databasen og gem for at få LejeId

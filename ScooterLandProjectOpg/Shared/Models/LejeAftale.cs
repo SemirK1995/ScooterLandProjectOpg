@@ -29,8 +29,11 @@ namespace ScooterLandProjectOpg.Shared.Models
 
         [Required(ErrorMessage = "Daglig leje er påkrævet.")]
         [Range(0, double.MaxValue, ErrorMessage = "Daglig leje skal være et positivt beløb.")]
-        public double? DagligLeje { get; set; }
-        public bool Forsikring { get; set; }
+        public double DagligLeje { get; set; }
+
+		// Forsikringspris pr. dag (standard 50 kr.)
+		[Required]
+        public double ForsikringsPris { get; set; } = 50;
 
         // Kilometerpris (fastsat til 0,53 kr.)
         [Range(0, double.MaxValue, ErrorMessage = "Kilometerpris skal være et positivt beløb.")]
@@ -38,7 +41,7 @@ namespace ScooterLandProjectOpg.Shared.Models
 
         // Selvrisiko (standardværdi 1000, hvis forsikring er valgt)
         [Range(0, double.MaxValue, ErrorMessage = "Selvrisiko skal være et positivt beløb.")]
-        public double Selvrisiko { get; set; } = 1000;
+        public double Selvrisiko { get; set; }
 
         // Korte kilometer (f.eks. inkluderede kilometer uden ekstra omkostninger)
         [Range(0, int.MaxValue, ErrorMessage = "Kort kilometer skal være et positivt tal.")]
@@ -50,12 +53,12 @@ namespace ScooterLandProjectOpg.Shared.Models
         {
             get
             {
-                var dage = (SlutDato - StartDato)?.Days ?? 0;
-                var kilometerOmkostning = KortKilometer.HasValue ? KilometerPris * KortKilometer.Value : 0;
-                var forsikringsPris = Forsikring ? Selvrisiko : 0;
+				var dage = (SlutDato - StartDato)?.Days ?? 0;
+				var forsikringsOmkostning = ForsikringsPris * dage;
+				var kilometerOmkostning = KortKilometer.HasValue ? KilometerPris * KortKilometer.Value : 0;
 
-                return (DagligLeje * dage ?? 0) + kilometerOmkostning + forsikringsPris;
-            }
+				return (DagligLeje * dage) + forsikringsOmkostning + kilometerOmkostning;
+			}
         }
 
         // Navigation property til en liste af LejeScooter
