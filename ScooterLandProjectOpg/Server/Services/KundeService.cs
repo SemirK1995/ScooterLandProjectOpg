@@ -62,5 +62,19 @@ namespace ScooterLandProjectOpg.Server.Services
                     .ThenInclude(oy => oy.Ydelse)
                 .ToListAsync();
         }
+
+        public async Task<Kunde> GetKundeWithManyDetailsByIdAsync(int kundeId)
+        {
+            return await _context.Kunder
+                .Include(k => k.Ordre)
+                    .ThenInclude(o => o.OrdreYdelse)
+                    .ThenInclude(oy => oy.Ydelse)
+                .Include(k => k.LejeAftale)
+				.ThenInclude(la => la.LejeScooter)
+				 .Include(k => k.KundeScooter)
+				.FirstOrDefaultAsync(k => k.KundeId == kundeId);
+        }
+
+
     }
 }

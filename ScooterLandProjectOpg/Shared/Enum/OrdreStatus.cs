@@ -9,6 +9,7 @@ namespace ScooterLandProjectOpg.Shared.Enum
 	public enum OrdreStatus
 	{
 		Oprettet,
+		Behandles,
 		Afsluttet,
 		Annulleret,
 		Betalt

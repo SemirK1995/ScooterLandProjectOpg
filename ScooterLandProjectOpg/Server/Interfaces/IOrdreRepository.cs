@@ -1,4 +1,5 @@
-﻿using ScooterLandProjectOpg.Shared.Models;
+﻿using ScooterLandProjectOpg.Shared.Enum;
+using ScooterLandProjectOpg.Shared.Models;
 
 namespace ScooterLandProjectOpg.Server.Interfaces
 {
@@ -6,5 +7,8 @@ namespace ScooterLandProjectOpg.Server.Interfaces
 	{
 		Task<IEnumerable<Ordre>> GetAllWithDetailsAsync();
 		Task<Ordre> GetWithDetailsByIdAsync(int id);
+        Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus);
+        Task TilføjSelvrisikoAsync(int ordreId);
+		Task FjernSelvrisikoAsync(int ordreId); // Tilføj denne metode
 	}
 }

@@ -11,5 +11,7 @@ namespace ScooterLandProjectOpg.Server.Interfaces
 
 		//En specifik metode til at hente kunder med ordre
         Task<IEnumerable<Ordre>> GetOrdrerForKundeAsync(int kundeId);
+
+        Task<Kunde> GetKundeWithManyDetailsByIdAsync(int kundeId);
     }
 }

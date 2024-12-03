@@ -112,5 +112,17 @@ namespace ScooterLandProjectOpg.Server.Controllers
 
             return Ok(ordrer);
         }
+
+        [HttpGet("{kundeId}/details")]
+        public async Task<ActionResult<Kunde>> GetKundeDetails(int kundeId)
+        {
+            var kunde = await _kundeRepository.GetKundeWithManyDetailsByIdAsync(kundeId);
+
+            if (kunde == null)
+                return NotFound($"Ingen kunde fundet med ID {kundeId}.");
+
+            return Ok(kunde);
+        }
+
     }
 }

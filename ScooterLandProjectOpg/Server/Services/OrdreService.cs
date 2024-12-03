@@ -2,6 +2,7 @@
 using ScooterLandProjectOpg.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using ScooterLandProjectOpg.Server.Context;
+using ScooterLandProjectOpg.Shared.Enum;
 namespace ScooterLandProjectOpg.Server.Services
 {
 	public class OrdreService : Repository<Ordre>, IOrdreRepository
@@ -39,6 +40,59 @@ namespace ScooterLandProjectOpg.Server.Services
 			_context.Ordrer.Add(ordre);
 			await _context.SaveChangesAsync();
 			return ordre;
+		}
+
+        // Update order status
+        public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
+        {
+            var ordre = await _context.Ordrer.FindAsync(ordreId);
+            if (ordre == null)
+            {
+                throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
+            }
+
+            ordre.Status = nyStatus;
+            await _context.SaveChangesAsync();
+        }
+
+        // Add Selvrisiko to an order
+        public async Task TilføjSelvrisikoAsync(int ordreId)
+        {
+            var ordre = await _context.Ordrer.FindAsync(ordreId);
+            if (ordre == null)
+            {
+                throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
+            }
+
+            ordre.TotalPris += 1000; // Tilføj 1000 kr. for selvrisiko
+            await _context.SaveChangesAsync();
+        }
+		public async Task FjernSelvrisikoAsync(int ordreId)
+		{
+			var ordre = await _context.Ordrer.FindAsync(ordreId);
+			if (ordre == null)
+			{
+				throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
+			}
+
+			// Træk selvrisiko fra totalpris, hvis den er tilføjet
+			if (ordre.TotalPris != null && ordre.TotalPris >= 1000)
+			{
+				ordre.TotalPris -= 1000;
+			}
+
+			await _context.SaveChangesAsync();
+		}
+
+
+		public async Task<Ordre> GetManyDetailsByIdAsync(int id)
+		{
+			return await _context.Ordrer
+				.Include(o => o.Kunde)
+				.Include(o => o.OrdreYdelse)
+					.ThenInclude(oy => oy.Ydelse)
+				.Include(o => o.LejeAftale) // Inkluder LejeAftale
+				.FirstOrDefaultAsync(o => o.OrdreId == id);
 		}
 
 	}

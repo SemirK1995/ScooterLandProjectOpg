@@ -45,6 +45,17 @@ namespace ScooterLandProjectOpg.Shared.Models
 		public DateTime? Dato { get; set; }
 		public double? AftaltPris { get; set; }
 
+		[NotMapped] // Ikke gemmes i databasen
+		public double BeregnetPris
+		{
+			get
+			{
+				return AftaltPris.HasValue && AftaltPris > 0
+					? AftaltPris.Value
+					: Ydelse?.StandardPris ?? 0; // Brug StandardPris, hvis AftaltPris ikke er angivet
+			}
+		}
+
 
 		//Null constructor
 		public OrdreYdelse()

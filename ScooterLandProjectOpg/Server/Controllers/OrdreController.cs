@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ScooterLandProjectOpg.Server.Context;
 using ScooterLandProjectOpg.Server.Interfaces;
 using ScooterLandProjectOpg.Shared.DTO;
+using ScooterLandProjectOpg.Shared.Enum;
 using ScooterLandProjectOpg.Shared.Models;
 
 namespace ScooterLandProjectOpg.Server.Controllers
@@ -130,6 +131,56 @@ namespace ScooterLandProjectOpg.Server.Controllers
 				return StatusCode(500, $"Fejl: {ex.Message}");
 			}
 		}
+
+        [HttpPut("{ordreId}/status")]
+        public async Task<IActionResult> UpdateOrdreStatus(int ordreId, [FromBody] OrdreStatus nyStatus)
+        {
+			var ordre = await _ordreRepository.GetByIdAsync(ordreId);
+			if (ordre == null)
+			{
+				return NotFound($"Ordre med ID {ordreId} blev ikke fundet.");
+			}
+
+			ordre.Status = nyStatus;
+			await _ordreRepository.UpdateAsync(ordre);
+
+			return NoContent();
+		}
+
+        [HttpPut("{ordreId}/selvrisiko")]
+        public async Task<IActionResult> TilføjSelvrisiko(int ordreId)
+        {
+            try
+            {
+                await _ordreRepository.TilføjSelvrisikoAsync(ordreId);
+                return Ok($"Selvrisiko tilføjet til ordre ID {ordreId}.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+		[HttpPut("{ordreId}/remove-selvrisiko")]
+		public async Task<IActionResult> FjernSelvrisiko(int ordreId)
+		{
+			try
+			{
+				await _ordreRepository.FjernSelvrisikoAsync(ordreId); // Kald den forenklede service-metode
+				return Ok($"Selvrisiko fjernet fra ordre ID {ordreId}.");
+			}
+			catch (KeyNotFoundException ex)
+			{
+				return NotFound(ex.Message); // Returner en 404-fejl, hvis ordren ikke findes
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"En fejl opstod: {ex.Message}"); // Håndter andre fejl
+			}
+		}
+
+
+
 
 
 

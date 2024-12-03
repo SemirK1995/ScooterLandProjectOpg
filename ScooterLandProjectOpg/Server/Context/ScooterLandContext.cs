@@ -32,7 +32,14 @@ namespace ScooterLandProjectOpg.Server.Context
                 .WithMany(la => la.LejeScooter) // LejeAftale kan have mange LejeScooter
                 .HasForeignKey(ls => ls.LejeId) // Foreign Key er LejeId i LejeScooter
                 .OnDelete(DeleteBehavior.Restrict); // Restriktiv sletning, så scootere ikke slettes automatisk
-        }
+
+			// Definer relationen mellem Ordre og LejeAftale
+			modelBuilder.Entity<Ordre>()
+				.HasOne(o => o.LejeAftale) // Ordre har en LejeAftale
+				.WithMany() // Hvis LejeAftale kan have flere ordrer, tilføj WithMany(la => la.Ordrer)
+				.HasForeignKey(o => o.LejeId) // Foreign Key er LejeId i Ordre
+				.OnDelete(DeleteBehavior.Restrict); // Eller Cascade, afhængigt af dine krav
+		}
 
     }
 }
