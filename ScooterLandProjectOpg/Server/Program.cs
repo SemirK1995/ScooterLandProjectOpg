@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using ScooterLandProjectOpg.Server.Context;
 using ScooterLandProjectOpg.Server.Interfaces;
+using ScooterLandProjectOpg.Server.PDFServices;
 using ScooterLandProjectOpg.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +26,8 @@ builder.Services.AddScoped<IOrdreRepository, OrdreService>();
 builder.Services.AddScoped<IOrdreYdelseRepository, OrdreYdelseService>();
 builder.Services.AddScoped<IYdelseRepository, YdelseService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddTransient<FakturaService>();
+
 
 
 

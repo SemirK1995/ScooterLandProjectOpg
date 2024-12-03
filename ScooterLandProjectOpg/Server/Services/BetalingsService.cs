@@ -2,6 +2,7 @@
 using ScooterLandProjectOpg.Server.Interfaces;
 using ScooterLandProjectOpg.Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using ScooterLandProjectOpg.Shared.Enum;
 
 
 namespace ScooterLandProjectOpg.Server.Services
@@ -29,5 +30,83 @@ namespace ScooterLandProjectOpg.Server.Services
 				.Include(b => b.Ordre)
 				.FirstOrDefaultAsync(b => b.BetalingsId == id);
 		}
-	}
+
+        public async Task<IEnumerable<Betaling>> SearchByQueryAsync(string query)
+        {
+            // Parse søgeforespørgslen som tal, hvis muligt
+            bool isNumeric = int.TryParse(query, out int parsedId);
+
+            return await _context.Betalinger
+                .Include(b => b.Ordre)
+                .ThenInclude(o => o.Kunde)
+                .Where(b =>
+                    (isNumeric && (b.BetalingsId == parsedId || b.OrdreId == parsedId)) || // Søg på betalings/ordre ID
+                    (!isNumeric && b.Ordre.Kunde.Navn.Contains(query))) // Søg på kundens navn
+                .ToListAsync();
+        }
+
+        public async Task UpdateBetalingsStatusAsync(int betalingsId, bool betaltStatus)
+        {
+            var betaling = await _context.Betalinger.FindAsync(betalingsId);
+            if (betaling == null)
+                throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
+
+            betaling.Betalt = betaltStatus;
+            await _context.SaveChangesAsync();
+        }
+        public async Task UpdateBetalingsMetodeAsync(int betalingsId, BetalingsMetodeStatus nyMetode)
+        {
+            var betaling = await _context.Betalinger.FindAsync(betalingsId);
+            if (betaling == null)
+                throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
+
+            betaling.BetalingsMetode = nyMetode;
+            await _context.SaveChangesAsync();
+        }
+        public async Task<Betaling> GetFakturaDetaljerAsync(int betalingsId)
+        {
+            return await _context.Betalinger
+                .Include(b => b.Ordre)
+                    .ThenInclude(o => o.LejeAftale)
+                    .ThenInclude(la => la.LejeScooter)
+                .Include(b => b.Ordre)
+                    .ThenInclude(o => o.OrdreYdelse)
+                    .ThenInclude(oy => oy.Scooter)
+                .Include(b => b.Ordre)
+                    .ThenInclude(o => o.OrdreYdelse)
+                    .ThenInclude(oy => oy.Ydelse)
+                .Include(b => b.Ordre)
+                    .ThenInclude(o => o.Kunde)
+                .FirstOrDefaultAsync(b => b.BetalingsId == betalingsId);
+        }
+
+
+
+
+        public async Task<int> OpretBetalingerTilEksisterendeOrdrerAsync()
+        {
+            var ordrerUdenBetaling = await _context.Ordrer
+                .Where(o => !_context.Betalinger.Any(b => b.OrdreId == o.OrdreId))
+                .ToListAsync();
+
+            foreach (var ordre in ordrerUdenBetaling)
+            {
+                var betaling = new Betaling
+                {
+                    OrdreId = ordre.OrdreId,
+                    BetalingsDato = DateTime.Now, // Brug nuværende tidspunkt som betalingsdato
+                    Beløb = ordre.TotalPris, // Brug ordreens totalpris som beløb
+                    BetalingsMetode = null, // Ingen betalingsmetode valgt endnu
+                    Betalt = false // Markér som ikke betalt
+                };
+
+                _context.Betalinger.Add(betaling);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return ordrerUdenBetaling.Count;
+        }
+
+    }
 }

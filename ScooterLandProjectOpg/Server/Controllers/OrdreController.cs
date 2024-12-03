@@ -118,7 +118,21 @@ namespace ScooterLandProjectOpg.Server.Controllers
 				_context.Ordrer.Add(ordre);
 				await _context.SaveChangesAsync();
 
-				return CreatedAtAction(nameof(GetById), new { id = ordre.OrdreId }, ordre);
+                // Opret tilknyttet betaling
+                var betaling = new Betaling
+                {
+                    OrdreId = ordre.OrdreId,
+                    BetalingsDato = null, // Ingen dato endnu
+                    Beløb = ordre.TotalPris, // Totalpris på ordren som standard
+                    Betalt = false, // Marker som ikke betalt
+                    BetalingsMetode = null // Ingen metode valgt endnu
+                };
+
+                // Tilføj betalingen til databasen
+                _context.Betalinger.Add(betaling);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetById), new { id = ordre.OrdreId }, ordre);
 			}
 			catch (DbUpdateException dbEx)
 			{

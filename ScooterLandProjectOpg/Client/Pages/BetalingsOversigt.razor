@@ -1,0 +1,284 @@
+﻿@page "/betalingsoversigt"
+@using ScooterLandProjectOpg.Shared.Models
+@using ScooterLandProjectOpg.Shared.Enum
+@using ScooterLandProjectOpg.Shared.DTO
+@inject IJSRuntime JSRuntime
+@inject HttpClient Http
+
+<h3>Betalingsoversigt</h3>
+
+<div class="mb-3">
+    <input type="text" class="form-control" placeholder="Søg efter Betalings ID, Ordre ID eller Kundens navn"
+           @bind="søgeFelt" @onkeypress="HandleSearchKeyPress" />
+    <button class="btn btn-primary mt-2" @onclick="SøgBetalinger">Søg</button>
+    <button class="btn btn-secondary mt-2" @onclick="ResetSøgning">Nulstil</button>
+</div>
+
+@if (betalinger == null)
+{
+    <p>Indlæser betalinger...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Betalings ID</th>
+                <th>Ordre ID</th>
+                <th>Beløb</th>
+                <th>Betalt</th>
+                <th>Betalingsmetode</th>
+                <th>Betalingsdato</th>
+                <th>Handlinger</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var betaling in betalinger)
+            {
+                <tr>
+                    <td>@betaling.BetalingsId</td>
+                    <td>@betaling.OrdreId</td>
+                    <td>@betaling.Beløb?.ToString("F2") kr.</td>
+                    <td>
+                        <select class="form-control" @onchange="async e => await OpdaterBetaltStatus(betaling.BetalingsId, e.Value.ToString())">
+                            <option value="true" selected="@(betaling.Betalt ? "true" : null)">Ja</option>
+                            <option value="false" selected="@(betaling.Betalt ? null : "false")">Nej</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control" @onchange="async e => await OpdaterBetalingsMetode(betaling.BetalingsId, e.Value.ToString())">
+                            @foreach (var metode in Enum.GetValues<BetalingsMetodeStatus>())
+                            {
+                                <option value="@metode.ToString()" selected="@(betaling.BetalingsMetode == metode ? "selected" : null)">
+                                    @metode
+                                </option>
+                            }
+                        </select>
+                    </td>
+                    <td>@betaling.BetalingsDato?.ToString("dd-MM-yyyy")</td>
+                    <td>
+                        <button class="btn btn-info" @onclick="() => VisFakturaDetaljer(betaling.BetalingsId)">Vis Faktura</button>
+                        <button class="btn btn-primary" @onclick="async () => await DownloadFaktura(betaling.BetalingsId)">Download Faktura</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<!-- Modal til faktura -->
+@if (visFakturaModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Faktura Detaljer</h5>
+                    <button type="button" class="btn-close" @onclick="LukFakturaModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (fakturaData != null)
+                    {
+                        <p><strong>Kunde ID:</strong> @fakturaData.KundeId</p>
+                        <p><strong>Kunde Navn:</strong> @fakturaData.KundeNavn</p>
+                        <p><strong>Telefon:</strong> @fakturaData.KundeTelefon</p>
+                        <p><strong>Email:</strong> @fakturaData.KundeEmail</p>
+                        <p><strong>Adresse:</strong> @fakturaData.KundeAdresse</p>
+                        <hr />
+                        <p><strong>Betalings ID:</strong> @fakturaData.BetalingsId</p>
+                        <p><strong>Ordre ID:</strong> @fakturaData.OrdreId</p>
+                        <p><strong>Beløb:</strong> @fakturaData.Beløb kr.</p>
+                        <p><strong>Betalings Metode:</strong> @fakturaData.BetalingsMetode</p>
+                        <p><strong>Betalingsstatus:</strong> @(fakturaData.Betalt ? "Betalt" : "Ikke betalt")</p>
+                        <p><strong>Betalingsdato:</strong> @fakturaData.BetalingsDato</p>
+                        <hr />
+                        <p><strong>Ordre Dato:</strong> @fakturaData.OrdreDato?.ToString("dd-MM-yyyy")</p>
+                        <p><strong>Total Pris:</strong> @fakturaData.TotalPris kr.</p>
+                        <hr />
+
+                        @if (fakturaData.Lejeaftale != null)
+                        {
+                            <h6>Lejeaftale:</h6>
+                            <p><strong>Startdato:</strong> @fakturaData.Lejeaftale.StartDato?.ToString("dd-MM-yyyy")</p>
+                            <p><strong>Slutdato:</strong> @fakturaData.Lejeaftale.SlutDato?.ToString("dd-MM-yyyy")</p>
+                            <p><strong>Forsikrings Pris:</strong> @fakturaData.Lejeaftale.ForsikringsPris kr.</p>
+                            <p><strong>Daglig Leje:</strong> @fakturaData.Lejeaftale.DagligLeje kr.</p>
+                            <p><strong>Kilometer kørt:</strong> @fakturaData.Lejeaftale.KortKilometer?.ToString("F2") km</p>
+                            <p><strong>Selvrisiko:</strong> @fakturaData.Lejeaftale.Selvrisiko kr.</p>
+                            <ul>
+                                @foreach (var scooter in fakturaData.Lejeaftale.Scootere)
+                                {
+                                    <li>@scooter</li>
+                                }
+                            </ul>
+                            <hr />
+                        }
+
+                        <h6>Ydelser:</h6>
+                        @if (fakturaData.Ydelser != null && fakturaData.Ydelser.Any())
+                        {
+                            <ul>
+                                @foreach (var ydelse in fakturaData.Ydelser)
+                                {
+                                    <li>@ydelse.YdelseNavn - @ydelse.BeregnetPris?.ToString("F2") kr. (Scooter: @ydelse.ScooterMaerke @ydelse.ScooterModel)</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>Ingen ydelser tilføjet.</p>
+                        }
+                    }
+                    else
+                    {
+                        <p>Indlæser faktura...</p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="LukFakturaModal">Luk</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<button class="btn btn-primary" @onclick="OpretBetalinger">Opret betalinger for eksisterende ordrer</button>
+
+
+@code {
+    private List<Betaling> betalinger;
+    private FakturaDto? fakturaData; // Dynamisk objekt til faktura
+    private bool visFakturaModal = false;
+    private string søgeFelt = string.Empty; // Søgefelt
+
+    protected override async Task OnInitializedAsync()
+    {
+        await HentBetalinger();
+    }
+
+    private async Task HentBetalinger()
+    {
+        betalinger = await Http.GetFromJsonAsync<List<Betaling>>("api/Betalings");
+    }
+    private async Task SøgBetalinger()
+    {
+        if (string.IsNullOrWhiteSpace(søgeFelt))
+        {
+            await HentBetalinger();
+            return;
+        }
+
+        try
+        {
+            betalinger = await Http.GetFromJsonAsync<List<Betaling>>($"api/Betalings/search?query={søgeFelt}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Søgefejl: {ex.Message}");
+        }
+    }
+
+    private void ResetSøgning()
+    {
+        søgeFelt = string.Empty;
+        _ = HentBetalinger(); // Hent alle betalinger igen
+    }
+
+    private async Task HandleSearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SøgBetalinger();
+        }
+    }
+
+    private async Task OpdaterBetaltStatus(int betalingsId, string nyStatus)
+    {
+        var status = nyStatus == "true";
+        await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/status", status);
+        // Genindlæs fakturaen, hvis den er åben og denne betaling opdateres
+        if (visFakturaModal && fakturaData?.BetalingsId == betalingsId)
+        {
+            await VisFakturaDetaljer(betalingsId);
+        }
+
+        await HentBetalinger(); // Opdater listen
+    }
+
+    private async Task OpdaterBetalingsMetode(int betalingsId, string nyMetode)
+    {
+        try
+        {
+            // Konverter string til enum
+            var metode = Enum.Parse<BetalingsMetodeStatus>(nyMetode, ignoreCase: true);
+
+            // Kald API for at opdatere betalingsmetoden
+            var response = await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/metode", metode);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Genindlæs fakturaen, hvis den er åben og denne betaling opdateres
+                if (visFakturaModal && fakturaData?.BetalingsId == betalingsId)
+                {
+                    await VisFakturaDetaljer(betalingsId);
+                }
+                // Opdater listen, hvis API-kaldet lykkedes
+                await HentBetalinger();
+            }
+            else
+            {
+                // Håndter fejl
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Fejl ved opdatering: {errorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fejl: {ex.Message}");
+        }
+    }
+
+
+    private async Task VisFakturaDetaljer(int betalingsId)
+    {
+        try
+        {
+            fakturaData = await Http.GetFromJsonAsync<FakturaDto>($"api/Betalings/{betalingsId}/faktura");
+            visFakturaModal = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fejl ved hentning af faktura: {ex.Message}");
+        }
+    }
+
+
+    private void LukFakturaModal()
+    {
+        visFakturaModal = false;
+    }
+
+    private async Task DownloadFaktura(int betalingsId)
+    {
+        // Hent PDF-data fra backend
+        var pdfBytes = await Http.GetByteArrayAsync($"api/Betalings/{betalingsId}/download");
+
+        // Kald JavaScript-funktionen
+        await JSRuntime.InvokeVoidAsync("downloadFileFromBytes", $"Faktura_{betalingsId}.pdf", pdfBytes);
+    }
+    private async Task OpretBetalinger()
+    {
+        var response = await Http.PostAsync("api/Betalings/opret-betalinger-til-eksisterende-ordrer", null);
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine("Betalinger oprettet for eksisterende ordrer.");
+            // Opdater betalingsoversigten, hvis relevant
+            await HentBetalinger();
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Fejl ved oprettelse af betalinger: {errorMessage}");
+        }
+    }
+}
+
