@@ -97,6 +97,7 @@ namespace ScooterLandProjectOpg.Server.Controllers
                     Beløb = betaling.Beløb,
                     BetalingsMetode = betaling.BetalingsMetode?.ToString(),
                     BetalingsDato = betaling.BetalingsDato?.ToString("dd-MM-yyyy"),
+                    Betalt = betaling.Betalt,
 
                     // Ordre
                     OrdreDato = ordre.Dato,
@@ -165,6 +166,26 @@ namespace ScooterLandProjectOpg.Server.Controllers
                 return BadRequest($"Fejl under oprettelse af betalinger: {ex.Message}");
             }
         }
+        [HttpPut("{betalingsId}/dato")]
+        public async Task<IActionResult> UpdateBetalingsDato(int betalingsId, [FromBody] DateTime? nyDato)
+        {
+            try
+            {
+                var betaling = await _betalingRepository.GetByIdAsync(betalingsId);
+                if (betaling == null)
+                {
+                    return NotFound($"Betaling med ID {betalingsId} blev ikke fundet.");
+                }
 
+                betaling.BetalingsDato = nyDato;
+                await _betalingRepository.UpdateAsync(betaling);
+
+                return Ok("Betalingsdato opdateret.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Fejl ved opdatering af betalingsdato: {ex.Message}");
+            }
+        }
     }
 }

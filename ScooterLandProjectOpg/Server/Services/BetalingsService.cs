@@ -52,6 +52,7 @@ namespace ScooterLandProjectOpg.Server.Services
                 throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
 
             betaling.Betalt = betaltStatus;
+            _context.Betalinger.Update(betaling);
             await _context.SaveChangesAsync();
         }
         public async Task UpdateBetalingsMetodeAsync(int betalingsId, BetalingsMetodeStatus nyMetode)
@@ -81,8 +82,6 @@ namespace ScooterLandProjectOpg.Server.Services
         }
 
 
-
-
         public async Task<int> OpretBetalingerTilEksisterendeOrdrerAsync()
         {
             var ordrerUdenBetaling = await _context.Ordrer
@@ -107,6 +106,12 @@ namespace ScooterLandProjectOpg.Server.Services
 
             return ordrerUdenBetaling.Count;
         }
+        public async Task UpdateAsync(Betaling betaling)
+        {
+            _context.Betalinger.Update(betaling);
+            await _context.SaveChangesAsync();
+        }
+
 
     }
 }

@@ -13,5 +13,7 @@ namespace ScooterLandProjectOpg.Server.Interfaces
         Task<IEnumerable<Ordre>> GetOrdrerForKundeAsync(int kundeId);
 
         Task<Kunde> GetKundeWithManyDetailsByIdAsync(int kundeId);
-    }
+		Task<IEnumerable<Kunde>> SearchKunderAsync(string søgeTekst);
+
+	}
 }

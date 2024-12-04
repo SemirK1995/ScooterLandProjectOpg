@@ -93,8 +93,11 @@ namespace ScooterLandProjectOpg.Server.Controllers
 					_context.LejeAftaler.Add(lejeAftale);
 					await _context.SaveChangesAsync(); // Gem her for at få genereret LejeId
 
-					// Valider og opdater scooteren, hvis en scooter er valgt
-					if (ordreDTO.LejeAftale.LejeScooterId > 0)
+                    // Sæt LejeId på ordren
+                    ordre.LejeId = lejeAftale.LejeId;
+
+                    // Valider og opdater scooteren, hvis en scooter er valgt
+                    if (ordreDTO.LejeAftale.LejeScooterId > 0)
 					{
 						var lejeScooter = await _context.LejeScootere.FindAsync(ordreDTO.LejeAftale.LejeScooterId);
 						if (lejeScooter == null || !lejeScooter.ErTilgængelig)

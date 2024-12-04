@@ -33,14 +33,64 @@ else
 					<td>@mekaniker.Telefonnummer</td>
 					<td>
 						<button class="btn btn-primary" @onclick="() => VisRedigerModal(mekaniker)">Rediger</button>
-						<button class="btn btn-danger" @onclick="() => VisSletModal(mekaniker)">Slet</button>
 						<button class="btn btn-secondary" @onclick="() => VisTildelModal(mekaniker)">Tildel Ordreydelse</button>
+						<button class="btn btn-info" @onclick="() => VisArbejdsopgaverModal(mekaniker)">Se arbejdsopgaver</button>
 					</td>
 				</tr>
 			}
 		</tbody>
 	</table>
 }
+<!-- Modal for visning af arbejdsopgaver -->
+@if (visArbejdsopgaverModal)
+{
+	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Arbejdsopgaver for @valgtMekaniker.Navn</h5>
+					<button type="button" class="btn-close" @onclick="LukArbejdsopgaverModal"></button>
+				</div>
+				<div class="modal-body">
+					@if (string.IsNullOrEmpty(emptyMessage))
+					{
+						<table class="table">
+							<thead>
+								<tr>
+									<th>Ydelse</th>
+									<th>Startdato</th>
+									<th>Slutdato</th>
+									<th>Scooter</th>
+									<th>Planlagte Timer</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var opgave in arbejdsopgaver)
+								{
+									<tr>
+										<td>@opgave.Ydelse?.Navn</td>
+										<td>@opgave.StartDato?.ToString("dd-MM-yyyy")</td>
+										<td>@opgave.SlutDato?.ToString("dd-MM-yyyy")</td>
+										<td>@($"{opgave.Scooter?.Maerke} {opgave.Scooter?.Model}")</td>
+										<td>@opgave.Timer</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					}
+					else
+					{
+						<p>@emptyMessage</p>
+					}
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" @onclick="LukArbejdsopgaverModal">Luk</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
 
 <!-- Modal for oprettelse/redigering -->
 @if (visModal)
@@ -53,7 +103,7 @@ else
 					<button type="button" class="btn-close" @onclick="LukModal"></button>
 				</div>
 				<div class="modal-body">
-					<EditForm Model="valgtMekaniker" OnValidSubmit="VisBekræftModal">
+					<EditForm Model="valgtMekaniker" OnValidSubmit="GemMekaniker">
 						<DataAnnotationsValidator />
 						<div>
 							<label>Navn:</label>
@@ -70,13 +120,40 @@ else
 					</EditForm>
 				</div>
 				<div class="modal-footer">
-					<button class="btn btn-primary" @onclick="VisBekræftModal">Gem</button>
+					<button class="btn btn-primary" @onclick="GemMekaniker">Gem</button>
+					@if (valgtMekaniker.MekanikerId != 0)
+					{
+						<button class="btn btn-danger" @onclick="VisBekræftSletningModal">Slet</button>
+					}
 					<button class="btn btn-secondary" @onclick="LukModal">Annuller</button>
 				</div>
 			</div>
 		</div>
 	</div>
 }
+
+<!-- Bekræftelsesmodal for sletning -->
+@if (visBekræftSletningModal)
+{
+	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Bekræft Sletning</h5>
+					<button type="button" class="btn-close" @onclick="LukBekræftSletningModal"></button>
+				</div>
+				<div class="modal-body">
+					<p>Er du sikker på, at du vil slette mekanikeren "@valgtMekaniker.Navn"?</p>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-danger" @onclick="SletMekaniker">Ja, Slet</button>
+					<button class="btn btn-secondary" @onclick="LukBekræftSletningModal">Annuller</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
 <!-- Modal for tildeling af ordreydelse -->
 @if (visTildelModal)
 {
@@ -111,8 +188,7 @@ else
 										<td><InputDate @bind-Value="ordreYdelse.StartDato" class="form-control" style="padding: 2px;" /></td>
 										<td><InputDate @bind-Value="ordreYdelse.SlutDato" class="form-control" style="padding: 2px;" /></td>
 										<td><InputNumber @bind-Value="ordreYdelse.Timer" class="form-control" style="padding: 2px;" /></td>
-										@* <td><button class="btn btn-primary" @onclick="() => TildelMekaniker(ordreYdelse)">Tildel</button></td> *@
-										<button class="btn btn-primary" @onclick="() => VisBekræftTildelModal(ordreYdelse)">Tildel</button>
+										<td><button class="btn btn-primary" @onclick="() => VisBekræftTildelModal(ordreYdelse)">Tildel</button></td>
 									</tr>
 								}
 							</tbody>
@@ -122,30 +198,9 @@ else
 			</div>
 		</div>
 	</div>
-
 }
 
-<!-- Bekræftelsesmodal for oprettelse -->
-@if (visBekræftModal)
-{
-	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">Bekræftelse</h5>
-					<button type="button" class="btn-close" @onclick="LukBekræftModal"></button>
-				</div>
-				<div class="modal-body">
-					<p>Er du sikker på, at du vil ændre mekanikeren "@valgtMekaniker.Navn" med speciale i @valgtMekaniker.Speciale?</p>
-				</div>
-				<div class="modal-footer">
-					<button class="btn btn-success" @onclick="GemMekaniker">Ja, Opret</button>
-					<button class="btn btn-secondary" @onclick="LukBekræftModal">Annuller</button>
-				</div>
-			</div>
-		</div>
-	</div>
-}
+<!-- Bekræftelsesmodal for tildeling -->
 @if (visBekræftTildelModal)
 {
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
@@ -167,52 +222,22 @@ else
 	</div>
 }
 
-<!-- Modal for sletning -->
-@if (visSletModal)
-{
-	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">Bekræft sletning</h5>
-					<button type="button" class="btn-close" @onclick="LukSletModal"></button>
-				</div>
-				<div class="modal-body">
-					<p>Er du sikker på, at du vil slette mekanikeren "@mekanikerTilSletning.Navn"?</p>
-				</div>
-				<div class="modal-footer">
-					<button class="btn btn-danger" @onclick="SletBekræftetMekaniker">Ja, Slet</button>
-					<button class="btn btn-secondary" @onclick="LukSletModal">Annuller</button>
-				</div>
-			</div>
-		</div>
-	</div>
-
-}
-<div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 150px;">
-	<div class="alert alert-light border rounded-3 shadow-sm text-center"
-		 style="max-width: 600px; width: 90%; padding: 15px; margin-bottom: 0;">
-		<h6 class="text-primary fw-bold mb-2">Scooterland</h6>
-		<p class="mb-1"><strong>Adresse:</strong> Hovedgade 123, 4000 Roskilde</p>
-		<p class="mb-1"><strong>Telefon:</strong> 12 34 56 78</p>
-		<p class="mb-1"><strong>Email:</strong> kontakt@scooterland.dk</p>
-		<p class="mb-0"><strong>Dags dato:</strong> @DateTime.Now.ToString("dd-MM-yyyy")</p>
-	</div>
-</div>
-
 @code {
 	private List<Mekaniker>? mekanikere = new List<Mekaniker>();
 	private List<OrdreYdelseDto>? ordreYdelser = new List<OrdreYdelseDto>();
+	private List<OrdreYdelse>? arbejdsopgaver = new List<OrdreYdelse>();
+	private Mekaniker mekanikerMedOpgaver = new Mekaniker();
 	private Mekaniker valgtMekaniker = new Mekaniker();
-	private Mekaniker mekanikerTilSletning = new Mekaniker();
 	private Mekaniker mekanikerTilTildeling = new Mekaniker();
+	private bool visArbejdsopgaverModal = false;
 	private bool visModal = false;
-	private bool visBekræftModal = false;
+	private bool visBekræftSletningModal = false;
 	private bool visTildelModal = false;
-	private bool visSletModal = false;
-	private string modalTitel = "";
 	private bool visBekræftTildelModal = false;
-	private OrdreYdelseDto? ordreYdelseTilBekræftelse; //Tilbekræftelse boks
+	private string modalTitel = "";
+	private OrdreYdelseDto? ordreYdelseTilBekræftelse;
+	private string? emptyMessage = null;
+
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -223,44 +248,44 @@ else
 	{
 		mekanikere = await Http.GetFromJsonAsync<List<Mekaniker>>("api/Mekaniker");
 	}
-
-	private void VisOpretModal()
+	private async Task VisArbejdsopgaverModal(Mekaniker mekaniker)
 	{
-		valgtMekaniker = new Mekaniker(); // Ny mekaniker
-		modalTitel = "Opret Mekaniker";
-		visModal = true;
-	}
-	private async Task HentIkkeTildelteOrdreYdelser()
-	{
-		ordreYdelser = await Http.GetFromJsonAsync<List<OrdreYdelseDto>>("api/ordreydelse/ikke-tildelt");
-	}
-	private void VisTildelModal(Mekaniker mekaniker)
-	{
-		mekanikerTilTildeling = mekaniker;
-		visTildelModal = true;
-		_ = HentIkkeTildelteOrdreYdelser();
-	}
-	private async Task TildelMekaniker(OrdreYdelseDto ordreYdelse)
-	{
-		var tildelDto = new TildelMekanikerDto
-			{
-				OrdreYdelseId = ordreYdelse.OrdreYdelseId,
-				MekanikerId = mekanikerTilTildeling.MekanikerId,
-				StartDato = ordreYdelse.StartDato,
-				SlutDato = ordreYdelse.SlutDato,
-				Timer = ordreYdelse.Timer
-			};
-
-		var response = await Http.PutAsJsonAsync("api/OrdreYdelse/tildel", tildelDto);
-		if (response.IsSuccessStatusCode)
+		try
 		{
-			await HentIkkeTildelteOrdreYdelser();
+			// Hent arbejdsopgaver for mekanikeren
+			arbejdsopgaver = await Http.GetFromJsonAsync<List<OrdreYdelse>>($"api/Mekaniker/{mekaniker.MekanikerId}/arbejdsopgaver");
+
+			if (arbejdsopgaver == null || !arbejdsopgaver.Any())
+			{
+				arbejdsopgaver = new List<OrdreYdelse>(); // Sæt til en tom liste
+				emptyMessage = $"Ingen arbejdsopgaver fundet for mekanikeren {mekaniker.Navn}.";
+			}
+			else
+			{
+				emptyMessage = null; // Ryd beskeden, hvis der findes data
+			}
+
+			valgtMekaniker = mekaniker;
+			visArbejdsopgaverModal = true;
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Fejl ved hentning af arbejdsopgaver: {ex.Message}");
 		}
 	}
 
-	private void LukTildelModal()
+
+	private void LukArbejdsopgaverModal()
 	{
-		visTildelModal = false;
+		visArbejdsopgaverModal = false;
+		arbejdsopgaver = new List<OrdreYdelse>();
+	}
+
+	private void VisOpretModal()
+	{
+		valgtMekaniker = new Mekaniker();
+		modalTitel = "Opret Mekaniker";
+		visModal = true;
 	}
 
 	private void VisRedigerModal(Mekaniker mekaniker)
@@ -276,9 +301,78 @@ else
 		visModal = true;
 	}
 
-	private void VisBekræftModal()
+	private void VisBekræftSletningModal()
 	{
-		visBekræftModal = true;
+		visBekræftSletningModal = true;
+	}
+
+	private void LukBekræftSletningModal()
+	{
+		visBekræftSletningModal = false;
+	}
+
+	private async Task SletMekaniker()
+	{
+		if (valgtMekaniker.MekanikerId > 0)
+		{
+			var response = await Http.DeleteAsync($"api/Mekaniker/{valgtMekaniker.MekanikerId}");
+			if (response.IsSuccessStatusCode)
+			{
+				await HentAlleMekanikere();
+			}
+		}
+		LukModal();
+		LukBekræftSletningModal();
+	}
+
+	private async Task HentIkkeTildelteOrdreYdelser()
+	{
+		ordreYdelser = await Http.GetFromJsonAsync<List<OrdreYdelseDto>>("api/ordreydelse/ikke-tildelt");
+	}
+
+	private async Task VisTildelModal(Mekaniker mekaniker)
+	{
+		mekanikerTilTildeling = mekaniker;
+		await HentIkkeTildelteOrdreYdelser();
+		visTildelModal = true;
+	}
+
+	private void LukTildelModal()
+	{
+		visTildelModal = false;
+	}
+
+	private void VisBekræftTildelModal(OrdreYdelseDto ydelse)
+	{
+		ordreYdelseTilBekræftelse = ydelse;
+		visBekræftTildelModal = true;
+	}
+
+	private async Task BekræftTildel()
+	{
+		if (ordreYdelseTilBekræftelse != null)
+		{
+			var tildelDto = new TildelMekanikerDto
+				{
+					OrdreYdelseId = ordreYdelseTilBekræftelse.OrdreYdelseId,
+					MekanikerId = mekanikerTilTildeling.MekanikerId,
+					StartDato = ordreYdelseTilBekræftelse.StartDato,
+					SlutDato = ordreYdelseTilBekræftelse.SlutDato,
+					Timer = ordreYdelseTilBekræftelse.Timer
+				};
+
+			var response = await Http.PutAsJsonAsync("api/OrdreYdelse/tildel", tildelDto);
+			if (response.IsSuccessStatusCode)
+			{
+				await HentIkkeTildelteOrdreYdelser();
+			}
+			LukBekræftTildelModal();
+		}
+	}
+
+	private void LukBekræftTildelModal()
+	{
+		visBekræftTildelModal = false;
 	}
 
 	private async Task GemMekaniker()
@@ -300,56 +394,10 @@ else
 			}
 		}
 		LukModal();
-		LukBekræftModal();
 	}
 
 	private void LukModal()
 	{
 		visModal = false;
-	}
-
-	private void LukBekræftModal()
-	{
-		visBekræftModal = false;
-	}
-
-	private void VisSletModal(Mekaniker mekaniker)
-	{
-		mekanikerTilSletning = mekaniker;
-		visSletModal = true;
-	}
-
-	private async Task SletBekræftetMekaniker()
-	{
-		var response = await Http.DeleteAsync($"api/Mekaniker/{mekanikerTilSletning.MekanikerId}");
-		if (response.IsSuccessStatusCode)
-		{
-			await HentAlleMekanikere();
-		}
-		LukSletModal();
-	}
-
-	private void LukSletModal()
-	{
-		visSletModal = false;
-	}
-	private void VisBekræftTildelModal(OrdreYdelseDto ordreYdelse)
-	{
-		ordreYdelseTilBekræftelse = ordreYdelse;
-		visBekræftTildelModal = true;
-	}
-	private void LukBekræftTildelModal()
-	{
-		visBekræftTildelModal = false;
-		ordreYdelseTilBekræftelse = null;
-	}
-
-	private async Task BekræftTildel()
-	{
-		if (ordreYdelseTilBekræftelse != null)
-		{
-			await TildelMekaniker(ordreYdelseTilBekræftelse);
-			LukBekræftTildelModal();
-		}
 	}
 }

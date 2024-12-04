@@ -74,7 +74,31 @@ namespace ScooterLandProjectOpg.Server.Services
 				 .Include(k => k.KundeScooter)
 				.FirstOrDefaultAsync(k => k.KundeId == kundeId);
         }
+		public async Task<IEnumerable<Kunde>> SearchKunderAsync(string søgeTekst)
+		{
+			if (string.IsNullOrWhiteSpace(søgeTekst))
+				return new List<Kunde>();
+
+			var søgning = søgeTekst.Trim().ToLower();
+
+			// Check om søgeteksten er numerisk
+			bool isNumeric = int.TryParse(søgning, out int numericValue);
+
+			// Filtrér efter ID, telefonnummer eller navn
+			var kunder = await _context.Kunder
+				.Where(k =>
+					(isNumeric && (k.KundeId == numericValue ||
+								   (k.Telefonnummer.HasValue && k.Telefonnummer.Value == numericValue))) ||
+					(!isNumeric && k.Navn != null && k.Navn.ToLower().Contains(søgning)))
+				.ToListAsync();
+
+			return kunder;
+		}
 
 
-    }
+
+
+
+
+	}
 }

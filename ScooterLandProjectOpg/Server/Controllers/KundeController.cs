@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ScooterLandProjectOpg.Server.Interfaces;
+using ScooterLandProjectOpg.Server.Services;
 using ScooterLandProjectOpg.Shared.Models;
 
 namespace ScooterLandProjectOpg.Server.Controllers
@@ -124,5 +125,13 @@ namespace ScooterLandProjectOpg.Server.Controllers
             return Ok(kunde);
         }
 
-    }
+		[HttpGet("searchmany")]
+		public async Task<IActionResult> SøgKunder([FromQuery] string? søgeTekst)
+		{
+			var result = await _kundeRepository.SearchKunderAsync(søgeTekst);
+			return Ok(result);
+		}
+
+
+	}
 }

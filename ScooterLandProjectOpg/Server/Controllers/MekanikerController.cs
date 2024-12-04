@@ -75,6 +75,29 @@ namespace ScooterLandProjectOpg.Server.Controllers
             await _mekanikerRepository.DeleteAsync(id);
             return NoContent();
         }
-    }
+
+		[HttpGet("{mekanikerId}/arbejdsopgaver")]
+		public async Task<ActionResult<IEnumerable<OrdreYdelse>>> GetArbejdsopgaverForMekaniker(int mekanikerId)
+		{
+			try
+			{
+				var arbejdsopgaver = await _mekanikerRepository.GetArbejdsopgaverForMekanikerAsync(mekanikerId);
+
+				// Returner altid en tom liste, hvis der ikke findes data
+				if (arbejdsopgaver == null || !arbejdsopgaver.Any())
+				{
+					return Ok(new List<OrdreYdelse>());
+				}
+
+				return Ok(arbejdsopgaver);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Fejl ved hentning af arbejdsopgaver: {ex.Message}");
+			}
+		}
+
+
+	}
 }
 

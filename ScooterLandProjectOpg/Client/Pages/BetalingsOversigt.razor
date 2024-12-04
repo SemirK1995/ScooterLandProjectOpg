@@ -55,7 +55,13 @@ else
                             }
                         </select>
                     </td>
-                    <td>@betaling.BetalingsDato?.ToString("dd-MM-yyyy")</td>
+                   
+                    <td>
+                        <input type="date" class="form-control"
+                               value="@betaling.BetalingsDato?.ToString("yyyy-MM-dd")"
+                               @onchange="async e => await OpdaterBetalingsDato(betaling.BetalingsId, e.Value?.ToString())">
+                    </td>
+
                     <td>
                         <button class="btn btn-info" @onclick="() => VisFakturaDetaljer(betaling.BetalingsId)">Vis Faktura</button>
                         <button class="btn btn-primary" @onclick="async () => await DownloadFaktura(betaling.BetalingsId)">Download Faktura</button>
@@ -112,7 +118,6 @@ else
                             </ul>
                             <hr />
                         }
-
                         <h6>Ydelser:</h6>
                         @if (fakturaData.Ydelser != null && fakturaData.Ydelser.Any())
                         {
@@ -195,14 +200,17 @@ else
     {
         var status = nyStatus == "true";
         await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/status", status);
+
         // Genindlæs fakturaen, hvis den er åben og denne betaling opdateres
         if (visFakturaModal && fakturaData?.BetalingsId == betalingsId)
         {
-            await VisFakturaDetaljer(betalingsId);
+            await VisFakturaDetaljer(betalingsId); // Genindlæs fakturaen
         }
 
         await HentBetalinger(); // Opdater listen
     }
+
+
 
     private async Task OpdaterBetalingsMetode(int betalingsId, string nyMetode)
     {
@@ -280,5 +288,31 @@ else
             Console.WriteLine($"Fejl ved oprettelse af betalinger: {errorMessage}");
         }
     }
+    private async Task OpdaterBetalingsDato(int betalingsId, string nyDato)
+    {
+        try
+        {
+            DateTime? dato = string.IsNullOrWhiteSpace(nyDato) ? null : DateTime.Parse(nyDato);
+
+            var response = await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/dato", dato);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Betalingsdato opdateret.");
+                // Opdater listen for at vise den ændrede dato
+                await HentBetalinger();
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Fejl ved opdatering af betalingsdato: {errorMessage}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fejl: {ex.Message}");
+        }
+    }
+
 }
 

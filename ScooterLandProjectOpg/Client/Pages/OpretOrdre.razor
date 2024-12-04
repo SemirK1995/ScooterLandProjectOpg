@@ -25,34 +25,27 @@
 		<!-- Opret Ordre Form -->
 		<div>
 			<div class="form-group">
-				<label for="kunde">Vælg Kunde:</label>
-				<select id="kunde" class="form-control" @bind ="valgtKundeId" @bind:event ="oninput" @onchange="HentScootereForKunde">
-					<option value="">-- Vælg en kunde --</option>
-					@foreach (var kunde in kunder)
-					{
-						<option value="@kunde.KundeId">@kunde.Navn</option>
-					}
-				</select>
+				<label for="search">Søg Kunde:</label>
+				<input id="search" class="form-control" @bind="SøgeTekst" placeholder="Søg på Kunde ID, Navn eller Telefonnummer" />
+
 			</div>
-			@if (kundeScootere != null && kundeScootere.Any())
-			{
-				<div>
-					<label for="scooter">Vælg en scooter:</label>
-					<select id="scooter" class="form-control" @bind="valgtKundeScooterId">
-						<option value="">-- Vælg en scooter --</option>
-						@foreach (var scooter in kundeScootere)
-						{
-							<option value="@scooter.ScooterId">@($"{scooter.Maerke} {scooter.Model} - {scooter.RegistreringsNummer}")</option>
-						}
-					</select>
-				</div>
-			}
-			else if (valgtKundeId > 0)
-			{
-				<p>Kunden har ingen scootere registreret.</p>
-			}
 
-
+			@if (filtreredeKunder.Any())
+			{
+				<ul class="list-group mt-2">
+					@foreach (var kunde in filtreredeKunder)
+					{
+						<li class="list-group-item d-flex justify-content-between align-items-center">
+							<span>@($"{kunde.KundeId} - {kunde.Navn} ({kunde.Telefonnummer})")</span>
+							<button class="btn btn-primary btn-sm" @onclick="() => VælgKunde(kunde.KundeId)">Vælg</button>
+						</li>
+					}
+				</ul>
+			}
+			else if (!string.IsNullOrWhiteSpace(søgeTekst))
+			{
+				<p class="text-muted mt-2">Ingen kunder matcher søgningen.</p>
+			}
 			@if (valgtKundeId > 0)
 			{
 				<div>
@@ -232,6 +225,26 @@
 	private bool visBekræftelsesModal = false;
 	private bool visSuccesBesked = false;
 
+	private string søgeTekst = ""; // Søgeteksten fra brugeren
+	private List<Kunde> filtreredeKunder = new(); // Den filtrerede liste af kunder
+	private string SøgeTekst
+	{
+		get => søgeTekst;
+		set
+		{
+			if (søgeTekst != value)
+			{
+				søgeTekst = value;
+				_ = PerformSearchAsync(); // Kald søgning når søgeTekst ændres
+				
+			}
+		}
+	}
+	private async Task PerformSearchAsync()
+	{
+		await SøgKunderAsync();
+		StateHasChanged(); // Tving UI-opdatering
+	}
 	private double TotalPris => valgteOrdreYdelser.Sum(oy => oy.AftaltPris ?? oy.Ydelse.StandardPris ?? 0) + BeregnLejeAftaleTotalPris();
 
 
@@ -241,25 +254,88 @@
 		alleYdelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
 		ledigeScootere = await Http.GetFromJsonAsync<List<LejeScooter>>("api/lejescooter/available");
 	}
-	private async Task HentScootereForKunde(ChangeEventArgs e)
+
+	private void FiltrerKunder()
 	{
-		if (int.TryParse(e.Value.ToString(), out int kundeId) && kundeId > 0)
+		if (string.IsNullOrWhiteSpace(søgeTekst))
 		{
-			try
-			{
-				valgtKundeId = kundeId;
-				var response = await Http.GetFromJsonAsync<List<KundeScooter>>($"api/KundeScooter/{kundeId}/scootere");
-				kundeScootere = response ?? new List<KundeScooter>();
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Fejl ved hentning af scootere: {ex.Message}");
-				kundeScootere = new List<KundeScooter>();
-			}
+			filtreredeKunder = new List<Kunde>(); // Tøm listen, hvis søgefeltet er tomt
 		}
 		else
 		{
-			kundeScootere = new List<KundeScooter>(); // Tøm listen, hvis ingen kunde er valgt
+			var søgetekstLower = søgeTekst.ToLower();
+			filtreredeKunder = kunder.Where(k =>
+			k.KundeId.ToString().Contains(søgeTekst) ||
+			(!string.IsNullOrEmpty(k.Navn) && k.Navn.ToLower().Contains(søgeTekst.ToLower())) ||
+			k.Telefonnummer?.ToString().Contains(søgeTekst) == true
+
+			).ToList();
+
+		}
+	}
+	private async Task SøgKunderAsync()
+	{
+		try
+		{
+			if (string.IsNullOrWhiteSpace(søgeTekst))
+			{
+				filtreredeKunder = new List<Kunde>(); // Tøm listen, hvis søgefeltet er tomt
+			}
+			else
+			{
+				var response = await Http.GetFromJsonAsync<List<Kunde>>($"api/Kunde/searchmany?søgeTekst={Uri.EscapeDataString(søgeTekst)}");
+				filtreredeKunder = response ?? new List<Kunde>();
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Fejl under søgning: {ex.Message}");
+			filtreredeKunder = new List<Kunde>(); // Hvis der opstår en fejl
+		}
+	}
+
+
+
+	private async Task VælgKunde(int kundeId)
+	{
+		valgtKundeId = kundeId;
+		søgeTekst = ""; // Ryd søgeteksten
+		filtreredeKunder = new List<Kunde>(); // Tøm resultatlisten
+		await HentScootereForKunde(kundeId);
+	}
+
+	// private async Task HentScootereForKunde(ChangeEventArgs e)
+	// {
+	// 	if (int.TryParse(e.Value.ToString(), out int kundeId) && kundeId > 0)
+	// 	{
+	// 		try
+	// 		{
+	// 			valgtKundeId = kundeId;
+	// 			var response = await Http.GetFromJsonAsync<List<KundeScooter>>($"api/KundeScooter/{kundeId}/scootere");
+	// 			kundeScootere = response ?? new List<KundeScooter>();
+	// 		}
+	// 		catch (Exception ex)
+	// 		{
+	// 			Console.WriteLine($"Fejl ved hentning af scootere: {ex.Message}");
+	// 			kundeScootere = new List<KundeScooter>();
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		kundeScootere = new List<KundeScooter>(); // Tøm listen, hvis ingen kunde er valgt
+	// 	}
+	// }
+	private async Task HentScootereForKunde(int kundeId)
+	{
+		try
+		{
+			var response = await Http.GetFromJsonAsync<List<KundeScooter>>($"api/KundeScooter/{kundeId}/scootere");
+			kundeScootere = response ?? new List<KundeScooter>();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Fejl ved hentning af scootere: {ex.Message}");
+			kundeScootere = new List<KundeScooter>();
 		}
 	}
 
@@ -281,7 +357,7 @@
 
 
 	private void AktivTabSkift(string tab) => aktivTab = tab;
-	
+
 
 
 	private void TilføjYdelse(Ydelse ydelse)
@@ -342,7 +418,7 @@
 					YdelseId = oy.Ydelse.YdelseId,
 					AftaltPris = oy.AftaltPris,
 					Dato = DateTime.Now,
-					ScooterId = valgtKundeScooterId
+					ScooterId = oy.ScooterId
 				}).ToList(),
 				LejeAftale = lejeaftale
 			};

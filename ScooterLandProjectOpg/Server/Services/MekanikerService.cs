@@ -52,6 +52,15 @@ namespace ScooterLandProjectOpg.Server.Services
 				await _context.SaveChangesAsync();
 			}
 		}
+		// Hent arbejdsopgaver for en mekaniker
+		public async Task<IEnumerable<OrdreYdelse>> GetArbejdsopgaverForMekanikerAsync(int mekanikerId)
+		{
+			return await _context.OrdreYdelser
+				.Include(oy => oy.Ydelse) // Medtag oplysninger om ydelsen
+				.Include(oy => oy.Scooter) // Medtag oplysninger om kundens scooter
+				.Where(oy => oy.MekanikerId == mekanikerId)
+				.ToListAsync();
+		}
 	}
 }
 
