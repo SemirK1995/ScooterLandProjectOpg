@@ -26,8 +26,8 @@ else
                 <th>Betalings ID</th>
                 <th>Ordre ID</th>
                 <th>Beløb</th>
-                <th>Betalt</th>
                 <th>Betalingsmetode</th>
+                <th>Betalt</th>
                 <th>Betalingsdato</th>
                 <th>Handlinger</th>
             </tr>
@@ -40,12 +40,6 @@ else
                     <td>@betaling.OrdreId</td>
                     <td>@betaling.Beløb?.ToString("F2") kr.</td>
                     <td>
-                        <select class="form-control" @onchange="async e => await OpdaterBetaltStatus(betaling.BetalingsId, e.Value.ToString())">
-                            <option value="true" selected="@(betaling.Betalt ? "true" : null)">Ja</option>
-                            <option value="false" selected="@(betaling.Betalt ? null : "false")">Nej</option>
-                        </select>
-                    </td>
-                    <td>
                         <select class="form-control" @onchange="async e => await OpdaterBetalingsMetode(betaling.BetalingsId, e.Value.ToString())">
                             @foreach (var metode in Enum.GetValues<BetalingsMetodeStatus>())
                             {
@@ -55,11 +49,18 @@ else
                             }
                         </select>
                     </td>
+                    <td>
+                        <select class="form-control" @onchange="async e => await OpdaterBetaltStatus(betaling.BetalingsId, e.Value.ToString())">
+                            <option value="true" selected="@(betaling.Betalt ? "true" : null)">Ja</option>
+                            <option value="false" selected="@(betaling.Betalt ? null : "false")">Nej</option>
+                        </select>
+                    </td>
+                    
                    
                     <td>
                         <input type="date" class="form-control"
                                value="@betaling.BetalingsDato?.ToString("yyyy-MM-dd")"
-                               @onchange="async e => await OpdaterBetalingsDato(betaling.BetalingsId, e.Value?.ToString())">
+                               disabled/>
                     </td>
 
                     <td>
@@ -244,19 +245,6 @@ else
         }
     }
 
-    // private async Task OpdaterBetaltStatus(int betalingsId, string nyStatus)
-    // {
-    //     var status = nyStatus == "true";
-    //     await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/status", status);
-
-    //     Genindlæs fakturaen, hvis den er åben og denne betaling opdateres
-    //     if (visFakturaModal && fakturaData?.BetalingsId == betalingsId)
-    //     {
-    //         await VisFakturaDetaljer(betalingsId); Genindlæs fakturaen
-    //     }
-
-    //     await HentBetalinger(); Opdater listen
-    // }
     private async Task OpdaterBetaltStatus(int betalingsId, string nyStatus)
     {
         var status = nyStatus == "true";
@@ -264,8 +252,7 @@ else
         // DTO til at sende status og dato
         var betalingUpdate = new BetalingUpdateDto
             {
-                Betalt = status,
-                BetalingsDato = status ? DateTime.Now : null
+                Betalt = status
             };
 
         var response = await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/status", betalingUpdate);

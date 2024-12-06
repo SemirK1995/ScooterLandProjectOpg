@@ -46,13 +46,15 @@ namespace ScooterLandProjectOpg.Server.Services
                 .ToListAsync();
         }
 
-        //public async Task UpdateBetalingsStatusAsync(int betalingsId, bool betaltStatus)
+        //public async Task UpdateBetalingsStatusAsync(int betalingsId, BetalingUpdateDto betalingUpdate)
         //{
         //    var betaling = await _context.Betalinger.FindAsync(betalingsId);
         //    if (betaling == null)
         //        throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
 
-        //    betaling.Betalt = betaltStatus;
+        //    betaling.Betalt = betalingUpdate.Betalt;
+        //    betaling.BetalingsDato = betalingUpdate.Betalt ? (betalingUpdate.BetalingsDato ?? DateTime.Now) : null;
+
         //    _context.Betalinger.Update(betaling);
         //    await _context.SaveChangesAsync();
         //}
@@ -62,12 +64,21 @@ namespace ScooterLandProjectOpg.Server.Services
             if (betaling == null)
                 throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
 
+            // Kun sæt betalingsdato, hvis Betalt er true
             betaling.Betalt = betalingUpdate.Betalt;
-            betaling.BetalingsDato = betalingUpdate.Betalt ? (betalingUpdate.BetalingsDato ?? DateTime.Now) : null;
+            if (betalingUpdate.Betalt)
+            {
+                betaling.BetalingsDato = DateTime.Now;
+            }
+            else
+            {
+                betaling.BetalingsDato = null; // Slet dato, hvis ikke betalt
+            }
 
             _context.Betalinger.Update(betaling);
             await _context.SaveChangesAsync();
         }
+
 
         public async Task UpdateBetalingsMetodeAsync(int betalingsId, BetalingsMetodeStatus nyMetode)
         {

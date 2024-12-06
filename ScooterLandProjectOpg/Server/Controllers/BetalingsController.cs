@@ -43,19 +43,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
             return Ok(betalinger);
         }
 
-        //[HttpPut("{betalingsId}/status")]
-        //public async Task<IActionResult> UpdateStatus(int betalingsId, [FromBody] bool betaltStatus)
-        //{
-        //    try
-        //    {
-        //        await _betalingRepository.UpdateBetalingsStatusAsync(betalingsId, betaltStatus);
-        //        return Ok("Betalingsstatus opdateret.");
-        //    }
-        //    catch (KeyNotFoundException ex)
-        //    {
-        //        return NotFound(ex.Message);
-        //    }
-        //}
         [HttpPut("{betalingsId}/status")]
         public async Task<IActionResult> UpdateStatus(int betalingsId, [FromBody] BetalingUpdateDto betalingUpdate)
         {
