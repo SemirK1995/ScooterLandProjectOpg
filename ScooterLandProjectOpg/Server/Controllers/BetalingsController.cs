@@ -133,6 +133,7 @@ namespace ScooterLandProjectOpg.Server.Controllers
                     // Produkter
                     Produkter = ordre.OrdreProdukter?.Select(op => new FakturaProduktDto
                     {
+                        ProduktId = op.Produkt.ProduktId,
                         ProduktNavn = op.Produkt.ProduktNavn,
                         Antal = op.Antal,
                         Pris = op.Pris

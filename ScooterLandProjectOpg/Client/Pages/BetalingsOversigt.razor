@@ -123,6 +123,7 @@ else
                             <table class="table">
                                 <thead>
                                     <tr>
+                                        <th>YdelseId</th>
                                         <th>Ydelsesnavn</th>
                                         <th>Scooter Mærke</th>
                                         <th>Scooter Model</th>
@@ -133,6 +134,7 @@ else
                                     @foreach (var ydelse in fakturaData.Ydelser)
                                     {
                                         <tr>
+                                            <td>@ydelse.YdelseId</td>
                                             <td>@ydelse.YdelseNavn</td>
                                             <td>@ydelse.ScooterMaerke</td>
                                             <td>@ydelse.ScooterModel</td>
@@ -157,6 +159,7 @@ else
                         <table class="table">
                             <thead>
                                 <tr>
+                                    <th>ProduktId</th>
                                     <th>Produktnavn</th>
                                     <th>Antal</th>
                                     <th>Pris</th>
@@ -167,6 +170,7 @@ else
                                 @foreach (var produkt in fakturaData.Produkter)
                                 {
                                     <tr>
+                                        <td>@produkt.ProduktId</td>
                                         <td>@produkt.ProduktNavn</td>
                                         <td>@produkt.Antal</td>
                                         <td>@produkt.Pris.ToString("F2") kr.</td>

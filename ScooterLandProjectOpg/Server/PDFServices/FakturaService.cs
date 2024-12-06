@@ -23,6 +23,9 @@ namespace ScooterLandProjectOpg.Server.PDFServices
                     .ThenInclude(o => o.OrdreYdelse)
                     .ThenInclude(oy => oy.Ydelse)
                 .Include(b => b.Ordre)
+                    .ThenInclude(o => o.OrdreProdukter)
+                    .ThenInclude(op => op.Produkt)
+                .Include(b => b.Ordre)
                     .ThenInclude(o => o.Kunde)
                 .FirstOrDefaultAsync(b => b.BetalingsId == betalingsId);
 
@@ -42,7 +45,7 @@ namespace ScooterLandProjectOpg.Server.PDFServices
                 int yPoint = 40;
 
                 // Faktura header
-                gfx.DrawString("Faktura", new XFont("Arial", 18, XFontStyle.Bold), XBrushes.Black, new XRect(0, yPoint, page.Width, 0), XStringFormats.TopCenter);
+                gfx.DrawString("Scooterland Faktura", new XFont("Arial", 18, XFontStyle.Bold), XBrushes.Black, new XRect(0, yPoint, page.Width, 0), XStringFormats.TopCenter);
                 yPoint += 40;
 
                 // Betaling detaljer
@@ -65,8 +68,6 @@ namespace ScooterLandProjectOpg.Server.PDFServices
                 gfx.DrawString($"Ordre ID: {ordre.OrdreId}", font, XBrushes.Black, new XRect(40, yPoint, page.Width, 0), XStringFormats.TopLeft);
                 yPoint += 20;
                 gfx.DrawString($"Dato: {ordre.Dato?.ToString("dd-MM-yyyy")}", font, XBrushes.Black, new XRect(40, yPoint, page.Width, 0), XStringFormats.TopLeft);
-                yPoint += 20;
-                gfx.DrawString($"Total Pris: {ordre.TotalPris?.ToString("F2")} kr.", font, XBrushes.Black, new XRect(40, yPoint, page.Width, 0), XStringFormats.TopLeft);
                 yPoint += 40;
 
                 // Lejeaftale detaljer (hvis nogen)
@@ -88,17 +89,31 @@ namespace ScooterLandProjectOpg.Server.PDFServices
                     yPoint += 20;
                     foreach (var ydelse in ordre.OrdreYdelse)
                     {
-                        gfx.DrawString($"- {ydelse.Ydelse?.Navn}: {ydelse.BeregnetPris.ToString("F2")} kr.", font, XBrushes.Black, new XRect(60, yPoint, page.Width, 0), XStringFormats.TopLeft);
+                        gfx.DrawString($"- Ydelse ID: {ydelse.YdelseId}, Navn: {ydelse.Ydelse?.Navn}, Pris: {ydelse.BeregnetPris.ToString("F2")} kr.", font, XBrushes.Black, new XRect(60, yPoint, page.Width, 0), XStringFormats.TopLeft);
                         yPoint += 20;
                     }
                 }
+
+                // Produkter
+                if (ordre.OrdreProdukter != null && ordre.OrdreProdukter.Any())
+                {
+                    gfx.DrawString("Produkter:", font, XBrushes.Black, new XRect(40, yPoint, page.Width, 0), XStringFormats.TopLeft);
+                    yPoint += 20;
+                    foreach (var produkt in ordre.OrdreProdukter)
+                    {
+                        gfx.DrawString($"- Produkt ID: {produkt.ProduktId}, Navn: {produkt.Produkt?.ProduktNavn}, Antal: {produkt.Antal}, Pris: {produkt.Pris.ToString("F2")} kr.", font, XBrushes.Black, new XRect(60, yPoint, page.Width, 0), XStringFormats.TopLeft);
+                        yPoint += 20;
+                    }
+                }
+
+                // Subtotal og Total Pris
+                yPoint += 20;
+                gfx.DrawString($"Total: {ordre.TotalPris?.ToString("F2")} kr.", new XFont("Arial", 14, XFontStyle.Bold), XBrushes.Black, new XRect(40, yPoint, page.Width, 0), XStringFormats.TopLeft);
 
                 // Gem som PDF
                 pdf.Save(ms);
                 return ms.ToArray();
             }
         }
-
-
     }
 }
