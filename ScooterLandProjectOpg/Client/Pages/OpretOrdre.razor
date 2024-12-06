@@ -387,19 +387,7 @@
 			ledigeScootere = new List<LejeScooter>();
 		}
 	}
-	// private void TilføjProdukt(Produkt produkt)
-	// {
-	// 	if (!valgteProdukter.Any(p => p.ProduktId == produkt.ProduktId))
-	// 	{
-	// 		valgteProdukter.Add(new Produkt
-	// 			{
-	// 				ProduktId = produkt.ProduktId,
-	// 				ProduktNavn = produkt.ProduktNavn,
-	// 				Pris = produkt.Pris,
-	// 				Antal = produkt.Antal ?? 1
-	// 			});
-	// 	}
-	// }
+	
 	private void NulstilOrdreData()
 	{
 		valgteProdukter.Clear();
@@ -414,24 +402,6 @@
 		visSuccesBesked = false;
 		StateHasChanged(); // Tving UI-opdatering
 	}
-	// private void TilføjProdukt(Produkt produkt)
-	// {
-	// 	var eksisterendeProdukt = valgteProdukter.FirstOrDefault(p => p.ProduktId == produkt.ProduktId);
-	// 	if (eksisterendeProdukt == null)
-	// 	{
-	// 		valgteProdukter.Add(new Produkt
-	// 			{
-	// 				ProduktId = produkt.ProduktId,
-	// 				ProduktNavn = produkt.ProduktNavn,
-	// 				Pris = produkt.Pris,
-	// 				Antal = produkt.Antal ?? 1
-	// 			});
-	// 	}
-	// 	else
-	// 	{
-	// 		eksisterendeProdukt.Antal += produkt.Antal ?? 1; // Opdater antal
-	// 	}
-	// }
 	private void TilføjProdukt(Produkt produkt)
 	{
 		var eksisterendeProdukt = valgteProdukter.FirstOrDefault(p => p.ProduktId == produkt.ProduktId);
@@ -441,16 +411,16 @@
 				{
 					ProduktId = produkt.ProduktId,
 					ProduktNavn = produkt.ProduktNavn,
-					Pris = produkt.Pris, // Send kun basisprisen
-					Antal = 1 // Standardér antal til 1, hvis ikke valgt
+					Pris = produkt.Pris,
+					Antal = produkt.Antal ?? 1
 				});
 		}
 		else
 		{
-			eksisterendeProdukt.Antal++; // Forøg kun antallet
+			eksisterendeProdukt.Antal += produkt.Antal ?? 1; // Opdater antal
 		}
 	}
-
+	
 
 	private void FjernProdukt(Produkt produkt)
 	{
