@@ -48,5 +48,20 @@ namespace ScooterLandProjectOpg.Server.Controllers
             return Ok(scootere);
         }
 
-    }
+		[HttpGet("all")]
+		public async Task<ActionResult<IEnumerable<KundeScooter>>> GetAllScootersWithKunder()
+		{
+			var allScooters = await _kundeScooterRepository.GetScootersWithKundeAsync();
+
+			if (allScooters == null || !allScooters.Any())
+			{
+				return NotFound("Ingen scootere fundet.");
+			}
+
+			return Ok(allScooters);
+		}
+
+
+
+	}
 }

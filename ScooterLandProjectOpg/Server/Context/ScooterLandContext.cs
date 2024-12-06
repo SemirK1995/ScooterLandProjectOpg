@@ -19,6 +19,8 @@ namespace ScooterLandProjectOpg.Server.Context
 		public DbSet<Ordre> Ordrer { get; set; }
 		public DbSet<OrdreYdelse> OrdreYdelser { get; set; }
 		public DbSet<Ydelse> Ydelser { get; set; }
+		public DbSet<Produkt> Produkter { get; set; }
+		public DbSet<OrdreProdukt> OrdreProdukter { get; set; }
 
 
         // Konfiguration af relationer mellem modeller

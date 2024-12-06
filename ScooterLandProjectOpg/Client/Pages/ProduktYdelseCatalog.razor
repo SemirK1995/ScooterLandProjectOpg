@@ -1,0 +1,311 @@
+﻿@page "/produktydelsecatalog"
+@using ScooterLandProjectOpg.Shared.Models
+@inject HttpClient Http
+
+<h3>Produkt og Ydelse Katalog</h3>
+
+<ul class="nav nav-tabs">
+	<li class="nav-item">
+		<a class="nav-link @(aktivTab == "ydelser" ? "active" : "")" @onclick="@(() => AktivTabSkift("ydelser"))">
+			Ydelser
+		</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link @(aktivTab == "produkter" ? "active" : "")" @onclick="@(() => AktivTabSkift("produkter"))">
+			Produkter
+		</a>
+	</li>
+</ul>
+
+<div class="tab-content mt-4">
+	@if (aktivTab == "ydelser")
+	{
+		<div>
+			<button class="btn btn-success mb-3" @onclick="VisOpretYdelseModal">Opret Ydelse</button>
+			@if (ydelser == null)
+			{
+				<p>Loading ydelser...</p>
+			}
+			else
+			{
+				<table class="table">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Navn</th>
+							<th>Standard Pris</th>
+							<th>Handlinger</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var ydelse in ydelser)
+						{
+							<tr>
+								<td>@ydelse.YdelseId</td>
+								<td>@ydelse.Navn</td>
+								<td>@ydelse.StandardPris?.ToString("F2") kr.</td>
+								<td>
+									<button class="btn btn-primary" @onclick="() => VisRedigerYdelseModal(ydelse)">Rediger</button>
+									<button class="btn btn-danger" @onclick="() => BekræftSletYdelse(ydelse)">Slet</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+		</div>
+	}
+	else if (aktivTab == "produkter")
+	{
+		<div>
+			<button class="btn btn-success mb-3" @onclick="VisOpretProduktModal">Opret Produkt</button>
+			@if (produkter == null)
+			{
+				<p>Loading produkter...</p>
+			}
+			else
+			{
+				<table class="table">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Navn</th>
+							<th>Pris</th>
+							<th>Lager Antal</th>
+							<th>Handlinger</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var produkt in produkter)
+						{
+							<tr>
+								<td>@produkt.ProduktId</td>
+								<td>@produkt.ProduktNavn</td>
+								<td>@produkt.Pris?.ToString("F2") kr.</td>
+								<td>@produkt.Antal</td>
+								<td>
+									<button class="btn btn-primary" @onclick="() => VisRedigerProduktModal(produkt)">Rediger</button>
+									<button class="btn btn-danger" @onclick="() => BekræftSletProdukt(produkt)">Slet</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+		</div>
+	}
+</div>
+
+<!-- Modals -->
+@if (visYdelseModal)
+{
+	<EditForm Model="valgtYdelse" OnValidSubmit="GemYdelse">
+		<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">@ydelseModalTitel</h5>
+						<button type="button" class="btn-close" @onclick="LukYdelseModal"></button>
+					</div>
+					<div class="modal-body">
+						<DataAnnotationsValidator />
+						<div class="mb-3">
+							<label>Navn:</label>
+							<InputText @bind-Value="valgtYdelse.Navn" class="form-control" />
+						</div>
+						<div class="mb-3">
+							<label>Standard Pris:</label>
+							<InputNumber @bind-Value="valgtYdelse.StandardPris" class="form-control" />
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary">Gem</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</EditForm>
+}
+
+@if (visProduktModal)
+{
+	<EditForm Model="valgtProdukt" OnValidSubmit="GemProdukt">
+		<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">@produktModalTitel</h5>
+						<button type="button" class="btn-close" @onclick="LukProduktModal"></button>
+					</div>
+					<div class="modal-body">
+						<DataAnnotationsValidator />
+						<div class="mb-3">
+							<label>Navn:</label>
+							<InputText @bind-Value="valgtProdukt.ProduktNavn" class="form-control" />
+						</div>
+						<div class="mb-3">
+							<label>Pris:</label>
+							<InputNumber @bind-Value="valgtProdukt.Pris" class="form-control" />
+						</div>
+						<div class="mb-3">
+							<label>Antal:</label>
+							<InputNumber @bind-Value="valgtProdukt.Antal" class="form-control" />
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary">Gem</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</EditForm>
+}
+
+@if (visBekræftSletModal)
+{
+	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Bekræft Sletning</h5>
+					<button type="button" class="btn-close" @onclick="LukBekræftSletModal"></button>
+				</div>
+				<div class="modal-body">
+					<p>Er du sikker på, at du vil slette "@bekræftModalTitel"?</p>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-danger" @onclick="BekræftSlet">Ja, Slet</button>
+					<button class="btn btn-secondary" @onclick="LukBekræftSletModal">Annuller</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+@code {
+	private string aktivTab = "ydelser";
+	private List<Ydelse>? ydelser;
+	private List<Produkt>? produkter;
+	private Ydelse valgtYdelse = new();
+	private Produkt valgtProdukt = new();
+	private bool visYdelseModal = false;
+	private bool visProduktModal = false;
+	private string ydelseModalTitel = "";
+	private string produktModalTitel = "";
+	private bool visBekræftSletModal = false;
+	private string bekræftModalTitel = "";
+	private int? idTilSletning = null;
+	private string aktivTypeTilSletning = ""; // "ydelse" eller "produkt"
+
+	protected override async Task OnInitializedAsync()
+	{
+		await HentYdelser();
+		await HentProdukter();
+	}
+
+	private async Task HentYdelser() => ydelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
+	private async Task HentProdukter() => produkter = await Http.GetFromJsonAsync<List<Produkt>>("api/Produkt");
+
+	private void AktivTabSkift(string tab) => aktivTab = tab;
+
+	private void VisOpretYdelseModal()
+	{
+		valgtYdelse = new();
+		ydelseModalTitel = "Opret Ydelse";
+		visYdelseModal = true;
+	}
+
+	private void VisRedigerYdelseModal(Ydelse ydelse)
+	{
+		valgtYdelse = ydelse;
+		ydelseModalTitel = "Rediger Ydelse";
+		visYdelseModal = true;
+	}
+
+	private void LukYdelseModal() => visYdelseModal = false;
+
+	private async Task GemYdelse()
+	{
+		if (valgtYdelse.YdelseId == 0)
+		{
+			await Http.PostAsJsonAsync("api/Ydelse", valgtYdelse);
+		}
+		else
+		{
+			await Http.PutAsJsonAsync($"api/Ydelse/{valgtYdelse.YdelseId}", valgtYdelse);
+		}
+		await HentYdelser();
+		LukYdelseModal();
+	}
+
+	private void BekræftSletYdelse(Ydelse ydelse)
+	{
+		bekræftModalTitel = ydelse.Navn ?? "ukendt ydelse";
+		idTilSletning = ydelse.YdelseId;
+		aktivTypeTilSletning = "ydelse";
+		visBekræftSletModal = true;
+	}
+
+	private void VisOpretProduktModal()
+	{
+		valgtProdukt = new();
+		produktModalTitel = "Opret Produkt";
+		visProduktModal = true;
+	}
+
+	private void VisRedigerProduktModal(Produkt produkt)
+	{
+		valgtProdukt = produkt;
+		produktModalTitel = "Rediger Produkt";
+		visProduktModal = true;
+	}
+
+	private void LukProduktModal() => visProduktModal = false;
+
+	private async Task GemProdukt()
+	{
+		if (valgtProdukt.ProduktId == 0)
+		{
+			await Http.PostAsJsonAsync("api/Produkt", valgtProdukt);
+		}
+		else
+		{
+			await Http.PutAsJsonAsync($"api/Produkt/{valgtProdukt.ProduktId}", valgtProdukt);
+		}
+		await HentProdukter();
+		LukProduktModal();
+	}
+
+	private void BekræftSletProdukt(Produkt produkt)
+	{
+		bekræftModalTitel = produkt.ProduktNavn ?? "ukendt produkt";
+		idTilSletning = produkt.ProduktId;
+		aktivTypeTilSletning = "produkt";
+		visBekræftSletModal = true;
+	}
+
+	private void LukBekræftSletModal()
+	{
+		visBekræftSletModal = false;
+		idTilSletning = null;
+		aktivTypeTilSletning = "";
+	}
+
+	private async Task BekræftSlet()
+	{
+		if (idTilSletning != null)
+		{
+			if (aktivTypeTilSletning == "ydelse")
+			{
+				await Http.DeleteAsync($"api/Ydelse/{idTilSletning}");
+				await HentYdelser();
+			}
+			else if (aktivTypeTilSletning == "produkt")
+			{
+				await Http.DeleteAsync($"api/Produkt/{idTilSletning}");
+				await HentProdukter();
+			}
+		}
+		LukBekræftSletModal();
+	}
+}

@@ -5,6 +5,20 @@
 
 <h3>Opret Ordre</h3>
 
+@if (valgtKunde != null)
+{
+	<div class="alert alert-info">
+		<h5>Valgt Kunde</h5>
+		<p>
+			<strong>ID:</strong> @valgtKunde.KundeId<br />
+			<strong>Navn:</strong> @valgtKunde.Navn<br />
+			<strong>Telefon:</strong> @valgtKunde.Telefonnummer
+		</p>
+		<button class="btn btn-warning" @onclick="RydValgtKunde">Ryd Valg</button>
+	</div>
+}
+
+
 <!-- Tabs navigation -->
 <ul class="nav nav-tabs">
 	<li class="nav-item">
@@ -17,6 +31,11 @@
 			Lejeaftale
 		</a>
 	</li>
+	<li class="nav-item">
+		<a class="nav-link @(aktivTab == "produkter" ? "active" : "")" @onclick="@(() => AktivTabSkift("produkter"))">
+			Produkter
+		</a>
+	</li>
 </ul>
 
 <div class="tab-content mt-4">
@@ -25,7 +44,6 @@
 		<!-- Opret Ordre Form -->
 		<div>
 			<div class="form-group">
-				<label for="search">Søg Kunde:</label>
 				<input id="search" class="form-control" @bind="SøgeTekst" placeholder="Søg på Kunde ID, Navn eller Telefonnummer" />
 
 			</div>
@@ -49,7 +67,7 @@
 			@if (valgtKundeId > 0)
 			{
 				<div>
-					<h5>Tilgængelige Ydelser:</h5>
+
 					@if (alleYdelser != null && alleYdelser.Any())
 					{
 						<table class="table">
@@ -81,7 +99,7 @@
 				</div>
 
 				<div class="mt-3">
-					<h5>Valgte Ydelser:</h5>
+					<h5>Tilføjet Ydelser:</h5>
 					@if (valgteOrdreYdelser.Any())
 					{
 						<table class="table">
@@ -123,7 +141,7 @@
 					}
 					else
 					{
-						<p>Ingen ydelser er valgt.</p>
+						<p>Ingen ydelser er tilføjet.</p>
 					}
 
 					<button class="btn btn-primary mt-3" @onclick="VisBekræftelse">Gem Ordre</button>
@@ -165,14 +183,23 @@
 
 			<div class="form-group mt-3">
 				<label for="scooter">Vælg en ledig scooter:</label>
-				<select id="scooter" class="form-control" @bind="valgtLejeScooterId">
-					<option value="">-- Vælg en scooter --</option>
-					@foreach (var scooter in ledigeScootere)
-					{
-						<option value="@scooter.LejeScooterId">@($"{scooter.ScooterMaerke} {scooter.ScooterModel} - {scooter.RegistreringsNummer}")</option>
-					}
-				</select>
+
+				@if (ledigeScootere == null || !ledigeScootere.Any())
+				{
+					<p class="text-warning">Der er i øjeblikket ingen ledige scootere til lejeaftaler.</p>
+				}
+				else
+				{
+					<select id="scooter" class="form-control" @bind="valgtLejeScooterId">
+						<option value="">-- Vælg en scooter --</option>
+						@foreach (var scooter in ledigeScootere)
+						{
+							<option value="@scooter.LejeScooterId">@($"{scooter.ScooterMaerke} {scooter.ScooterModel} - {scooter.RegistreringsNummer}")</option>
+						}
+					</select>
+				}
 			</div>
+
 
 			<h5>Samlet pris for lejeaftale: @BeregnLejeAftaleTotalPris() kr.</h5>
 			<p class="text-warning">
@@ -180,7 +207,81 @@
 			</p>
 		</div>
 	}
+	else if (aktivTab == "produkter")
+	{
+		<!-- Indhold for Produkter-fanen -->
+		<div>
+			<h5>Tilføj Produkter</h5>
+			<p class="text-muted">Vælg produkter, der skal inkluderes i ordren.</p>
+			@if (alleProdukter == null || !alleProdukter.Any())
+			{
+				<p>Ingen produkter tilgængelige.</p>
+			}
+			else
+			{
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Produkt</th>
+							<th>Pris</th>
+							<th>Antal</th>
+							<th>Handlinger</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var produkt in alleProdukter)
+						{
+							<tr>
+								<td>@produkt.ProduktNavn</td>
+								<td>@produkt.Pris?.ToString("F2") kr.</td>
+								<td>
+									<InputNumber @bind-Value="produkt.Antal" class="form-control" />
+								</td>
+								<td>
+									<button class="btn btn-success" @onclick="() => TilføjProdukt(produkt)">Tilføj</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+			<h5>Valgte Produkter:</h5>
+			@if (valgteProdukter.Any())
+			{
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Produkt</th>
+							<th>Pris</th>
+							<th>Antal</th>
+							<th>Handlinger</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var produkt in valgteProdukter)
+						{
+							<tr>
+								<td>@produkt.ProduktNavn</td>
+								<td>@produkt.Pris?.ToString("F2") kr.</td>
+								<td>@produkt.Antal</td>
+								<td>
+									<button class="btn btn-danger" @onclick="() => FjernProdukt(produkt)">Fjern</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+				<h5>Total pris for produkter: @TotalPrisForProdukter kr.</h5>
+			}
+			else
+			{
+				<p>Ingen produkter valgt.</p>
+			}
+		</div>
+	}
 </div>
+
+
 
 <!-- Bekræftelsesmodal -->
 @if (visBekræftelsesModal)
@@ -218,15 +319,21 @@
 	private List<OrdreYdelse> valgteOrdreYdelser = new List<OrdreYdelse>();
 	private CreateLejeAftaleDto lejeaftale = new();
 	private List<KundeScooter> kundeScootere = new();
+	private List<Produkt> alleProdukter = new();
+	private List<Produkt> valgteProdukter = new();
 	private int valgtKundeId;
 	private int? valgtLejeScooterId;
 	private int? valgtKundeScooterId;
 	private string aktivTab = "ordre";
 	private bool visBekræftelsesModal = false;
 	private bool visSuccesBesked = false;
+	private Kunde valgtKunde; // Gemmer oplysninger om den valgte kunde
+
+	private double? TotalPrisFraBackend { get; set; }
 
 	private string søgeTekst = ""; // Søgeteksten fra brugeren
 	private List<Kunde> filtreredeKunder = new(); // Den filtrerede liste af kunder
+
 	private string SøgeTekst
 	{
 		get => søgeTekst;
@@ -236,7 +343,7 @@
 			{
 				søgeTekst = value;
 				_ = PerformSearchAsync(); // Kald søgning når søgeTekst ændres
-				
+
 			}
 		}
 	}
@@ -245,15 +352,111 @@
 		await SøgKunderAsync();
 		StateHasChanged(); // Tving UI-opdatering
 	}
-	private double TotalPris => valgteOrdreYdelser.Sum(oy => oy.AftaltPris ?? oy.Ydelse.StandardPris ?? 0) + BeregnLejeAftaleTotalPris();
+
+	private double TotalPris => valgteOrdreYdelser.Sum(oy => oy.AftaltPris ?? oy.Ydelse.StandardPris ?? 0) + BeregnLejeAftaleTotalPris() + TotalPrisForProdukter;
+	private double TotalPrisForProdukter => valgteProdukter.Sum(p => (p.Pris ?? 0) * (p.Antal ?? 1));
 
 
 	protected override async Task OnInitializedAsync()
 	{
-		kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
-		alleYdelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
-		ledigeScootere = await Http.GetFromJsonAsync<List<LejeScooter>>("api/lejescooter/available");
+		try
+		{
+			// Hent kunder og ydelser
+			kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
+			alleYdelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
+			//Hent produkter
+			alleProdukter = await Http.GetFromJsonAsync<List<Produkt>>("api/Produkt");
+			// Hent ledige scootere
+			ledigeScootere = await Http.GetFromJsonAsync<List<LejeScooter>>("api/lejescooter/available");
+
+			// Hvis ingen scootere er tilgængelige, initialiser en tom liste og log besked
+			if (ledigeScootere == null || !ledigeScootere.Any())
+			{
+				Console.WriteLine("Ingen ledige scootere fundet.");
+				ledigeScootere = new List<LejeScooter>();
+			}
+		}
+		catch (HttpRequestException ex)
+		{
+			Console.WriteLine($"Fejl ved hentning af data: {ex.Message}");
+			ledigeScootere = new List<LejeScooter>(); // Initialiser som tom liste for at undgå fejl
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Uventet fejl: {ex.Message}");
+			ledigeScootere = new List<LejeScooter>();
+		}
 	}
+	// private void TilføjProdukt(Produkt produkt)
+	// {
+	// 	if (!valgteProdukter.Any(p => p.ProduktId == produkt.ProduktId))
+	// 	{
+	// 		valgteProdukter.Add(new Produkt
+	// 			{
+	// 				ProduktId = produkt.ProduktId,
+	// 				ProduktNavn = produkt.ProduktNavn,
+	// 				Pris = produkt.Pris,
+	// 				Antal = produkt.Antal ?? 1
+	// 			});
+	// 	}
+	// }
+	private void NulstilOrdreData()
+	{
+		valgteProdukter.Clear();
+		valgteOrdreYdelser.Clear();
+		lejeaftale = new CreateLejeAftaleDto();
+		valgtLejeScooterId = null;
+		valgtKunde = null;
+		valgtKundeId = 0;
+		TotalPrisFraBackend = null;
+		aktivTab = "ordre"; // Sæt standard-tabben tilbage
+		visBekræftelsesModal = false;
+		visSuccesBesked = false;
+		StateHasChanged(); // Tving UI-opdatering
+	}
+	// private void TilføjProdukt(Produkt produkt)
+	// {
+	// 	var eksisterendeProdukt = valgteProdukter.FirstOrDefault(p => p.ProduktId == produkt.ProduktId);
+	// 	if (eksisterendeProdukt == null)
+	// 	{
+	// 		valgteProdukter.Add(new Produkt
+	// 			{
+	// 				ProduktId = produkt.ProduktId,
+	// 				ProduktNavn = produkt.ProduktNavn,
+	// 				Pris = produkt.Pris,
+	// 				Antal = produkt.Antal ?? 1
+	// 			});
+	// 	}
+	// 	else
+	// 	{
+	// 		eksisterendeProdukt.Antal += produkt.Antal ?? 1; // Opdater antal
+	// 	}
+	// }
+	private void TilføjProdukt(Produkt produkt)
+	{
+		var eksisterendeProdukt = valgteProdukter.FirstOrDefault(p => p.ProduktId == produkt.ProduktId);
+		if (eksisterendeProdukt == null)
+		{
+			valgteProdukter.Add(new Produkt
+				{
+					ProduktId = produkt.ProduktId,
+					ProduktNavn = produkt.ProduktNavn,
+					Pris = produkt.Pris, // Send kun basisprisen
+					Antal = 1 // Standardér antal til 1, hvis ikke valgt
+				});
+		}
+		else
+		{
+			eksisterendeProdukt.Antal++; // Forøg kun antallet
+		}
+	}
+
+
+	private void FjernProdukt(Produkt produkt)
+	{
+		valgteProdukter.Remove(produkt);
+	}
+
 
 	private void FiltrerKunder()
 	{
@@ -293,38 +496,31 @@
 			filtreredeKunder = new List<Kunde>(); // Hvis der opstår en fejl
 		}
 	}
-
-
-
 	private async Task VælgKunde(int kundeId)
 	{
 		valgtKundeId = kundeId;
+
+		// Hent kunden fra filtreredeKunder eller fra API'et, hvis nødvendigt
+		valgtKunde = filtreredeKunder.FirstOrDefault(k => k.KundeId == kundeId);
+
+		if (valgtKunde == null)
+		{
+			valgtKunde = await Http.GetFromJsonAsync<Kunde>($"api/Kunde/{kundeId}");
+		}
+
 		søgeTekst = ""; // Ryd søgeteksten
-		filtreredeKunder = new List<Kunde>(); // Tøm resultatlisten
-		await HentScootereForKunde(kundeId);
+		filtreredeKunder.Clear(); // Tøm resultatlisten
+		await HentScootereForKunde(kundeId); // Hent scootere relateret til kunden
+		StateHasChanged(); // Tving UI-opdatering
+	}
+	private void RydValgtKunde()
+	{
+		valgtKunde = null;
+		valgtKundeId = 0;
+		filtreredeKunder.Clear();
+		StateHasChanged(); // Tving UI-opdatering
 	}
 
-	// private async Task HentScootereForKunde(ChangeEventArgs e)
-	// {
-	// 	if (int.TryParse(e.Value.ToString(), out int kundeId) && kundeId > 0)
-	// 	{
-	// 		try
-	// 		{
-	// 			valgtKundeId = kundeId;
-	// 			var response = await Http.GetFromJsonAsync<List<KundeScooter>>($"api/KundeScooter/{kundeId}/scootere");
-	// 			kundeScootere = response ?? new List<KundeScooter>();
-	// 		}
-	// 		catch (Exception ex)
-	// 		{
-	// 			Console.WriteLine($"Fejl ved hentning af scootere: {ex.Message}");
-	// 			kundeScootere = new List<KundeScooter>();
-	// 		}
-	// 	}
-	// 	else
-	// 	{
-	// 		kundeScootere = new List<KundeScooter>(); // Tøm listen, hvis ingen kunde er valgt
-	// 	}
-	// }
 	private async Task HentScootereForKunde(int kundeId)
 	{
 		try
@@ -348,8 +544,8 @@
 
 		var dage = (lejeaftale.SlutDato.Value - lejeaftale.StartDato.Value).Days;
 		var kilometerOmkostning = lejeaftale.KortKilometer.HasValue
-			? lejeaftale.KilometerPris * lejeaftale.KortKilometer.Value
-			: 0;
+		? lejeaftale.KilometerPris * lejeaftale.KortKilometer.Value
+		: 0;
 		var forsikringsPris = lejeaftale.ForsikringsPris * dage;
 
 		return (lejeaftale.DagligLeje * dage) + kilometerOmkostning + forsikringsPris;
@@ -420,7 +616,13 @@
 					Dato = DateTime.Now,
 					ScooterId = oy.ScooterId
 				}).ToList(),
-				LejeAftale = lejeaftale
+				LejeAftale = lejeaftale,
+				OrdreProdukter = valgteProdukter.Select(p => new CreateOrdreProduktDto
+				{
+					ProduktId = p.ProduktId,
+					Antal = p.Antal ?? 1,
+					Pris = p.Pris ?? 0
+				}).ToList() // Tilføj produkterne
 			};
 
 		try
@@ -429,10 +631,7 @@
 			if (response.IsSuccessStatusCode)
 			{
 				visSuccesBesked = true;
-				valgteOrdreYdelser.Clear();
-				valgtKundeId = 0;
-				valgtLejeScooterId = null;
-				lejeaftale = new CreateLejeAftaleDto();
+				NulstilOrdreData(); // Nulstil data
 			}
 			else
 			{
@@ -445,5 +644,5 @@
 		}
 	}
 
-}
+	}
 

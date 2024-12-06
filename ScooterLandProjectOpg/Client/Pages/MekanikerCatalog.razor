@@ -33,7 +33,7 @@ else
 					<td>@mekaniker.Telefonnummer</td>
 					<td>
 						<button class="btn btn-primary" @onclick="() => VisRedigerModal(mekaniker)">Rediger</button>
-						<button class="btn btn-secondary" @onclick="() => VisTildelModal(mekaniker)">Tildel Ordreydelse</button>
+						<button class="btn btn-secondary" @onclick="() => VisTildelModal(mekaniker)">Book arbejdsopgave</button>
 						<button class="btn btn-info" @onclick="() => VisArbejdsopgaverModal(mekaniker)">Se arbejdsopgaver</button>
 					</td>
 				</tr>
@@ -161,7 +161,7 @@ else
 		<div class="modal-dialog modal-xl">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title">Tilføj opgave til @mekanikerTilTildeling.Navn</h5>
+					<h5 class="modal-title">Tilføj arbejdsopgave til @mekanikerTilTildeling.Navn</h5>
 					<button type="button" class="btn-close" @onclick="LukTildelModal"></button>
 				</div>
 				<div class="modal-body" style="overflow-x: auto; max-height: 500px;">
@@ -188,7 +188,7 @@ else
 										<td><InputDate @bind-Value="ordreYdelse.StartDato" class="form-control" style="padding: 2px;" /></td>
 										<td><InputDate @bind-Value="ordreYdelse.SlutDato" class="form-control" style="padding: 2px;" /></td>
 										<td><InputNumber @bind-Value="ordreYdelse.Timer" class="form-control" style="padding: 2px;" /></td>
-										<td><button class="btn btn-primary" @onclick="() => VisBekræftTildelModal(ordreYdelse)">Tildel</button></td>
+										<td><button class="btn btn-primary" @onclick="() => VisBekræftTildelModal(ordreYdelse)">Book</button></td>
 									</tr>
 								}
 							</tbody>

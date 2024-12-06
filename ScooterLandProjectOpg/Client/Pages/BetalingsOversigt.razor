@@ -146,7 +146,6 @@ else
     </div>
 }
 
-<button class="btn btn-primary" @onclick="OpretBetalinger">Opret betalinger for eksisterende ordrer</button>
 
 
 @code {
@@ -273,21 +272,7 @@ else
         // Kald JavaScript-funktionen
         await JSRuntime.InvokeVoidAsync("downloadFileFromBytes", $"Faktura_{betalingsId}.pdf", pdfBytes);
     }
-    private async Task OpretBetalinger()
-    {
-        var response = await Http.PostAsync("api/Betalings/opret-betalinger-til-eksisterende-ordrer", null);
-        if (response.IsSuccessStatusCode)
-        {
-            Console.WriteLine("Betalinger oprettet for eksisterende ordrer.");
-            // Opdater betalingsoversigten, hvis relevant
-            await HentBetalinger();
-        }
-        else
-        {
-            var errorMessage = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Fejl ved oprettelse af betalinger: {errorMessage}");
-        }
-    }
+   
     private async Task OpdaterBetalingsDato(int betalingsId, string nyDato)
     {
         try

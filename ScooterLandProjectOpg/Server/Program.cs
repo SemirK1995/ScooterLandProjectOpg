@@ -25,6 +25,7 @@ builder.Services.AddScoped<IMekanikerRepository, MekanikerService>();
 builder.Services.AddScoped<IOrdreRepository, OrdreService>();
 builder.Services.AddScoped<IOrdreYdelseRepository, OrdreYdelseService>();
 builder.Services.AddScoped<IYdelseRepository, YdelseService>();
+builder.Services.AddScoped<IProduktRepository, ProduktService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddTransient<FakturaService>();
 

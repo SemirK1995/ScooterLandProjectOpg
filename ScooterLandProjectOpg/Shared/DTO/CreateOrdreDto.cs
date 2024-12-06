@@ -14,6 +14,7 @@ namespace ScooterLandProjectOpg.Shared.DTO
         public List<CreateOrdreYdelseDto> OrdreYdelser { get; set; } = new();
 
         // Valgfri lejeaftale
-        public CreateLejeAftaleDto? LejeAftale { get; set; } // Valgfri
-    }
+        public CreateLejeAftaleDto? LejeAftale { get; set; } 
+		public List<CreateOrdreProduktDto>? OrdreProdukter { get; set; } = new();
+	}
 }

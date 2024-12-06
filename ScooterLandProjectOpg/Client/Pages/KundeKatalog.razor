@@ -22,6 +22,7 @@ else
 				<th>Email</th>
 				<th>Telefon</th>
 				<th>Adresse</th>
+				<th>Scootere</th> <!-- Tilføjet kolonne -->
 				<th>Handlinger</th>
 			</tr>
 		</thead>
@@ -35,15 +36,55 @@ else
 					<td>@kunde.Telefonnummer</td>
 					<td>@kunde.Adresse</td>
 					<td>
+						<button class="btn btn-link" @onclick="() => ToggleScooterVisning(kunde.KundeId)">
+							Vis Scootere
+						</button>
+					</td>
+
+					<td>
 						<button class="btn btn-info" @onclick="() => ÅbnSidePanel(kunde.KundeId)">Se Ordrer</button>
 						<button class="btn btn-primary" @onclick="() => VisRedigerModal(kunde)">Rediger</button>
 						<button class="btn btn-secondary" @onclick="() => VisTilføjScooterModal(kunde)">Tilføj Scooter</button>
 					</td>
 				</tr>
+				@if (kundeScootere.TryGetValue(kunde.KundeId, out var scootere) && visScooterKundeId == kunde.KundeId)
+				{
+					<tr>
+						<td colspan="7">
+							<table class="table">
+								<thead>
+									<tr>
+										<th>Mærke</th>
+										<th>Model</th>
+										<th>Registreringsnummer</th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (var scooter in scootere)
+									{
+										<tr>
+											<td>@scooter.Maerke</td>
+											<td>@scooter.Model</td>
+											<td>@scooter.RegistreringsNummer</td>
+										</tr>
+									}
+									@if (!scootere.Any())
+									{
+										<tr>
+											<td colspan="3" class="text-muted">Ingen scootere fundet for denne kunde.</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</td>
+					</tr>
+				}
+
 			}
 		</tbody>
 	</table>
 }
+
 @if (visTilføjScooterModal)
 {
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
@@ -172,6 +213,7 @@ else
 									<th>Ydelse</th>
 									<th>Pris</th>
 									<th>Scooter</th>
+									<th></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -190,6 +232,36 @@ else
 					{
 						<p>Ingen ydelser tilføjet.</p>
 					}
+					<h6>Produkter:</h6>
+					@if (valgtOrdre.OrdreProdukter != null && valgtOrdre.OrdreProdukter.Any())
+					{
+						<table class="table">
+							<thead>
+								<tr>
+									<th>Produkt</th>
+									<th>Antal</th>
+									<th>Pris pr. enhed</th>
+									<th>Total</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var produkt in valgtOrdre.OrdreProdukter)
+								{
+									<tr>
+										<td>@produkt.Produkt?.ProduktNavn</td>
+										<td>@produkt.Antal</td>
+										<td>@produkt.Pris.ToString("F2") kr.</td>
+										<td>@(produkt.Antal * produkt.Pris) kr.</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					}
+					else
+					{
+						<p>Ingen produkter tilknyttet denne ordre.</p>
+					}
+
 
 					<h6>Lejeaftale:</h6>
 					@if (valgtOrdre.LejeAftale != null)
@@ -349,15 +421,49 @@ else
 	private int valgtOrdreId; // Gemmer det valgte ordre-ID
 	private Ordre? valgtOrdre; // Indeholder detaljer om den valgte ordre
 	private bool visOrdreDetaljerModal; // Styrer modalens synlighed
+	private Dictionary<int, List<KundeScooter>> kundeScootere = new(); // Holder scootere for hver kunde
+	private int? visScooterKundeId = null;
+
+
+	private async Task ToggleScooterVisning(int kundeId)
+	{
+		if (visScooterKundeId == kundeId)
+		{
+			visScooterKundeId = null; // Skjul
+		}
+		else
+		{
+			try
+			{
+				// Hent scootere for kunden fra serveren
+				var scootere = await Http.GetFromJsonAsync<List<KundeScooter>>($"api/KundeScooter/{kundeId}/scootere");
+				kundeScootere[kundeId] = scootere ?? new List<KundeScooter>();
+				visScooterKundeId = kundeId; // Vis for valgt kunde
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Fejl ved hentning af scootere for kunde {kundeId}: {ex.Message}");
+				kundeScootere[kundeId] = new List<KundeScooter>();
+			}
+		}
+	}
 
 	protected override async Task OnInitializedAsync()
 	{
-		await HentAlleKunder();
+		await HentAlleKunder(); // Hent kun kunder
 	}
 
 	private async Task HentAlleKunder()
 	{
-		kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
+		try
+		{
+			kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Fejl ved hentning af kunder: {ex.Message}");
+			kunder = new List<Kunde>();
+		}
 	}
 
 	private async Task ÅbnSidePanel(int kundeId)
@@ -529,11 +635,23 @@ else
 	{
 		try
 		{
-			valgtOrdre = søgeResultatKunde.Ordre.FirstOrDefault(o => o.OrdreId == ordreId);
+			valgtOrdre = søgeResultatKunde.Ordre
+				.FirstOrDefault(o => o.OrdreId == ordreId);
+
 			if (valgtOrdre == null)
 			{
 				Console.WriteLine($"Ingen ordre fundet med ID {ordreId}.");
 				return;
+			}
+
+			// Hent detaljer om ordreprodukter, hvis nødvendigt
+			if (valgtOrdre.OrdreProdukter == null || !valgtOrdre.OrdreProdukter.Any())
+			{
+				var response = await Http.GetFromJsonAsync<Ordre>($"api/Ordre/{ordreId}");
+				if (response != null)
+				{
+					valgtOrdre = response; // Opdater valgt ordre med detaljer fra server
+				}
 			}
 
 			visOrdreDetaljerModal = true; // Åbn modal
@@ -544,9 +662,11 @@ else
 		}
 	}
 
+
 	private void LukOrdreDetaljerModal()
 	{
 		visOrdreDetaljerModal = false;
 
 	}
+
 }

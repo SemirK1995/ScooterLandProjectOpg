@@ -36,7 +36,8 @@ namespace ScooterLandProjectOpg.Shared.Models
 			{
 				var ydelsesPris = OrdreYdelse?.Sum(oy => oy.BeregnetPris) ?? 0;
 				var lejeAftalePris = LejeAftale?.TotalPris ?? 0;
-				return ydelsesPris + lejeAftalePris;
+				var produktPris = OrdreProdukter?.Sum(op => op.Pris * op.Antal) ?? 0;
+				return ydelsesPris + lejeAftalePris+produktPris;
 			}
 		}
 
@@ -47,6 +48,8 @@ namespace ScooterLandProjectOpg.Shared.Models
 
 		// Navigation property til en liste af OrdreYdelse
 		public List<OrdreYdelse>? OrdreYdelse { get; set; } = new List<OrdreYdelse>();
+
+		public List <OrdreProdukt>? OrdreProdukter { get; set; } = new List<OrdreProdukt> { };
 
 		//Null constructor
 		public Ordre()

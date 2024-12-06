@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ScooterLandProjectOpg.Server.Context;
 
@@ -11,9 +12,11 @@ using ScooterLandProjectOpg.Server.Context;
 namespace ScooterLandProjectOpg.Server.Migrations
 {
     [DbContext(typeof(ScooterLandContext))]
-    partial class ScooterLandContextModelSnapshot : ModelSnapshot
+    [Migration("20241205103600_OrdreIdIProduktsNull")]
+    partial class OrdreIdIProduktsNull
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -241,35 +244,6 @@ namespace ScooterLandProjectOpg.Server.Migrations
                     b.ToTable("Ordrer");
                 });
 
-            modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.OrdreProdukt", b =>
-                {
-                    b.Property<int>("OrdreProduktId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrdreProduktId"));
-
-                    b.Property<int>("Antal")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("OrdreId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Pris")
-                        .HasColumnType("float");
-
-                    b.Property<int?>("ProduktId")
-                        .HasColumnType("int");
-
-                    b.HasKey("OrdreProduktId");
-
-                    b.HasIndex("OrdreId");
-
-                    b.HasIndex("ProduktId");
-
-                    b.ToTable("OrdreProdukter");
-                });
-
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.OrdreYdelse", b =>
                 {
                     b.Property<int>("OrdreYdelseId")
@@ -329,6 +303,9 @@ namespace ScooterLandProjectOpg.Server.Migrations
                     b.Property<int?>("Antal")
                         .HasColumnType("int");
 
+                    b.Property<int?>("OrdreId")
+                        .HasColumnType("int");
+
                     b.Property<double?>("Pris")
                         .HasColumnType("float");
 
@@ -336,6 +313,8 @@ namespace ScooterLandProjectOpg.Server.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ProduktId");
+
+                    b.HasIndex("OrdreId");
 
                     b.ToTable("Produkter");
                 });
@@ -420,21 +399,6 @@ namespace ScooterLandProjectOpg.Server.Migrations
                     b.Navigation("LejeAftale");
                 });
 
-            modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.OrdreProdukt", b =>
-                {
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ordre", "Ordre")
-                        .WithMany("OrdreProdukter")
-                        .HasForeignKey("OrdreId");
-
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Produkt", "Produkt")
-                        .WithMany()
-                        .HasForeignKey("ProduktId");
-
-                    b.Navigation("Ordre");
-
-                    b.Navigation("Produkt");
-                });
-
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.OrdreYdelse", b =>
                 {
                     b.HasOne("ScooterLandProjectOpg.Shared.Models.Mekaniker", "Mekaniker")
@@ -466,6 +430,15 @@ namespace ScooterLandProjectOpg.Server.Migrations
                     b.Navigation("Ydelse");
                 });
 
+            modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Produkt", b =>
+                {
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ordre", "Ordre")
+                        .WithMany("Produkter")
+                        .HasForeignKey("OrdreId");
+
+                    b.Navigation("Ordre");
+                });
+
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Kunde", b =>
                 {
                     b.Navigation("KundeScooter");
@@ -484,9 +457,9 @@ namespace ScooterLandProjectOpg.Server.Migrations
                 {
                     b.Navigation("Betalinger");
 
-                    b.Navigation("OrdreProdukter");
-
                     b.Navigation("OrdreYdelse");
+
+                    b.Navigation("Produkter");
                 });
 
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Ydelse", b =>

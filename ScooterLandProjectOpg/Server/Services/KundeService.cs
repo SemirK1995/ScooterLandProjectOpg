@@ -63,17 +63,21 @@ namespace ScooterLandProjectOpg.Server.Services
                 .ToListAsync();
         }
 
-        public async Task<Kunde> GetKundeWithManyDetailsByIdAsync(int kundeId)
-        {
-            return await _context.Kunder
-                .Include(k => k.Ordre)
-                    .ThenInclude(o => o.OrdreYdelse)
-                    .ThenInclude(oy => oy.Ydelse)
-                .Include(k => k.LejeAftale)
-				.ThenInclude(la => la.LejeScooter)
-				 .Include(k => k.KundeScooter)
+		public async Task<Kunde> GetKundeWithManyDetailsByIdAsync(int kundeId)
+		{
+			return await _context.Kunder
+				.Include(k => k.Ordre)
+					.ThenInclude(o => o.OrdreYdelse)
+						.ThenInclude(oy => oy.Ydelse)
+				.Include(k => k.Ordre)
+					.ThenInclude(o => o.OrdreProdukter) 
+						.ThenInclude(op => op.Produkt) 
+				.Include(k => k.LejeAftale)
+					.ThenInclude(la => la.LejeScooter)
+				.Include(k => k.KundeScooter)
 				.FirstOrDefaultAsync(k => k.KundeId == kundeId);
-        }
+		}
+
 		public async Task<IEnumerable<Kunde>> SearchKunderAsync(string søgeTekst)
 		{
 			if (string.IsNullOrWhiteSpace(søgeTekst))
