@@ -92,13 +92,12 @@ else
                         <hr />
                         <p><strong>Betalings ID:</strong> @fakturaData.BetalingsId</p>
                         <p><strong>Ordre ID:</strong> @fakturaData.OrdreId</p>
-                        <p><strong>Beløb:</strong> @fakturaData.Beløb kr.</p>
+                        <p><strong>Beløb til betaling:</strong> @fakturaData.Beløb kr.</p>
                         <p><strong>Betalings Metode:</strong> @fakturaData.BetalingsMetode</p>
                         <p><strong>Betalingsstatus:</strong> @(fakturaData.Betalt ? "Betalt" : "Ikke betalt")</p>
                         <p><strong>Betalingsdato:</strong> @fakturaData.BetalingsDato</p>
                         <hr />
                         <p><strong>Ordre Dato:</strong> @fakturaData.OrdreDato?.ToString("dd-MM-yyyy")</p>
-                        <p><strong>Total Pris:</strong> @fakturaData.TotalPris kr.</p>
                         <hr />
 
                         @if (fakturaData.Lejeaftale != null)
@@ -118,15 +117,30 @@ else
                             </ul>
                             <hr />
                         }
-                        <h6>Ydelser:</h6>
+                        
                         @if (fakturaData.Ydelser != null && fakturaData.Ydelser.Any())
                         {
-                            <ul>
-                                @foreach (var ydelse in fakturaData.Ydelser)
-                                {
-                                    <li>@ydelse.YdelseNavn - @ydelse.BeregnetPris?.ToString("F2") kr. (Scooter: @ydelse.ScooterMaerke @ydelse.ScooterModel)</li>
-                                }
-                            </ul>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Ydelsesnavn</th>
+                                        <th>Scooter Mærke</th>
+                                        <th>Scooter Model</th>
+                                        <th>Total Pris</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ydelse in fakturaData.Ydelser)
+                                    {
+                                        <tr>
+                                            <td>@ydelse.YdelseNavn</td>
+                                            <td>@ydelse.ScooterMaerke</td>
+                                            <td>@ydelse.ScooterModel</td>
+                                            <td>@ydelse.BeregnetPris?.ToString("F2") kr.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
                         }
                         else
                         {
@@ -137,6 +151,37 @@ else
                     {
                         <p>Indlæser faktura...</p>
                     }
+                    
+                    @if (fakturaData.Produkter != null && fakturaData.Produkter.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Produktnavn</th>
+                                    <th>Antal</th>
+                                    <th>Pris</th>
+                                    <th>Total pris</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var produkt in fakturaData.Produkter)
+                                {
+                                    <tr>
+                                        <td>@produkt.ProduktNavn</td>
+                                        <td>@produkt.Antal</td>
+                                        <td>@produkt.Pris.ToString("F2") kr.</td>
+                                        <td>@(produkt.Pris * produkt.Antal). kr.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p>Ingen produkter tilføjet.</p>
+                    }
+                    <p><strong>Total Sum:</strong> @fakturaData.TotalPris kr.</p>
+
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" @onclick="LukFakturaModal">Luk</button>

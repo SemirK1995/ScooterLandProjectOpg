@@ -129,7 +129,14 @@ namespace ScooterLandProjectOpg.Server.Controllers
                             DagligLeje = ordre.LejeAftale.DagligLeje,
                             Selvrisiko = ordre.LejeAftale?.Selvrisiko ?? 0,
                             Scootere = ordre.LejeAftale.LejeScooter?.Select(ls => $"{ls.ScooterMaerke} {ls.ScooterModel}").ToList() ?? new List<string>()
-                        }
+                        },
+                    // Produkter
+                    Produkter = ordre.OrdreProdukter?.Select(op => new FakturaProduktDto
+                    {
+                        ProduktNavn = op.Produkt.ProduktNavn,
+                        Antal = op.Antal,
+                        Pris = op.Pris
+                    }).ToList()
                 };
 
                 return Ok(fakturaDto);

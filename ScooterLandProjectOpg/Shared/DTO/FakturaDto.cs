@@ -34,5 +34,7 @@ namespace ScooterLandProjectOpg.Shared.DTO
 
         // Lejeaftale
         public FakturaLejeAftaleDto? Lejeaftale { get; set; }
-    }
+		// Produkter
+		public List<FakturaProduktDto>? Produkter { get; set; } = new List<FakturaProduktDto>();
+	}
 }
