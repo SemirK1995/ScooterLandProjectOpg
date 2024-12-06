@@ -3,6 +3,7 @@ using ScooterLandProjectOpg.Server.Interfaces;
 using ScooterLandProjectOpg.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using ScooterLandProjectOpg.Shared.Enum;
+using ScooterLandProjectOpg.Shared.DTO;
 
 
 namespace ScooterLandProjectOpg.Server.Services
@@ -45,16 +46,29 @@ namespace ScooterLandProjectOpg.Server.Services
                 .ToListAsync();
         }
 
-        public async Task UpdateBetalingsStatusAsync(int betalingsId, bool betaltStatus)
+        //public async Task UpdateBetalingsStatusAsync(int betalingsId, bool betaltStatus)
+        //{
+        //    var betaling = await _context.Betalinger.FindAsync(betalingsId);
+        //    if (betaling == null)
+        //        throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
+
+        //    betaling.Betalt = betaltStatus;
+        //    _context.Betalinger.Update(betaling);
+        //    await _context.SaveChangesAsync();
+        //}
+        public async Task UpdateBetalingsStatusAsync(int betalingsId, BetalingUpdateDto betalingUpdate)
         {
             var betaling = await _context.Betalinger.FindAsync(betalingsId);
             if (betaling == null)
                 throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
 
-            betaling.Betalt = betaltStatus;
+            betaling.Betalt = betalingUpdate.Betalt;
+            betaling.BetalingsDato = betalingUpdate.Betalt ? (betalingUpdate.BetalingsDato ?? DateTime.Now) : null;
+
             _context.Betalinger.Update(betaling);
             await _context.SaveChangesAsync();
         }
+
         public async Task UpdateBetalingsMetodeAsync(int betalingsId, BetalingsMetodeStatus nyMetode)
         {
             var betaling = await _context.Betalinger.FindAsync(betalingsId);
@@ -64,22 +78,7 @@ namespace ScooterLandProjectOpg.Server.Services
             betaling.BetalingsMetode = nyMetode;
             await _context.SaveChangesAsync();
         }
-        //public async Task<Betaling> GetFakturaDetaljerAsync(int betalingsId)
-        //{
-        //    return await _context.Betalinger
-        //        .Include(b => b.Ordre)
-        //            .ThenInclude(o => o.LejeAftale)
-        //            .ThenInclude(la => la.LejeScooter)
-        //        .Include(b => b.Ordre)
-        //            .ThenInclude(o => o.OrdreYdelse)
-        //            .ThenInclude(oy => oy.Scooter)
-        //        .Include(b => b.Ordre)
-        //            .ThenInclude(o => o.OrdreYdelse)
-        //            .ThenInclude(oy => oy.Ydelse)
-        //        .Include(b => b.Ordre)
-        //            .ThenInclude(o => o.Kunde)
-        //        .FirstOrDefaultAsync(b => b.BetalingsId == betalingsId);
-        //}
+      
         public async Task<Betaling> GetFakturaDetaljerAsync(int betalingsId)
         {
             return await _context.Betalinger

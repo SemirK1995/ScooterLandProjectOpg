@@ -244,19 +244,51 @@ else
         }
     }
 
+    // private async Task OpdaterBetaltStatus(int betalingsId, string nyStatus)
+    // {
+    //     var status = nyStatus == "true";
+    //     await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/status", status);
+
+    //     Genindlæs fakturaen, hvis den er åben og denne betaling opdateres
+    //     if (visFakturaModal && fakturaData?.BetalingsId == betalingsId)
+    //     {
+    //         await VisFakturaDetaljer(betalingsId); Genindlæs fakturaen
+    //     }
+
+    //     await HentBetalinger(); Opdater listen
+    // }
     private async Task OpdaterBetaltStatus(int betalingsId, string nyStatus)
     {
         var status = nyStatus == "true";
-        await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/status", status);
 
-        // Genindlæs fakturaen, hvis den er åben og denne betaling opdateres
-        if (visFakturaModal && fakturaData?.BetalingsId == betalingsId)
+        // DTO til at sende status og dato
+        var betalingUpdate = new BetalingUpdateDto
+            {
+                Betalt = status,
+                BetalingsDato = status ? DateTime.Now : null
+            };
+
+        var response = await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/status", betalingUpdate);
+
+        if (response.IsSuccessStatusCode)
         {
-            await VisFakturaDetaljer(betalingsId); // Genindlæs fakturaen
-        }
+            Console.WriteLine("Betalingsstatus og dato opdateret.");
 
-        await HentBetalinger(); // Opdater listen
+            // Genindlæs fakturaen, hvis den er åben og denne betaling opdateres
+            if (visFakturaModal && fakturaData?.BetalingsId == betalingsId)
+            {
+                await VisFakturaDetaljer(betalingsId);
+            }
+
+            await HentBetalinger(); // Opdater listen
+        }
+        else
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Fejl ved opdatering: {errorMessage}");
+        }
     }
+
 
 
 

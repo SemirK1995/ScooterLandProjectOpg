@@ -43,19 +43,37 @@ namespace ScooterLandProjectOpg.Server.Controllers
             return Ok(betalinger);
         }
 
+        //[HttpPut("{betalingsId}/status")]
+        //public async Task<IActionResult> UpdateStatus(int betalingsId, [FromBody] bool betaltStatus)
+        //{
+        //    try
+        //    {
+        //        await _betalingRepository.UpdateBetalingsStatusAsync(betalingsId, betaltStatus);
+        //        return Ok("Betalingsstatus opdateret.");
+        //    }
+        //    catch (KeyNotFoundException ex)
+        //    {
+        //        return NotFound(ex.Message);
+        //    }
+        //}
         [HttpPut("{betalingsId}/status")]
-        public async Task<IActionResult> UpdateStatus(int betalingsId, [FromBody] bool betaltStatus)
+        public async Task<IActionResult> UpdateStatus(int betalingsId, [FromBody] BetalingUpdateDto betalingUpdate)
         {
             try
             {
-                await _betalingRepository.UpdateBetalingsStatusAsync(betalingsId, betaltStatus);
-                return Ok("Betalingsstatus opdateret.");
+                await _betalingRepository.UpdateBetalingsStatusAsync(betalingsId, betalingUpdate);
+                return Ok("Betalingsstatus og dato opdateret.");
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
+            catch (Exception ex)
+            {
+                return BadRequest($"Fejl ved opdatering af betaling: {ex.Message}");
+            }
         }
+
 
         [HttpPut("{betalingsId}/metode")]
         public async Task<IActionResult> UpdateBetalingsMetode(int betalingsId, [FromBody] BetalingsMetodeStatus nyMetode)
