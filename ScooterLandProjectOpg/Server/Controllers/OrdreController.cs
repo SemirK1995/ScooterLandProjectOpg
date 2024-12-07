@@ -145,8 +145,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
 			}
 		}
 
-
-
 		[HttpPut("{ordreId}/status")]
         public async Task<IActionResult> UpdateOrdreStatus(int ordreId, [FromBody] OrdreStatus nyStatus)
         {

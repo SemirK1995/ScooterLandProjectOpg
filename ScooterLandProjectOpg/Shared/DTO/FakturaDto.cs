@@ -8,6 +8,8 @@ namespace ScooterLandProjectOpg.Shared.DTO
 {
     public class FakturaDto
     {
+        //Denne DTO er lavet for at vise hvad en faktura skal indeholde. 
+
         // Kundeoplysninger
         public int KundeId { get; set; }
         public string? KundeNavn { get; set; }

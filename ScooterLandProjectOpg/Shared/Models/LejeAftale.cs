@@ -21,7 +21,9 @@ namespace ScooterLandProjectOpg.Shared.Models
         [ForeignKey("KundeId")]
         public Kunde Kunde { get; set; }
 
+
         //Attributter
+
         [Required(ErrorMessage = "Startdato er påkrævet.")]
         public DateTime? StartDato { get; set; }
         [Required(ErrorMessage = "Slutdato er påkrævet.")]
@@ -43,12 +45,12 @@ namespace ScooterLandProjectOpg.Shared.Models
         [Range(0, double.MaxValue, ErrorMessage = "Selvrisiko skal være et positivt beløb.")]
         public double Selvrisiko { get; set; }
 
-        // Korte kilometer (f.eks. inkluderede kilometer uden ekstra omkostninger)
+        // Kørte kilometer 
         [Range(0, int.MaxValue, ErrorMessage = "Kort kilometer skal være et positivt tal.")]
         public int? KortKilometer { get; set; }
 
         
-        [NotMapped] // Gemmes ikke i databasen
+        [NotMapped]
         public double TotalPris
         {
             get

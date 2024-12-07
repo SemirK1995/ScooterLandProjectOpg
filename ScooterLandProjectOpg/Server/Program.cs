@@ -16,6 +16,7 @@ builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
 
 builder.Services.AddRazorPages();
 
+//Her tilføjes der scopes for alle Repositories:
 builder.Services.AddScoped<IKundeRepository, KundeService>();
 builder.Services.AddScoped<IBetalingRepository, BetalingsService>();
 builder.Services.AddScoped<IKundeScooterRepository, KundeScooterService>();
@@ -27,6 +28,8 @@ builder.Services.AddScoped<IOrdreYdelseRepository, OrdreYdelseService>();
 builder.Services.AddScoped<IYdelseRepository, YdelseService>();
 builder.Services.AddScoped<IProduktRepository, ProduktService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+//Denne tilføjes fordi vi har en seperat fil som generere faktura. 
 builder.Services.AddTransient<FakturaService>();
 
 

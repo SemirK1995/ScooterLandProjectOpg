@@ -9,9 +9,11 @@ namespace ScooterLandProjectOpg.Shared.Models
 {
 	public class Kunde
 	{
-		//Primary Key
+		// Primary Key
 		[Key]
 		public int KundeId { get; set; }
+
+		// Attributter
 
 		[Required(ErrorMessage = "Navn er påkrævet.")]
 		public string? Navn { get; set; }
@@ -30,14 +32,11 @@ namespace ScooterLandProjectOpg.Shared.Models
 
 		// Navigation property til en liste af KundeScooter
 		public List<KundeScooter>? KundeScooter { get; set; } = new List<KundeScooter>();
-
 		// Navigation property til en liste af LejeaAftale
 		public List<LejeAftale>? LejeAftale { get; set; } = new List<LejeAftale>();
-
 		// Navigation property til en liste af Ordre
 		public List<Ordre>? Ordre { get; set; } = new List<Ordre>();
 
-		//Null constructor til EF
 		public Kunde()
 		{
 		}

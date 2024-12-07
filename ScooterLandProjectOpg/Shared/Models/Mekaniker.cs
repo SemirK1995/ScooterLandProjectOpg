@@ -18,8 +18,6 @@ namespace ScooterLandProjectOpg.Shared.Models
 		public int? Telefonnummer { get; set; }
 		public string? Speciale { get; set; }
 
-
-		//Null constructor
 		public Mekaniker()
 		{
 		}

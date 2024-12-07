@@ -13,7 +13,7 @@ namespace ScooterLandProjectOpg.Server.Services
 			_context = context;
 		}
 
-		// Retrieve all OrdreYdelse with related Ordre and Ydelse details
+		//Hent alle OrdreYdelser med en ordre og detaljer omkring ydelsen.
 		public async Task<IEnumerable<OrdreYdelse>> GetAllWithDetailsAsync()
 		{
 			return await _context.Set<OrdreYdelse>()
@@ -24,15 +24,13 @@ namespace ScooterLandProjectOpg.Server.Services
 				.ToListAsync();
 		}
 
-		// Retrieve a specific OrdreYdelse by ID with related Ordre and Ydelse details
-		public async Task<OrdreYdelse> GetWithDetailsByIdAsync(int id)
+        //Hent en OrdreYdelse med en ordre og detaljer omkring ydelsen.
+        public async Task<OrdreYdelse> GetWithDetailsByIdAsync(int id)
 		{
 			return await _context.Set<OrdreYdelse>()
 				.Include(o => o.Ordre)  // Include the associated Ordre
 				.Include(o => o.Ydelse) // Include the associated Ydelse
 				.FirstOrDefaultAsync(o => o.OrdreYdelseId == id);
 		}
-
-
 	}
 }

@@ -14,21 +14,21 @@ namespace ScooterLandProjectOpg.Server.Services
 			_context = context;
 		}
 
-		// Retrieve all LejeAftale entities with related Kunde and LejeScooter data
+		//Henter alt omkring lejeaftaler med kunder og deres scooter som de har lejet.
 		public async Task<IEnumerable<LejeAftale>> GetAllWithKundeAndScootersAsync()
 		{
 			return await _context.Set<LejeAftale>()
-				.Include(la => la.Kunde) // Include related Kunde
-				.Include(la => la.LejeScooter) // Include related LejeScooter list
+				.Include(la => la.Kunde) 
+				.Include(la => la.LejeScooter)
 				.ToListAsync();
 		}
 
-		// Retrieve a specific LejeAftale with related Kunde and LejeScooter details
+		//Henter alt omkring en lejeaftale med en kunde og hans scooter som han har lejet.
 		public async Task<LejeAftale> GetLejeAftaleWithDetailsAsync(int id)
 		{
 			return await _context.Set<LejeAftale>()
-				.Include(la => la.Kunde) // Include related Kunde
-				.Include(la => la.LejeScooter) // Include related LejeScooter list
+				.Include(la => la.Kunde)
+				.Include(la => la.LejeScooter) 
 				.FirstOrDefaultAsync(la => la.LejeId == id);
 		}
 	}

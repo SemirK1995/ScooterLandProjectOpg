@@ -42,6 +42,5 @@ namespace ScooterLandProjectOpg.Server.Context
 				.HasForeignKey(o => o.LejeId) // Foreign Key er LejeId i Ordre
 				.OnDelete(DeleteBehavior.Restrict); // Eller Cascade, afhængigt af dine krav
 		}
-
     }
 }

@@ -28,7 +28,10 @@ namespace ScooterLandProjectOpg.Shared.Models
 
 		//Attributter
 		public DateTime? Dato { get; set; } = DateTime.Now;
-		public double? TotalPris { get; set; }
+        public OrdreStatus? Status { get; set; } = OrdreStatus.Oprettet;
+        public double? TotalPris { get; set; }
+
+		//Udregning af Totalpris i en ordre
 		[NotMapped]
 		public double TotalOrdrePris
 		{
@@ -40,9 +43,6 @@ namespace ScooterLandProjectOpg.Shared.Models
 				return ydelsesPris + lejeAftalePris+produktPris;
 			}
 		}
-
-		public OrdreStatus? Status { get; set; } = OrdreStatus.Oprettet;
-
 		// Navigation property til en liste af betalinger
 		public List<Betaling>? Betalinger { get; set; } = new List<Betaling>();
 

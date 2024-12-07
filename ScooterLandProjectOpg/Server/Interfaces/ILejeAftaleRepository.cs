@@ -6,6 +6,5 @@ namespace ScooterLandProjectOpg.Server.Interfaces
 	{
 		Task<IEnumerable<LejeAftale>> GetAllWithKundeAndScootersAsync();
 		Task<LejeAftale> GetLejeAftaleWithDetailsAsync(int id);
-
 	}
 }

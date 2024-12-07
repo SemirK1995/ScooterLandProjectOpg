@@ -25,9 +25,6 @@ namespace ScooterLandProjectOpg.Shared.DTO
         public double DagligLeje { get; set; }
 		public double ForsikringsPris { get; set; } = 50;
 		public double KilometerPris { get; set; } = 0.53;
-        public int? KortKilometer { get; set; } // Antal kilometer inkluderet i lejen
-
-        // Ikke nødvendig at inkludere TotalPris, da den kan beregnes dynamisk på backend
-
+        public int? KortKilometer { get; set; }
     }
 }

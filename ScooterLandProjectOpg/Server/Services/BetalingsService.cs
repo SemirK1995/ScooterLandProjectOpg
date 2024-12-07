@@ -23,7 +23,6 @@ namespace ScooterLandProjectOpg.Server.Services
 				.Include(b => b.Ordre)
 				.ToListAsync();
 		}
-
 		// Custom implementation for GetById with related orders
 		public async Task<Betaling> GetByIdAsync(int id)
 		{
@@ -31,7 +30,6 @@ namespace ScooterLandProjectOpg.Server.Services
 				.Include(b => b.Ordre)
 				.FirstOrDefaultAsync(b => b.BetalingsId == id);
 		}
-
         public async Task<IEnumerable<Betaling>> SearchByQueryAsync(string query)
         {
             // Parse søgeforespørgslen som tal, hvis muligt
@@ -45,19 +43,6 @@ namespace ScooterLandProjectOpg.Server.Services
                     (!isNumeric && b.Ordre.Kunde.Navn.Contains(query))) // Søg på kundens navn
                 .ToListAsync();
         }
-
-        //public async Task UpdateBetalingsStatusAsync(int betalingsId, BetalingUpdateDto betalingUpdate)
-        //{
-        //    var betaling = await _context.Betalinger.FindAsync(betalingsId);
-        //    if (betaling == null)
-        //        throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
-
-        //    betaling.Betalt = betalingUpdate.Betalt;
-        //    betaling.BetalingsDato = betalingUpdate.Betalt ? (betalingUpdate.BetalingsDato ?? DateTime.Now) : null;
-
-        //    _context.Betalinger.Update(betaling);
-        //    await _context.SaveChangesAsync();
-        //}
         public async Task UpdateBetalingsStatusAsync(int betalingsId, BetalingUpdateDto betalingUpdate)
         {
             var betaling = await _context.Betalinger.FindAsync(betalingsId);
@@ -78,8 +63,6 @@ namespace ScooterLandProjectOpg.Server.Services
             _context.Betalinger.Update(betaling);
             await _context.SaveChangesAsync();
         }
-
-
         public async Task UpdateBetalingsMetodeAsync(int betalingsId, BetalingsMetodeStatus nyMetode)
         {
             var betaling = await _context.Betalinger.FindAsync(betalingsId);
@@ -109,9 +92,6 @@ namespace ScooterLandProjectOpg.Server.Services
                         .ThenInclude(op => op.Produkt)
                 .FirstOrDefaultAsync(b => b.BetalingsId == betalingsId);
         }
-
-
-
         public async Task<int> OpretBetalingerTilEksisterendeOrdrerAsync()
         {
             var ordrerUdenBetaling = await _context.Ordrer
@@ -141,7 +121,5 @@ namespace ScooterLandProjectOpg.Server.Services
             _context.Betalinger.Update(betaling);
             await _context.SaveChangesAsync();
         }
-
-
     }
 }

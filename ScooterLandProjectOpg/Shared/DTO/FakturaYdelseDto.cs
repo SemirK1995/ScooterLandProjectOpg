@@ -8,6 +8,7 @@ namespace ScooterLandProjectOpg.Shared.DTO
 {
     public class FakturaYdelseDto
     {
+        //Denne DTO er lavet for at kunne vise hvilken ydelse der er lavet på en kunde scooter i en faktura. 
         public int YdelseId { get; set; }
         public string? YdelseNavn { get; set; }
         public double? BeregnetPris { get; set; }

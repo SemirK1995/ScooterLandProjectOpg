@@ -10,11 +10,15 @@ namespace ScooterLandProjectOpg.Shared.Models
 {
 	public class Produkt
 	{
+		//PK
 		[Key]
 		public int ProduktId { get; set; }
+
+		//Attributter
 		public string? ProduktNavn { get; set; }
-		public double ? Pris { get; set; }
-		public int ? Antal { get; set; }
+		public double? Pris { get; set; }
+		public int? Antal { get; set; }
+
 		public Produkt()
 		{
 

@@ -96,8 +96,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
 				return StatusCode(500, $"Fejl ved hentning af arbejdsopgaver: {ex.Message}");
 			}
 		}
-
-
 	}
 }
 

@@ -41,6 +41,5 @@ namespace ScooterLandProjectOpg.Server.Controllers
                 return NotFound(ex.Message);
             }
         }
-
     }
 }

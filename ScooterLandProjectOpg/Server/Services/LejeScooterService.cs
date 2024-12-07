@@ -36,6 +36,5 @@ namespace ScooterLandProjectOpg.Server.Services
             _context.LejeScootere.Update(scooter);
             await _context.SaveChangesAsync();
         }
-
     }
 }

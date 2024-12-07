@@ -8,7 +8,9 @@ namespace ScooterLandProjectOpg.Server.Interfaces
 		Task<IEnumerable<Ordre>> GetAllWithDetailsAsync();
 		Task<Ordre> GetWithDetailsByIdAsync(int id);
         Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus);
+
+		//To metoder der fjerne og tilføjer selvrisiko
         Task TilføjSelvrisikoAsync(int ordreId);
-		Task FjernSelvrisikoAsync(int ordreId); // Tilføj denne metode
+		Task FjernSelvrisikoAsync(int ordreId); 
 	}
 }

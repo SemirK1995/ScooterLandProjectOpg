@@ -60,8 +60,5 @@ namespace ScooterLandProjectOpg.Server.Controllers
 
 			return Ok(allScooters);
 		}
-
-
-
 	}
 }
