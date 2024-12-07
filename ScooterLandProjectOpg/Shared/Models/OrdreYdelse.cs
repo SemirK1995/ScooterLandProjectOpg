@@ -36,11 +36,9 @@ namespace ScooterLandProjectOpg.Shared.Models
 		public Mekaniker? Mekaniker { get; set; }
 
 
-		// Start og slutdato
-		public DateTime? StartDato { get; set; }
+        //Attributter
+        public DateTime? StartDato { get; set; }
 		public DateTime? SlutDato { get; set; }
-
-		//Attributter
 		public double? Timer { get; set; }
 		public DateTime? Dato { get; set; }
 		public double? AftaltPris { get; set; }
@@ -56,8 +54,6 @@ namespace ScooterLandProjectOpg.Shared.Models
 			}
 		}
 
-
-		//Null constructor
 		public OrdreYdelse()
 		{
 		}

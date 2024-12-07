@@ -14,27 +14,27 @@ namespace ScooterLandProjectOpg.Server.Services
 			_context = context;
 		}
 
-		// Retrieve all Kunder with their related Orders
+		//Henter alle kunder med en ordre.
 		public async Task<IEnumerable<Kunde>> GetAllWithOrdersAsync()
 		{
 			return await _context.Kunder
-				.Include(k => k.Ordre) // Include related Orders
+				.Include(k => k.Ordre) 
 				.ToListAsync();
 		}
 
-		// Retrieve a specific Kunde with their related Scooters
+		//Henter en specifikt kunde med de scootere han har.
 		public async Task<Kunde> GetKundeWithScootersAsync(int id)
 		{
 			return await _context.Kunder
-				.Include(k => k.KundeScooter) // Include related Scooters
+				.Include(k => k.KundeScooter)
 				.FirstOrDefaultAsync(k => k.KundeId == id);
 		}
 
-		// Search Kunder by Name (case-insensitive partial match)
+		// Søg efter kunde via navn.
 		public async Task<IEnumerable<Kunde>> SearchByNameAsync(string name)
 		{
 			return await _context.Kunder
-				.Where(k => EF.Functions.Like(k.Navn, $"%{name}%")) // Use SQL LIKE for partial match
+				.Where(k => EF.Functions.Like(k.Navn, $"%{name}%")) 
 				.ToListAsync();
 		}
 
@@ -62,7 +62,6 @@ namespace ScooterLandProjectOpg.Server.Services
                     .ThenInclude(oy => oy.Ydelse)
                 .ToListAsync();
         }
-
 		public async Task<Kunde> GetKundeWithManyDetailsByIdAsync(int kundeId)
 		{
 			return await _context.Kunder
@@ -77,7 +76,6 @@ namespace ScooterLandProjectOpg.Server.Services
 				.Include(k => k.KundeScooter)
 				.FirstOrDefaultAsync(k => k.KundeId == kundeId);
 		}
-
 		public async Task<IEnumerable<Kunde>> SearchKunderAsync(string søgeTekst)
 		{
 			if (string.IsNullOrWhiteSpace(søgeTekst))
@@ -98,11 +96,5 @@ namespace ScooterLandProjectOpg.Server.Services
 
 			return kunder;
 		}
-
-
-
-
-
-
 	}
 }

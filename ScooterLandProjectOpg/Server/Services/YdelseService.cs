@@ -50,11 +50,5 @@ namespace ScooterLandProjectOpg.Server.Services
 				await _context.SaveChangesAsync();
 			}
 		}
-
-		public async Task<IEnumerable<Ydelse>> GetYdelserWithRelationsAsync()
-		{
-			// Tilføj logik til at hente Ydelser med relationer, hvis nødvendigt
-			return await _context.Ydelser.Include(y => y.YdelseId).ToListAsync();
-		}
 	}
 }

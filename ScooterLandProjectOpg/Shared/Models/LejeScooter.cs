@@ -21,19 +21,14 @@ namespace ScooterLandProjectOpg.Shared.Models
 		[ForeignKey("LejeId")]
 		public LejeAftale? LejeAftale { get; set; }
 
-		public string ScooterModel { get; set; }
-		public string ScooterMaerke { get; set; }
-
-        public string? RegistreringsNummer { get; set; }
-
-        public bool ErTilgængelig { get; set; } = true; // Standard: Ledig
-
         //Attrbutter
+        public string ScooterModel { get; set; }
+        public string ScooterMaerke { get; set; }
+        public string? RegistreringsNummer { get; set; }
+        public bool ErTilgængelig { get; set; } = true; // Standard: Ledig
         public DateTime? StartDato { get; set; }
 		public DateTime? SlutDato { get; set; }
 
-
-		//Null constructor
 		public LejeScooter()
 		{
 		}

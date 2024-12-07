@@ -17,7 +17,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
 		{
 			_ordreYdelseRepository = ordreYdelseRepository;
 		}
-
 		[HttpGet("ikke-tildelt")]
 		public async Task<ActionResult<List<OrdreYdelseDto>>> GetIkkeTildelteOrdreYdelser()
 		{
@@ -45,8 +44,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
 
 			return Ok(ikkeTildelteOrdreYdelser);
 		}
-
-
 		[HttpPut("tildel")]
 		public async Task<IActionResult> TildelMekanikerTilOrdreYdelse([FromBody] TildelMekanikerDto dto)
 		{
@@ -65,9 +62,5 @@ namespace ScooterLandProjectOpg.Server.Controllers
 
 			return Ok("Mekaniker tildelt.");
 		}
-
-
-
-
 	}
 }

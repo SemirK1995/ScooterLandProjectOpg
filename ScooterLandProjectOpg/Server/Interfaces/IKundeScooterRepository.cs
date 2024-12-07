@@ -5,6 +5,7 @@ namespace ScooterLandProjectOpg.Server.Interfaces
 	public interface IKundeScooterRepository : IRepository<KundeScooter>
 	{
 		Task<IEnumerable<KundeScooter>> GetScootersWithKundeAsync();
+
 		Task<KundeScooter> GetScooterWithKundeByIdAsync(int id);
 
         Task<KundeScooter> AddScooterAsync(KundeScooter scooter);

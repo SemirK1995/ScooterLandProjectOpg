@@ -8,6 +8,7 @@ namespace ScooterLandProjectOpg.Shared.DTO
 {
 	public class OrdreYdelseDto
 	{
+		//Denne DTO er lavet for at kunne vise information omkring en specifik ydelse og hvilken scooter ydelsen laves på.
 		public int OrdreYdelseId { get; set; }
 		public string? YdelseNavn { get; set; } // Navn på ydelsen
 		public string? ScooterMaerke { get; set; } // Scooterens mærke

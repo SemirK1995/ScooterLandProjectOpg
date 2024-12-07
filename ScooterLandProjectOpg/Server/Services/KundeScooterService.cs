@@ -14,16 +14,14 @@ namespace ScooterLandProjectOpg.Server.Services
 			_context = context;
 		}
 
-		// Retrieve all KundeScooters with their related Kunde
+		//Henter alle kundescooter som er relateret til en kunde.
 		public async Task<IEnumerable<KundeScooter>> GetScootersWithKundeAsync()
 		{
 			return await _context.Set<KundeScooter>()
-				.Include(ks => ks.Kunde) // Include the related Kunde entity
+				.Include(ks => ks.Kunde) 
 				.ToListAsync();
 		}
-
-		
-        // Denne metode er designet til at hente en specifik scooter baseret på dens ScooterId. Den inkluderer også kundeoplysningerne via
+        // Denne metode er designet til at hente en specifik scooter baseret på dens ScooterId.
         public async Task<KundeScooter> AddScooterAsync(KundeScooter scooter)
         {
             _context.KunderScootere.Add(scooter); 
@@ -44,10 +42,5 @@ namespace ScooterLandProjectOpg.Server.Services
                 .Include(ks => ks.Kunde) // Hent relateret Kunde-data
                 .FirstOrDefaultAsync(ks => ks.ScooterId == id); // Find scooter med det givne id
         }
-
-
-
-
-
     }
 }

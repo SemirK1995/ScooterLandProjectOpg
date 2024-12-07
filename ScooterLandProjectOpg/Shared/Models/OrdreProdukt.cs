@@ -23,9 +23,11 @@ namespace ScooterLandProjectOpg.Shared.Models
 		public Produkt Produkt { get; set; }
 
 		// Attributter
-		public int Antal { get; set; } // Antal af produktet i denne ordre
-		public double Pris { get; set; } // Prisen for produktet i denne ordre
+		public int Antal { get; set; } 
+		public double Pris { get; set; } 
 
-		public OrdreProdukt() { }	
+		public OrdreProdukt() 
+		{
+		}	
 	}
 }

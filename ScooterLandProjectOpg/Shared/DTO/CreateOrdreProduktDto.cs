@@ -8,8 +8,8 @@ namespace ScooterLandProjectOpg.Shared.DTO
 {
 	public class CreateOrdreProduktDto
 	{
-		public int ProduktId { get; set; } // ID for produktet
-		public int Antal { get; set; } // Antal af produktet i ordren
-		public double? Pris { get; set; } // Pris for produktet i ordren (kan være rabatpris)
+		public int ProduktId { get; set; } 
+		public int Antal { get; set; } 
+		public double? Pris { get; set; } 
 	}
 }

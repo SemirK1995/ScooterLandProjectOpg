@@ -15,7 +15,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
         {
             _lejeaftaleRepository = lejeaftaleRepository;
         }
-
         // POST: api/lejeaftaler
         [HttpPost]
         public async Task<ActionResult<LejeAftale>> Add([FromBody] LejeAftale lejeAftale)
@@ -28,7 +27,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
             var createdLejeaftale = await _lejeaftaleRepository.AddAsync(lejeAftale);
             return CreatedAtAction(nameof(GetById), new { id = createdLejeaftale.LejeId }, createdLejeaftale);
         }
-
         // GET: api/lejeaftaler/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<LejeAftale>> GetById(int id)

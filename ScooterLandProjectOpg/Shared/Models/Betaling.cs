@@ -28,9 +28,6 @@ namespace ScooterLandProjectOpg.Shared.Models
 		public BetalingsMetodeStatus? BetalingsMetode { get; set; }
 		public bool Betalt { get; set; } = false;
 
-
-
-		//Null constructor til EF
 		public Betaling()
 		{
 		}

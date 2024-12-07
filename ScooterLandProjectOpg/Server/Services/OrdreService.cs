@@ -14,17 +14,17 @@ namespace ScooterLandProjectOpg.Server.Services
 			_context = context;
 		}
 
-		// Retrieve all orders with related Kunde, Betalinger, and OrdreYdelse details
+		//Henter alle ordre med en kunde, betalinger og ordreydelse detaljer.
 		public async Task<IEnumerable<Ordre>> GetAllWithDetailsAsync()
 		{
 			return await _context.Set<Ordre>()
-				.Include(o => o.Kunde)         // Include Kunde details
-				.Include(o => o.Betalinger)   // Include associated Betalinger
-				.Include(o => o.OrdreYdelse)  // Include associated OrdreYdelse
+				.Include(o => o.Kunde)         // Indkluderer Kunde details
+				.Include(o => o.Betalinger)   // Inkluderer Betalinger
+				.Include(o => o.OrdreYdelse)  // Inlluderer OrdreYdelse
 				.ToListAsync();
 		}
 
-		// Retrieve a specific order by ID with related Kunde, Betalinger, and OrdreYdelse details
+		//Henter en specifik ordre ud fra id og dens kunde, betalinger og ordreydelse detaljer.
 		public async Task<Ordre> GetWithDetailsByIdAsync(int id)
 		{
 			return await _context.Ordrer
@@ -42,7 +42,7 @@ namespace ScooterLandProjectOpg.Server.Services
 			return ordre;
 		}
 
-        // Update order status
+        //Opdaterer ordrer status
         public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
         {
             var ordre = await _context.Ordrer.FindAsync(ordreId);
@@ -55,7 +55,7 @@ namespace ScooterLandProjectOpg.Server.Services
             await _context.SaveChangesAsync();
         }
 
-        // Add Selvrisiko to an order
+        //Tilføj Selvrisiko til en ordrer
         public async Task TilføjSelvrisikoAsync(int ordreId)
         {
             var ordre = await _context.Ordrer.FindAsync(ordreId);
@@ -83,17 +83,5 @@ namespace ScooterLandProjectOpg.Server.Services
 
 			await _context.SaveChangesAsync();
 		}
-
-
-		public async Task<Ordre> GetManyDetailsByIdAsync(int id)
-		{
-			return await _context.Ordrer
-				.Include(o => o.Kunde)
-				.Include(o => o.OrdreYdelse)
-					.ThenInclude(oy => oy.Ydelse)
-				.Include(o => o.LejeAftale) // Inkluder LejeAftale
-				.FirstOrDefaultAsync(o => o.OrdreId == id);
-		}
-
 	}
 }

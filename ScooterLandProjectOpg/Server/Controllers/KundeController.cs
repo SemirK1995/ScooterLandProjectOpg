@@ -131,7 +131,5 @@ namespace ScooterLandProjectOpg.Server.Controllers
 			var result = await _kundeRepository.SearchKunderAsync(søgeTekst);
 			return Ok(result);
 		}
-
-
 	}
 }

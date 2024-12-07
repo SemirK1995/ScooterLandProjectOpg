@@ -8,6 +8,7 @@ namespace ScooterLandProjectOpg.Shared.DTO
 {
     public class FakturaLejeAftaleDto
     {
+        //Denne DTO er lavet for at kunne vise en lejeaftale i en faktura hvis den er valgt.
         public DateTime? StartDato { get; set; }
         public DateTime? SlutDato { get; set; }
         public double? ForsikringsPris { get; set; }

@@ -25,6 +25,5 @@ namespace ScooterLandProjectOpg.Shared.DTO
 
         public bool ErTilgængelig { get; set; } = true; // Standard: Tilgængelig
 
-        
     }
 }

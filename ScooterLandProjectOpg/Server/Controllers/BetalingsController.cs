@@ -21,7 +21,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
             _fakturaService = fakturaService;
         }
 
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Betaling>>> GetAll()
         {
