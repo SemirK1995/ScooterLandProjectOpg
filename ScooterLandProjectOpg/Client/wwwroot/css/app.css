@@ -129,3 +129,28 @@ a, .btn-link {
             margin-bottom: 6px; /* Lidt mere afstand under første linje */
         }
 
+/* Hover-effekt til navigationselementer */
+.nav-link {
+    transition: all 0.3s ease-in-out;
+    color: #fff; /* Standard tekstfarve */
+    text-decoration: none; /* Fjern understregning */
+    display: flex;
+    align-items: center;
+    padding: 8px 12px; /* Justér for spacing */
+    border-radius: 8px; /* For runde hjørner */
+}
+
+    .nav-link:hover {
+        background-color: #004080 !important;
+        color: #ffd700 !important;
+        font-weight: bold !important;
+    }
+
+        .nav-link:hover svg {
+            stroke: #ffd700 !important; /* Ændrer farve på SVG-ikon */
+        }
+
+    .nav-link:hover svg {
+        stroke: #ffd700; /* Ændrer ikonfarve ved hover */
+        transform: scale(1.1); /* Forstør ikonet en smule ved hover */
+    }
