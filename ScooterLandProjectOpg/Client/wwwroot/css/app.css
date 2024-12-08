@@ -154,3 +154,24 @@ a, .btn-link {
         stroke: #ffd700; /* Ændrer ikonfarve ved hover */
         transform: scale(1.1); /* Forstør ikonet en smule ved hover */
     }
+
+.frontpage .card {
+    height: 250px; /* Justér denne værdi efter behov */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.frontpage .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.frontpage svg {
+    width: 50px; /* Ens ikonstørrelse */
+    height: 50px; /* Ens ikonstørrelse */
+}
