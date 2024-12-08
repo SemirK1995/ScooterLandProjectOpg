@@ -175,3 +175,42 @@ a, .btn-link {
     width: 50px; /* Ens ikonstørrelse */
     height: 50px; /* Ens ikonstørrelse */
 }
+
+/* Container for the entire frontpage */
+.container {
+    margin-top: 50px;
+    padding: 20px;
+    width: 100%;
+}
+
+/* Jumbotron styling */
+.jumbotron {
+    background: linear-gradient(90deg, #007bff, #0056b3); /* Ens farver som Bootstrap */
+    color: white;
+    text-align: center;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Lidt skygge for dybde */
+}
+
+/* Title styling */
+.display-title {
+    font-size: 2.5em; /* Større tekst */
+    margin-bottom: 10px;
+}
+
+/* Subtitle styling */
+.subtitle {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+/* Divider line */
+.divider {
+    border: 0;
+    height: 1px;
+    background: #fff;
+    opacity: 0.5;
+    margin: 20px auto;
+    width: 80%; /* Juster bredden */
+}
