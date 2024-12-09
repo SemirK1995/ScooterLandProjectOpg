@@ -12,6 +12,7 @@ namespace ScooterLandProjectOpg.Shared.DTO
         public DateTime? StartDato { get; set; }
         public DateTime? SlutDato { get; set; }
         public double? ForsikringsPris { get; set; }
+        public double KilometerPris { get; set; } = 0.53;
         public int? KortKilometer { get; set; }
         public double? DagligLeje { get; set; }
         public double? Selvrisiko { get; set; }

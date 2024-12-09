@@ -106,8 +106,9 @@ else
                             <h6>Lejeaftale:</h6>
                             <p><strong>Startdato:</strong> @fakturaData.Lejeaftale.StartDato?.ToString("dd-MM-yyyy")</p>
                             <p><strong>Slutdato:</strong> @fakturaData.Lejeaftale.SlutDato?.ToString("dd-MM-yyyy")</p>
-                            <p><strong>Forsikrings Pris:</strong> @fakturaData.Lejeaftale.ForsikringsPris kr.</p>
+                            <p><strong>Daglig Forsikringspris:</strong> @fakturaData.Lejeaftale.ForsikringsPris kr.</p>
                             <p><strong>Daglig Leje:</strong> @fakturaData.Lejeaftale.DagligLeje kr.</p>
+                            <p><strong>Kilometer Pris:</strong> @fakturaData.Lejeaftale.KilometerPris kr.</p>
                             <p><strong>Kilometer kørt:</strong> @fakturaData.Lejeaftale.KortKilometer?.ToString("F2") km</p>
                             <p><strong>Selvrisiko:</strong> @fakturaData.Lejeaftale.Selvrisiko kr.</p>
                             <ul>
@@ -128,7 +129,7 @@ else
                                         <th>Ydelsesnavn</th>
                                         <th>Scooter Mærke</th>
                                         <th>Scooter Model</th>
-                                        <th>Total Pris</th>
+                                        <th>Pris</th>
                                     </tr>
                                 </thead>
                                 <tbody>
