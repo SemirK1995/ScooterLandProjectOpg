@@ -129,3 +129,88 @@ a, .btn-link {
             margin-bottom: 6px; /* Lidt mere afstand under første linje */
         }
 
+/* Hover-effekt til navigationselementer */
+.nav-link {
+    transition: all 0.3s ease-in-out;
+    color: #fff; /* Standard tekstfarve */
+    text-decoration: none; /* Fjern understregning */
+    display: flex;
+    align-items: center;
+    padding: 8px 12px; /* Justér for spacing */
+    border-radius: 8px; /* For runde hjørner */
+}
+
+    .nav-link:hover {
+        background-color: #004080 !important;
+        color: #ffd700 !important;
+        font-weight: bold !important;
+    }
+
+        .nav-link:hover svg {
+            stroke: #ffd700 !important; /* Ændrer farve på SVG-ikon */
+        }
+
+    .nav-link:hover svg {
+        stroke: #ffd700; /* Ændrer ikonfarve ved hover */
+        transform: scale(1.1); /* Forstør ikonet en smule ved hover */
+    }
+
+.frontpage .card {
+    height: 250px; /* Justér denne værdi efter behov */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.frontpage .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.frontpage svg {
+    width: 50px; /* Ens ikonstørrelse */
+    height: 50px; /* Ens ikonstørrelse */
+}
+
+/* Container for the entire frontpage */
+.container {
+    margin-top: 50px;
+    padding: 20px;
+    width: 100%;
+}
+
+/* Jumbotron styling */
+.jumbotron {
+    background: linear-gradient(90deg, #007bff, #0056b3); /* Ens farver som Bootstrap */
+    color: white;
+    text-align: center;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Lidt skygge for dybde */
+}
+
+/* Title styling */
+.display-title {
+    font-size: 2.5em; /* Større tekst */
+    margin-bottom: 10px;
+}
+
+/* Subtitle styling */
+.subtitle {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+/* Divider line */
+.divider {
+    border: 0;
+    height: 1px;
+    background: #fff;
+    opacity: 0.5;
+    margin: 20px auto;
+    width: 80%; /* Juster bredden */
+}

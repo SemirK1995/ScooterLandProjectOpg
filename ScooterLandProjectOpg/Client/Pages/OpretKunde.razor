@@ -98,7 +98,16 @@
 {
     <div class="alert alert-success mt-3">@succesbesked</div>
 }
-
+<div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 150px;">
+    <div class="alert alert-light border rounded-3 shadow-sm text-center"
+         style="max-width: 600px; width: 90%; padding: 15px; margin-bottom: 0;">
+        <h6 class="text-primary fw-bold mb-2">Scooterland</h6>
+        <p class="mb-1"><strong>Adresse:</strong> Hovedgade 123, 4000 Roskilde</p>
+        <p class="mb-1"><strong>Telefon:</strong> 12 34 56 78</p>
+        <p class="mb-1"><strong>Email:</strong> kontakt@scooterland.dk</p>
+        <p class="mb-0"><strong>Dags dato:</strong> @DateTime.Now.ToString("dd-MM-yyyy")</p>
+    </div>
+</div>
 @code {
     private Kunde nyKunde = new();
     private List<KundeScooter> scootere = new();
