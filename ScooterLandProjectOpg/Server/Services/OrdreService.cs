@@ -42,21 +42,46 @@ namespace ScooterLandProjectOpg.Server.Services
 			return ordre;
 		}
 
-        //Opdaterer ordrer status
-        public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
-        {
-            var ordre = await _context.Ordrer.FindAsync(ordreId);
-            if (ordre == null)
-            {
-                throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
-            }
+		////Opdaterer ordrer status
+		//public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
+		//{
+		//    var ordre = await _context.Ordrer.FindAsync(ordreId);
+		//    if (ordre == null)
+		//    {
+		//        throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
+		//    }
 
-            ordre.Status = nyStatus;
-            await _context.SaveChangesAsync();
-        }
+		//    ordre.Status = nyStatus;
+		//    await _context.SaveChangesAsync();
+		//}
+		public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
+		{
+			var ordre = await _context.Ordrer
+				.Include(o => o.OrdreYdelse)
+				.FirstOrDefaultAsync(o => o.OrdreId == ordreId);
 
-        //Tilføj Selvrisiko til en ordrer
-        public async Task TilføjSelvrisikoAsync(int ordreId)
+			if (ordre == null)
+				throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
+
+			// Opdater ordrestatus
+			ordre.Status = nyStatus;
+
+			// Hvis status er Afsluttet, Betalt eller Annulleret, fjern arbejdsopgaver
+			if (nyStatus == OrdreStatus.Afsluttet || nyStatus == OrdreStatus.Betalt || nyStatus == OrdreStatus.Annulleret)
+			{
+				foreach (var ydelse in ordre.OrdreYdelse)
+				{
+					ydelse.MekanikerId = null; // Fjern mekanikertildelingen
+				}
+			}
+
+			_context.Ordrer.Update(ordre);
+			await _context.SaveChangesAsync();
+		}
+
+
+		//Tilføj Selvrisiko til en ordrer
+		public async Task TilføjSelvrisikoAsync(int ordreId)
         {
             var ordre = await _context.Ordrer.FindAsync(ordreId);
             if (ordre == null)

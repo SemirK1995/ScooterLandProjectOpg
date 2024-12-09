@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ScooterLandProjectOpg.Server.Interfaces;
 using ScooterLandProjectOpg.Shared.Models;
-
+using ScooterLandProjectOpg.Server.Services;
 namespace ScooterLandProjectOpg.Server.Controllers
 {
     [Route("api/[controller]")]
@@ -76,26 +76,19 @@ namespace ScooterLandProjectOpg.Server.Controllers
             return NoContent();
         }
 
-		[HttpGet("{mekanikerId}/arbejdsopgaver")]
-		public async Task<ActionResult<IEnumerable<OrdreYdelse>>> GetArbejdsopgaverForMekaniker(int mekanikerId)
+		[HttpGet("{mekanikerId}/arbejdsopgaver/aktive")]
+		public async Task<IActionResult> GetAktiveArbejdsopgaver(int mekanikerId)
 		{
-			try
-			{
-				var arbejdsopgaver = await _mekanikerRepository.GetArbejdsopgaverForMekanikerAsync(mekanikerId);
+			var aktiveArbejdsopgaver = await _mekanikerRepository.GetAktiveArbejdsopgaverForMekanikerAsync(mekanikerId);
 
-				// Returner altid en tom liste, hvis der ikke findes data
-				if (arbejdsopgaver == null || !arbejdsopgaver.Any())
-				{
-					return Ok(new List<OrdreYdelse>());
-				}
-
-				return Ok(arbejdsopgaver);
-			}
-			catch (Exception ex)
+			if (!aktiveArbejdsopgaver.Any())
 			{
-				return StatusCode(500, $"Fejl ved hentning af arbejdsopgaver: {ex.Message}");
+				return NotFound($"Ingen aktive arbejdsopgaver fundet for mekaniker med ID {mekanikerId}.");
 			}
+
+			return Ok(aktiveArbejdsopgaver);
 		}
+
 	}
 }
 

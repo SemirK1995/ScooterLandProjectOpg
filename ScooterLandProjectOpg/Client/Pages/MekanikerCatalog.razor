@@ -248,17 +248,18 @@ else
 	{
 		mekanikere = await Http.GetFromJsonAsync<List<Mekaniker>>("api/Mekaniker");
 	}
+	
 	private async Task VisArbejdsopgaverModal(Mekaniker mekaniker)
 	{
 		try
 		{
-			// Hent arbejdsopgaver for mekanikeren
-			arbejdsopgaver = await Http.GetFromJsonAsync<List<OrdreYdelse>>($"api/Mekaniker/{mekaniker.MekanikerId}/arbejdsopgaver");
+			// Hent kun aktive arbejdsopgaver
+			arbejdsopgaver = await Http.GetFromJsonAsync<List<OrdreYdelse>>($"api/Mekaniker/{mekaniker.MekanikerId}/arbejdsopgaver/aktive");
 
 			if (arbejdsopgaver == null || !arbejdsopgaver.Any())
 			{
 				arbejdsopgaver = new List<OrdreYdelse>(); // Sæt til en tom liste
-				emptyMessage = $"Ingen arbejdsopgaver fundet for mekanikeren {mekaniker.Navn}.";
+				emptyMessage = $"Ingen aktive arbejdsopgaver fundet for mekanikeren {mekaniker.Navn}.";
 			}
 			else
 			{
@@ -273,7 +274,6 @@ else
 			Console.WriteLine($"Fejl ved hentning af arbejdsopgaver: {ex.Message}");
 		}
 	}
-
 
 	private void LukArbejdsopgaverModal()
 	{

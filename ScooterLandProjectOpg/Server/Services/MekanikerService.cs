@@ -2,6 +2,7 @@
 using ScooterLandProjectOpg.Server.Interfaces;
 using ScooterLandProjectOpg.Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using ScooterLandProjectOpg.Shared.Enum;
 
 namespace ScooterLandProjectOpg.Server.Services
 {
@@ -52,15 +53,29 @@ namespace ScooterLandProjectOpg.Server.Services
 				await _context.SaveChangesAsync();
 			}
 		}
-		// Hent arbejdsopgaver for en mekaniker
-		public async Task<IEnumerable<OrdreYdelse>> GetArbejdsopgaverForMekanikerAsync(int mekanikerId)
+		//Hent arbejdsopgaver for en mekaniker
+		//public async Task<IEnumerable<OrdreYdelse>> GetArbejdsopgaverForMekanikerAsync(int mekanikerId)
+		//{
+		//	return await _context.OrdreYdelser
+		//		.Include(oy => oy.Ydelse) // Inkluderer oplysninger om ydelsen
+		//		.Include(oy => oy.Scooter) // Inkluderer oplysninger om kundens scooter
+		//		.Where(oy => oy.MekanikerId == mekanikerId)
+		//		.ToListAsync();
+		//}
+		// Hent kun aktive arbejdsopgaver for en mekaniker
+		public async Task<IEnumerable<OrdreYdelse>> GetAktiveArbejdsopgaverForMekanikerAsync(int mekanikerId)
 		{
 			return await _context.OrdreYdelser
-				.Include(oy => oy.Ydelse) // Inkluderer oplysninger om ydelsen
-				.Include(oy => oy.Scooter) // Inkluderer oplysninger om kundens scooter
-				.Where(oy => oy.MekanikerId == mekanikerId)
+				.Include(oy => oy.Ydelse) // Inkluder oplysninger om ydelsen
+				.Include(oy => oy.Scooter) // Inkluder oplysninger om scooteren
+				.Include(oy => oy.Ordre) // Inkluder relateret ordre for at filtrere status
+				.Where(oy => oy.MekanikerId == mekanikerId &&
+							 oy.Ordre.Status != OrdreStatus.Afsluttet &&
+							 oy.Ordre.Status != OrdreStatus.Betalt &&
+							 oy.Ordre.Status != OrdreStatus.Annulleret)
 				.ToListAsync();
 		}
+
 	}
 }
 
