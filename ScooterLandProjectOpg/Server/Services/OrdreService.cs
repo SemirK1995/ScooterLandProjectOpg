@@ -24,7 +24,6 @@ namespace ScooterLandProjectOpg.Server.Services
 				.ToListAsync();
 		}
 
-		//Henter en specifik ordre ud fra id og dens kunde, betalinger og ordreydelse detaljer.
 		public async Task<Ordre> GetWithDetailsByIdAsync(int id)
 		{
 			return await _context.Ordrer
@@ -32,28 +31,16 @@ namespace ScooterLandProjectOpg.Server.Services
 				.Include(o => o.Betalinger)      // Betalinger
 				.Include(o => o.OrdreYdelse)
 					.ThenInclude(oy => oy.Ydelse) // Tilføj Ydelse-detaljer
+				.Include(o => o.LejeAftale)      // Tilføj LejeAftale
+					.ThenInclude(la => la.LejeScooter) // Tilføj LejeScooter, hvis relevant
 				.FirstOrDefaultAsync(o => o.OrdreId == id);
 		}
-
 		public async Task<Ordre> AddAsync(Ordre ordre)
 		{
 			_context.Ordrer.Add(ordre);
 			await _context.SaveChangesAsync();
 			return ordre;
 		}
-
-		////Opdaterer ordrer status
-		//public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
-		//{
-		//    var ordre = await _context.Ordrer.FindAsync(ordreId);
-		//    if (ordre == null)
-		//    {
-		//        throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
-		//    }
-
-		//    ordre.Status = nyStatus;
-		//    await _context.SaveChangesAsync();
-		//}
 		public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
 		{
 			var ordre = await _context.Ordrer

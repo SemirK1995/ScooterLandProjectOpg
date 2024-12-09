@@ -108,10 +108,12 @@ else
 						<div class="mb-3">
 							<label for="registreringsNummer">Registreringsnummer:</label>
 							<InputText @bind-Value="nyScooter.RegistreringsNummer" id="registreringsNummer" class="form-control" placeholder="Indtast registreringsnummer" />
+							<ValidationMessage For="@(() => nyScooter.RegistreringsNummer)" />
 						</div>
 						<div class="mb-3">
 							<label for="produktionsAar">Produktionsår:</label>
 							<InputNumber @bind-Value="nyScooter.ProduktionsAar" id="produktionsAar" class="form-control" placeholder="Indtast produktionsår" />
+							<ValidationMessage For="@(() => nyScooter.ProduktionsAar)" />
 						</div>
 						<button type="submit" class="btn btn-primary">Tilføj Scooter</button>
 					</EditForm>
@@ -204,7 +206,7 @@ else
 					<button type="button" class="btn-close" @onclick="LukOrdreDetaljerModal"></button>
 				</div>
 				<div class="modal-body">
-					<h6>Ydelser:</h6>
+					
 					@if (valgtOrdre.OrdreYdelse != null && valgtOrdre.OrdreYdelse.Any())
 					{
 						<table class="table">
@@ -232,7 +234,7 @@ else
 					{
 						<p>Ingen ydelser tilføjet.</p>
 					}
-					<h6>Produkter:</h6>
+					
 					@if (valgtOrdre.OrdreProdukter != null && valgtOrdre.OrdreProdukter.Any())
 					{
 						<table class="table">
@@ -272,6 +274,7 @@ else
 						<p><strong>Forsikringspris:</strong> @valgtOrdre.LejeAftale.ForsikringsPris kr.</p>
 						<p><strong>Kilometer pris:</strong> @valgtOrdre.LejeAftale.KilometerPris kr.</p>
 						<p><strong>Antal kørte Km:</strong> @valgtOrdre.LejeAftale.KortKilometer Km.</p>
+						<p><strong>Selvrisiko:</strong> @valgtOrdre.LejeAftale.Selvrisiko Kr.</p>
 
 						<h6>Scootere:</h6>
 						@if (valgtOrdre.LejeAftale.LejeScooter != null && valgtOrdre.LejeAftale.LejeScooter.Any())
@@ -294,14 +297,6 @@ else
 					}
 					<h6>Total Pris:</h6>
 					<p><strong>@valgtOrdre.TotalOrdrePris.ToString("F2") kr.</strong></p>
-
-					<h6>Tilføj/Fjern Selvrisiko:</h6>
-					<button class="btn btn-warning" @onclick="async () => await TilføjSelvrisiko(valgtOrdre.OrdreId)">
-						Tilføj Selvrisiko (1000 kr.)
-					</button>
-					<button class="btn btn-danger" @onclick="async () => await FjernSelvrisiko(valgtOrdre.OrdreId)">
-						Fjern Selvrisiko
-					</button>
 
 				</div>
 				<div class="modal-footer">
@@ -330,18 +325,22 @@ else
 						<div class="mb-3">
 							<label><strong>Navn:</strong></label>
 							<InputText @bind-Value="valgtKunde.Navn" class="form-control" />
+							<ValidationMessage For="@(() => valgtKunde.Navn)" />
 						</div>
 						<div class="mb-3">
 							<label><strong>Email:</strong></label>
 							<InputText @bind-Value="valgtKunde.Email" class="form-control" />
+							<ValidationMessage For="@(() => valgtKunde.Email)" />
 						</div>
 						<div class="mb-3">
 							<label><strong>Telefon:</strong></label>
 							<InputNumber @bind-Value="valgtKunde.Telefonnummer" class="form-control" />
+							<ValidationMessage For="@(() => valgtKunde.Telefonnummer)" />
 						</div>
 						<div class="mb-3">
 							<label><strong>Adresse:</strong></label>
 							<InputText @bind-Value="valgtKunde.Adresse" class="form-control" />
+							<ValidationMessage For="@(() => valgtKunde.Adresse)" />
 						</div>
 
 
@@ -596,41 +595,6 @@ else
 		}
 	}
 
-	private async Task TilføjSelvrisiko(int ordreId)
-	{
-		var response = await Http.PutAsync($"api/Ordre/{ordreId}/selvrisiko", null);
-		if (response.IsSuccessStatusCode)
-		{
-			Console.WriteLine($"Selvrisiko tilføjet til ordre ID {ordreId}.");
-			await HentKundeDetaljer(søgeKundeId); // Opdater data
-		}
-		else
-		{
-			Console.WriteLine("Fejl ved tilføjelse af selvrisiko.");
-		}
-	}
-
-	private async Task FjernSelvrisiko(int ordreId)
-	{
-		try
-		{
-			var response = await Http.PutAsync($"api/Ordre/{ordreId}/remove-selvrisiko", null);
-			if (response.IsSuccessStatusCode)
-			{
-				Console.WriteLine($"Selvrisiko fjernet fra ordre ID {ordreId}.");
-				await HentKundeDetaljer(søgeKundeId); // Opdater data i sidepanelet
-			}
-			else
-			{
-				Console.WriteLine($"Fejl ved fjernelse af selvrisiko for ordre ID {ordreId}.");
-			}
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"En fejl opstod: {ex.Message}");
-		}
-	}
-
 	private async Task VisOrdreDetaljer(int ordreId)
 	{
 		try
@@ -661,7 +625,6 @@ else
 			Console.WriteLine($"Fejl ved hentning af ordredetaljer: {ex.Message}");
 		}
 	}
-
 
 	private void LukOrdreDetaljerModal()
 	{

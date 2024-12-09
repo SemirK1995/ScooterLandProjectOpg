@@ -52,15 +52,12 @@ else
 					</td>
 					<td>@lejeAftale.DagligLeje.ToString("F2") kr.</td>
 					<td>
-						@* <input type="checkbox" class="form-check-input"
-				checked="@(lejeAftale.Selvrisiko > 0)"
-				@onchange="async e => await OpdaterSelvrisiko(lejeAftale.LejeId, (bool)((ChangeEventArgs)e).Value ? 1000 : 0)" /> *@
 						<input type="checkbox" class="form-check-input"
 							   checked="@(lejeAftale.Selvrisiko > 0)"
 							   @onchange="async e =>
                             {
                             await OpdaterSelvrisiko(lejeAftale.LejeId, (bool)((ChangeEventArgs)e).Value ? 1000 : 0);
-                            await HentLejeAftaler(); // Genindlæs listen for at opdatere TotalPris
+                            await HentLejeAftaler();
                             }" />
 					</td>
 
@@ -86,14 +83,32 @@ else
 					<p><strong>Leje ID:</strong> @valgtLejeAftale?.LejeId</p>
 					<p><strong>Kunde ID:</strong> @valgtLejeAftale?.KundeId</p>
 					<p><strong>Kunde Navn:</strong> @valgtLejeAftale?.Kunde?.Navn</p>
-					<p><strong>Startdato:</strong> @valgtLejeAftale?.StartDato?.ToString("dd-MM-yyyy")</p>
-					<p><strong>Slutdato:</strong> @valgtLejeAftale?.SlutDato?.ToString("dd-MM-yyyy")</p>
+					<p><strong>Startdato for lejeaftalen:</strong> @valgtLejeAftale?.StartDato?.ToString("dd-MM-yyyy")</p>
+					<p><strong>Slutdato for lejeaftalen:</strong> @valgtLejeAftale?.SlutDato?.ToString("dd-MM-yyyy")</p>
 					<p><strong>Daglig Leje:</strong> @valgtLejeAftale?.DagligLeje kr.</p>
 					<p><strong>Daglig Forsikringspris:</strong> @valgtLejeAftale?.ForsikringsPris kr.</p>
 					<p><strong>Kilometer Pris:</strong> @valgtLejeAftale?.KilometerPris kr.</p>
 					<p><strong>Kørte Kilometer:</strong> @valgtLejeAftale?.KortKilometer</p>
 					<p><strong>Selvrisiko:</strong> @valgtLejeAftale?.Selvrisiko kr.</p>
 					<p><strong>Total Pris:</strong> @valgtLejeAftale?.TotalPris kr.</p>
+					@if (valgtLejeAftale?.LejeScooter != null && valgtLejeAftale.LejeScooter.Any())
+					{
+						<h6>Leje Scooter Detaljer:</h6>
+						<ul>
+							@foreach (var scooter in valgtLejeAftale.LejeScooter)
+							{
+								<li>
+									<strong>Mærke:</strong> @scooter.ScooterMaerke,
+									<strong>Model:</strong> @scooter.ScooterModel
+								</li>
+							}
+						</ul>
+					}
+					else
+					{
+						<p class="text-muted">Ingen scootere er knyttet til denne lejeaftale.</p>
+					}
+
 				</div>
 				<div class="modal-footer">
 					<button class="btn btn-secondary" @onclick="LukDetaljerModal">Luk</button>

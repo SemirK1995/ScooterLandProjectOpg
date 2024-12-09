@@ -16,18 +16,22 @@ namespace ScooterLandProjectOpg.Shared.Models
 		// Attributter
 
 		[Required(ErrorMessage = "Navn er påkrævet.")]
-		public string? Navn { get; set; }
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Navn skal være mellem 2 og 100 tegn.")]
+        [RegularExpression(@"^[A-Za-zÆØÅæøå\s-]+$", ErrorMessage = "Navn må kun indeholde bogstaver og mellemrum.")]
+        public string? Navn { get; set; }
 
 		[Required(ErrorMessage = "Adresse er påkrævet.")]
-		public string? Adresse { get; set; }
+        [StringLength(200, ErrorMessage = "Adresse må ikke overstige 200 tegn.")]
+        public string? Adresse { get; set; }
 
 		[Required(ErrorMessage = "Telefonnummer er påkrævet.")]
 		[Range(10000000, 99999999, ErrorMessage = "Telefonnummer skal være et gyldigt 8-cifret tal.")]
 		public int? Telefonnummer { get; set; }
 
 		[Required(ErrorMessage = "Email er påkrævet.")]
-		[EmailAddress(ErrorMessage = "Indtast en gyldig email-adresse.")]
-		public string? Email { get; set; }
+        [RegularExpression(@"^[A-Za-z0-9._%+-]{2,}@[A-Za-z0-9.-]{2,}.[A-Za-z]{2,}$",
+        ErrorMessage = "Ugyldig email")]
+        public string? Email { get; set; }
 
 
 		// Navigation property til en liste af KundeScooter

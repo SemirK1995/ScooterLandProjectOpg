@@ -9,18 +9,22 @@
     <div class="mb-3">
         <label for="navn">Navn:</label>
         <InputText @bind-Value="nyKunde.Navn" id="navn" class="form-control" placeholder="Indtast navn" />
+        <ValidationMessage For="@(() => nyKunde.Navn)" />
     </div>
     <div class="mb-3">
         <label for="email">Email:</label>
         <InputText @bind-Value="nyKunde.Email" id="email" class="form-control" placeholder="Indtast email" />
+        <ValidationMessage For="@(() => nyKunde.Email)" />
     </div>
     <div class="mb-3">
         <label for="telefon">Telefon:</label>
         <InputNumber @bind-Value="nyKunde.Telefonnummer" id="telefon" class="form-control" placeholder="Indtast telefonnummer" />
+        <ValidationMessage For="@(() => nyKunde.Telefonnummer)" />
     </div>
     <div class="mb-3">
         <label for="adresse">Adresse:</label>
         <InputText @bind-Value="nyKunde.Adresse" id="adresse" class="form-control" placeholder="Indtast adresse" />
+        <ValidationMessage For="@(() => nyKunde.Adresse)" />
     </div>
 
     <h4>Tilføj Scootere</h4>
@@ -40,11 +44,23 @@
                 @foreach (var scooter in scootere)
                 {
                     <tr>
-                        <td><InputText @bind-Value="scooter.Maerke" class="form-control" /></td>
-                        <td><InputText @bind-Value="scooter.Model" class="form-control" /></td>
-                        <td><InputText @bind-Value="scooter.RegistreringsNummer" class="form-control" /></td>
-                        <td><InputNumber @bind-Value="scooter.ProduktionsAar" class="form-control" /></td>
-                        <td><button class="btn btn-danger" @onclick="() => FjernScooter(scooter)">Fjern</button></td>
+                        <td>
+                            <InputText @bind-Value="scooter.Maerke" class="form-control" />
+                        </td>
+                        <td>
+                            <InputText @bind-Value="scooter.Model" class="form-control" />
+                        </td>
+                        <td>
+                            <InputText @bind-Value="scooter.RegistreringsNummer" class="form-control" />
+                            <ValidationMessage For="@(() => scooter.RegistreringsNummer)" />
+                        </td>
+                        <td>
+                            <InputNumber @bind-Value="scooter.ProduktionsAar" class="form-control" />
+                            <ValidationMessage For="@(() => scooter.ProduktionsAar)" />
+                        </td>
+                        <td>
+                            <button class="btn btn-danger" @onclick="() => FjernScooter(scooter)">Fjern</button>
+                        </td>
                     </tr>
                 }
             </tbody>
