@@ -16,13 +16,42 @@ namespace ScooterLandProjectOpg.Server.Services
 		{
 			_context = context;
 		}
-		// Override to include related orders
+		//// Override to include related orders
+		//public async Task<IEnumerable<Betaling>> GetAllAsync()
+		//{
+		//	return await _context.Set<Betaling>()
+		//		.Include(b => b.Ordre)
+		//		.ToListAsync();
+		//}
+		// Override to include related orders and calculate correct payment amount
 		public async Task<IEnumerable<Betaling>> GetAllAsync()
 		{
-			return await _context.Set<Betaling>()
+			var betalinger = await _context.Set<Betaling>()
 				.Include(b => b.Ordre)
+				.ThenInclude(o => o.LejeAftale) // Inkluder LejeAftale, hvis nødvendigt
 				.ToListAsync();
+
+			foreach (var betaling in betalinger)
+			{
+				if (betaling.Ordre != null)
+				{
+					// Beregn det opdaterede beløb baseret på totalpris inklusive selvrisiko
+					var totalPris = betaling.Ordre.TotalPris ?? 0;
+
+					// Hvis der er en lejeaftale, tilføj selvrisiko
+					if (betaling.Ordre.LejeAftale != null)
+					{
+						totalPris += betaling.Ordre.LejeAftale.Selvrisiko;
+					}
+
+					// Opdater betalingens beløb
+					betaling.Beløb = totalPris;
+				}
+			}
+
+			return betalinger;
 		}
+
 		// Custom implementation for GetById with related orders
 		public async Task<Betaling> GetByIdAsync(int id)
 		{

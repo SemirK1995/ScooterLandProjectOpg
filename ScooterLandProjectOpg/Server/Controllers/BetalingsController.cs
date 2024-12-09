@@ -74,85 +74,170 @@ namespace ScooterLandProjectOpg.Server.Controllers
                 return NotFound(ex.Message);
             }
         }
-        [HttpGet("{betalingsId}/faktura")]
-        public async Task<ActionResult<FakturaDto>> GenererFaktura(int betalingsId)
-        {
-            try
-            {
-                var betaling = await _betalingRepository.GetFakturaDetaljerAsync(betalingsId);
-                if (betaling == null)
-                    return NotFound($"Betaling med ID {betalingsId} blev ikke fundet.");
+		//[HttpGet("{betalingsId}/faktura")]
+		//public async Task<ActionResult<FakturaDto>> GenererFaktura(int betalingsId)
+		//{
+		//    try
+		//    {
+		//        var betaling = await _betalingRepository.GetFakturaDetaljerAsync(betalingsId);
+		//        if (betaling == null)
+		//            return NotFound($"Betaling med ID {betalingsId} blev ikke fundet.");
 
-                var ordre = betaling.Ordre;
-                var kunde = ordre.Kunde;
+		//        var ordre = betaling.Ordre;
+		//        var kunde = ordre.Kunde;
 
-                var fakturaDto = new FakturaDto
-                {
-                    // Kundeoplysninger
-                    KundeId = kunde.KundeId,
-                    KundeNavn = kunde.Navn,
-                    KundeAdresse = kunde.Adresse,
-                    KundeTelefon = kunde.Telefonnummer?.ToString(),
-                    KundeEmail = kunde.Email,
+		//        var fakturaDto = new FakturaDto
+		//        {
+		//            // Kundeoplysninger
+		//            KundeId = kunde.KundeId,
+		//            KundeNavn = kunde.Navn,
+		//            KundeAdresse = kunde.Adresse,
+		//            KundeTelefon = kunde.Telefonnummer?.ToString(),
+		//            KundeEmail = kunde.Email,
 
-                    // Betaling
-                    BetalingsId = betaling.BetalingsId,
-                    OrdreId = betaling.OrdreId,
-                    Beløb = betaling.Beløb,
-                    BetalingsMetode = betaling.BetalingsMetode?.ToString(),
-                    BetalingsDato = betaling.BetalingsDato?.ToString("dd-MM-yyyy"),
-                    Betalt = betaling.Betalt,
+		//            // Betaling
+		//            BetalingsId = betaling.BetalingsId,
+		//            OrdreId = betaling.OrdreId,
+		//            Beløb = betaling.Beløb,
+		//            BetalingsMetode = betaling.BetalingsMetode?.ToString(),
+		//            BetalingsDato = betaling.BetalingsDato?.ToString("dd-MM-yyyy"),
+		//            Betalt = betaling.Betalt,
 
-                    // Ordre
-                    OrdreDato = ordre.Dato,
-                    TotalPris = ordre.TotalPris,
+		//            // Ordre
+		//            OrdreDato = ordre.Dato,
+		//            TotalPris = ordre.TotalPris,
 
-                    // Ydelser
-                    Ydelser = ordre.OrdreYdelse?.Select(oy => new FakturaYdelseDto
-                    {
-                        YdelseId = oy.YdelseId,
-                        YdelseNavn = oy.Ydelse?.Navn,
-                        BeregnetPris = oy.BeregnetPris,
-                        ScooterMaerke = oy.Scooter?.Maerke, // Forudsat at relationen findes
-                        ScooterModel = oy.Scooter?.Model    // Forudsat at relationen findes
+		//            // Ydelser
+		//            Ydelser = ordre.OrdreYdelse?.Select(oy => new FakturaYdelseDto
+		//            {
+		//                YdelseId = oy.YdelseId,
+		//                YdelseNavn = oy.Ydelse?.Navn,
+		//                BeregnetPris = oy.BeregnetPris,
+		//                ScooterMaerke = oy.Scooter?.Maerke, // Forudsat at relationen findes
+		//                ScooterModel = oy.Scooter?.Model    // Forudsat at relationen findes
 
-                    }).ToList(),
+		//            }).ToList(),
 
-                    // KundeScooter
-                    KundeScooter = ordre.OrdreYdelse?.FirstOrDefault()?.Scooter?.Model ?? "Ingen scooter valgt",
+		//            // KundeScooter
+		//            KundeScooter = ordre.OrdreYdelse?.FirstOrDefault()?.Scooter?.Model ?? "Ingen scooter valgt",
 
-                    // Lejeaftale (hvis relevant)
-                    Lejeaftale = ordre.LejeAftale == null
-                        ? null
-                        : new FakturaLejeAftaleDto
-                        {
-                            StartDato = ordre.LejeAftale.StartDato,
-                            SlutDato = ordre.LejeAftale.SlutDato,
-                            ForsikringsPris = ordre.LejeAftale.ForsikringsPris,
-                            KortKilometer = ordre.LejeAftale.KortKilometer ?? 0,
-                            DagligLeje = ordre.LejeAftale.DagligLeje,
-                            Selvrisiko = ordre.LejeAftale?.Selvrisiko ?? 0,
-                            Scootere = ordre.LejeAftale.LejeScooter?.Select(ls => $"{ls.ScooterMaerke} {ls.ScooterModel}").ToList() ?? new List<string>()
-                        },
-                    // Produkter
-                    Produkter = ordre.OrdreProdukter?.Select(op => new FakturaProduktDto
-                    {
-                        ProduktId = op.Produkt.ProduktId,
-                        ProduktNavn = op.Produkt.ProduktNavn,
-                        Antal = op.Antal,
-                        Pris = op.Pris
-                    }).ToList()
-                };
+		//            // Lejeaftale (hvis relevant)
+		//            Lejeaftale = ordre.LejeAftale == null
+		//                ? null
+		//                : new FakturaLejeAftaleDto
+		//                {
+		//                    StartDato = ordre.LejeAftale.StartDato,
+		//                    SlutDato = ordre.LejeAftale.SlutDato,
+		//                    ForsikringsPris = ordre.LejeAftale.ForsikringsPris,
+		//                    KortKilometer = ordre.LejeAftale.KortKilometer ?? 0,
+		//                    DagligLeje = ordre.LejeAftale.DagligLeje,
+		//                    Selvrisiko = ordre.LejeAftale?.Selvrisiko ?? 0,
+		//                    Scootere = ordre.LejeAftale.LejeScooter?.Select(ls => $"{ls.ScooterMaerke} {ls.ScooterModel}").ToList() ?? new List<string>()
+		//                },
+		//            // Produkter
+		//            Produkter = ordre.OrdreProdukter?.Select(op => new FakturaProduktDto
+		//            {
+		//                ProduktId = op.Produkt.ProduktId,
+		//                ProduktNavn = op.Produkt.ProduktNavn,
+		//                Antal = op.Antal,
+		//                Pris = op.Pris
+		//            }).ToList()
+		//        };
 
-                return Ok(fakturaDto);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Fejl ved generering af faktura: {ex.Message}");
-            }
-        }
+		//        return Ok(fakturaDto);
+		//    }
+		//    catch (Exception ex)
+		//    {
+		//        return BadRequest($"Fejl ved generering af faktura: {ex.Message}");
+		//    }
+		//}
+		[HttpGet("{betalingsId}/faktura")]
+		public async Task<ActionResult<FakturaDto>> GenererFaktura(int betalingsId)
+		{
+			try
+			{
+				var betaling = await _betalingRepository.GetFakturaDetaljerAsync(betalingsId);
+				if (betaling == null)
+					return NotFound($"Betaling med ID {betalingsId} blev ikke fundet.");
 
-        [HttpGet("{betalingsId}/download")]
+				var ordre = betaling.Ordre;
+				var kunde = ordre.Kunde;
+
+				// Beregn den opdaterede TotalPris inklusive selvrisiko
+				double totalPris = ordre.TotalPris ?? 0;
+				if (ordre.LejeAftale != null)
+				{
+					totalPris += ordre.LejeAftale.Selvrisiko; // Inkluder selvrisiko, hvis der er en lejeaftale
+				}
+
+				var fakturaDto = new FakturaDto
+				{
+					// Kundeoplysninger
+					KundeId = kunde.KundeId,
+					KundeNavn = kunde.Navn,
+					KundeAdresse = kunde.Adresse,
+					KundeTelefon = kunde.Telefonnummer?.ToString(),
+					KundeEmail = kunde.Email,
+
+					// Betaling
+					BetalingsId = betaling.BetalingsId,
+					OrdreId = betaling.OrdreId,
+					Beløb = totalPris, // Brug den opdaterede TotalPris her
+					BetalingsMetode = betaling.BetalingsMetode?.ToString(),
+					BetalingsDato = betaling.BetalingsDato?.ToString("dd-MM-yyyy"),
+					Betalt = betaling.Betalt,
+
+					// Ordre
+					OrdreDato = ordre.Dato,
+					TotalPris = totalPris, // Inkluder selvrisiko i totalprisen
+
+					// Ydelser
+					Ydelser = ordre.OrdreYdelse?.Select(oy => new FakturaYdelseDto
+					{
+						YdelseId = oy.YdelseId,
+						YdelseNavn = oy.Ydelse?.Navn,
+						BeregnetPris = oy.BeregnetPris,
+						ScooterMaerke = oy.Scooter?.Maerke, // Forudsat at relationen findes
+						ScooterModel = oy.Scooter?.Model    // Forudsat at relationen findes
+					}).ToList(),
+
+					// KundeScooter
+					KundeScooter = ordre.OrdreYdelse?.FirstOrDefault()?.Scooter?.Model ?? "Ingen scooter valgt",
+
+					// Lejeaftale (hvis relevant)
+					Lejeaftale = ordre.LejeAftale == null
+						? null
+						: new FakturaLejeAftaleDto
+						{
+							StartDato = ordre.LejeAftale.StartDato,
+							SlutDato = ordre.LejeAftale.SlutDato,
+							ForsikringsPris = ordre.LejeAftale.ForsikringsPris,
+							KortKilometer = ordre.LejeAftale.KortKilometer ?? 0,
+							DagligLeje = ordre.LejeAftale.DagligLeje,
+							Selvrisiko = ordre.LejeAftale?.Selvrisiko ?? 0,
+							Scootere = ordre.LejeAftale.LejeScooter?.Select(ls => $"{ls.ScooterMaerke} {ls.ScooterModel}").ToList() ?? new List<string>()
+						},
+
+					// Produkter
+					Produkter = ordre.OrdreProdukter?.Select(op => new FakturaProduktDto
+					{
+						ProduktId = op.Produkt.ProduktId,
+						ProduktNavn = op.Produkt.ProduktNavn,
+						Antal = op.Antal,
+						Pris = op.Pris
+					}).ToList()
+				};
+
+				return Ok(fakturaDto);
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Fejl ved generering af faktura: {ex.Message}");
+			}
+		}
+
+
+		[HttpGet("{betalingsId}/download")]
         public async Task<IActionResult> DownloadFaktura(int betalingsId)
         {
             try
