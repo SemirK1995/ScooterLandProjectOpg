@@ -1,7 +1,174 @@
 ﻿@page "/lejeaftalekatalog"
+@using ScooterLandProjectOpg.Shared.Models
+@inject HttpClient Http
 
-<h3>LejeAftaleKatalog</h3>
+<h3>Lejeaftale Katalog</h3>
+
+<div class="mb-3">
+	<input type="text" class="form-control" placeholder="Søg efter Kunde ID, Leje ID eller Kundens Navn"
+		   @bind="søgeFelt" @onkeypress="HandleSearchKeyPress" />
+	<button class="btn btn-primary mt-2" @onclick="SøgLejeAftaler">Søg</button>
+	<button class="btn btn-secondary mt-2" @onclick="ResetSøgning">Nulstil</button>
+</div>
+
+@if (lejeAftaler == null)
+{
+	<p>Indlæser lejeaftaler...</p>
+}
+else if (!lejeAftaler.Any())
+{
+	<p>Ingen lejeaftaler fundet.</p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Leje ID</th>
+				<th>Kunde ID</th>
+				<th>Kunde Navn</th>
+				<th>Startdato</th>
+				<th>Slutdato</th>
+				<th>Kørte Kilometer</th>
+				<th>Daglig Leje</th>
+				<th>Selvrisiko</th>
+				<th>Total Pris</th>
+				<th>Handlinger</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var lejeAftale in lejeAftaler)
+			{
+				<tr>
+					<td>@lejeAftale.LejeId</td>
+					<td>@lejeAftale.KundeId</td>
+					<td>@lejeAftale.Kunde?.Navn</td>
+					<td>@lejeAftale.StartDato?.ToString("dd-MM-yyyy")</td>
+					<td>@lejeAftale.SlutDato?.ToString("dd-MM-yyyy")</td>
+					<td>
+						<input type="number" class="form-control" style="width: 100px;"
+							   value="@lejeAftale.KortKilometer"
+							   @oninput="async e => await OpdaterKortKilometer(lejeAftale.LejeId, int.TryParse(e.Value.ToString(), out var result) ? result : lejeAftale.KortKilometer)" />
+					</td>
+					<td>@lejeAftale.DagligLeje.ToString("F2") kr.</td>
+					<td>
+						@* <input type="checkbox" class="form-check-input"
+				checked="@(lejeAftale.Selvrisiko > 0)"
+				@onchange="async e => await OpdaterSelvrisiko(lejeAftale.LejeId, (bool)((ChangeEventArgs)e).Value ? 1000 : 0)" /> *@
+						<input type="checkbox" class="form-check-input"
+							   checked="@(lejeAftale.Selvrisiko > 0)"
+							   @onchange="async e =>
+                            {
+                            await OpdaterSelvrisiko(lejeAftale.LejeId, (bool)((ChangeEventArgs)e).Value ? 1000 : 0);
+                            await HentLejeAftaler(); // Genindlæs listen for at opdatere TotalPris
+                            }" />
+					</td>
+
+					<td>@lejeAftale.TotalPris.ToString("F2") kr.</td>
+					<td>
+						<button class="btn btn-info btn-sm" @onclick="() => VisDetaljer(lejeAftale.LejeId)">Vis Detaljer</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+@if (visDetaljerModal)
+{
+	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Detaljer for Lejeaftale</h5>
+					<button type="button" class="btn-close" @onclick="LukDetaljerModal"></button>
+				</div>
+				<div class="modal-body">
+					<p><strong>Leje ID:</strong> @valgtLejeAftale?.LejeId</p>
+					<p><strong>Kunde ID:</strong> @valgtLejeAftale?.KundeId</p>
+					<p><strong>Kunde Navn:</strong> @valgtLejeAftale?.Kunde?.Navn</p>
+					<p><strong>Startdato:</strong> @valgtLejeAftale?.StartDato?.ToString("dd-MM-yyyy")</p>
+					<p><strong>Slutdato:</strong> @valgtLejeAftale?.SlutDato?.ToString("dd-MM-yyyy")</p>
+					<p><strong>Daglig Leje:</strong> @valgtLejeAftale?.DagligLeje kr.</p>
+					<p><strong>Kørte Kilometer:</strong> @valgtLejeAftale?.KortKilometer</p>
+					<p><strong>Selvrisiko:</strong> @valgtLejeAftale?.Selvrisiko kr.</p>
+					<p><strong>Total Pris:</strong> @valgtLejeAftale?.TotalPris kr.</p>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" @onclick="LukDetaljerModal">Luk</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
 
 @code {
+	private List<LejeAftale> lejeAftaler = new List<LejeAftale>();
+	private LejeAftale? valgtLejeAftale;
+	private string søgeFelt = string.Empty;
+	private bool visDetaljerModal = false;
 
+	protected override async Task OnInitializedAsync()
+	{
+		await HentLejeAftaler();
+	}
+
+	private async Task HentLejeAftaler()
+	{
+		lejeAftaler = await Http.GetFromJsonAsync<List<LejeAftale>>("api/LejeAftale");
+	}
+
+	private async Task SøgLejeAftaler()
+	{
+		if (string.IsNullOrWhiteSpace(søgeFelt))
+		{
+			await HentLejeAftaler();
+		}
+		else
+		{
+			lejeAftaler = await Http.GetFromJsonAsync<List<LejeAftale>>($"api/LejeAftale/search?query={søgeFelt}");
+		}
+	}
+
+	private void ResetSøgning()
+	{
+		søgeFelt = string.Empty;
+		_ = HentLejeAftaler();
+	}
+
+	private async Task OpdaterSelvrisiko(int lejeId, double selvrisiko)
+	{
+		var response = await Http.PutAsJsonAsync($"api/LejeAftale/{lejeId}/selvrisiko", selvrisiko);
+		if (response.IsSuccessStatusCode)
+		{
+			await HentLejeAftaler();
+		}
+	}
+
+	private async Task OpdaterKortKilometer(int lejeId, int? kortKilometer)
+	{
+		var response = await Http.PutAsJsonAsync($"api/LejeAftale/{lejeId}/kilometer", kortKilometer);
+		if (response.IsSuccessStatusCode)
+		{
+			await HentLejeAftaler();
+		}
+	}
+
+	private void VisDetaljer(int lejeId)
+	{
+		valgtLejeAftale = lejeAftaler.FirstOrDefault(l => l.LejeId == lejeId);
+		visDetaljerModal = true;
+	}
+
+	private void LukDetaljerModal()
+	{
+		visDetaljerModal = false;
+	}
+
+	private async Task HandleSearchKeyPress(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+		{
+			await SøgLejeAftaler();
+		}
+	}
 }

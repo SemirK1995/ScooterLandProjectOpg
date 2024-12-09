@@ -59,7 +59,7 @@ namespace ScooterLandProjectOpg.Shared.Models
 				var forsikringsOmkostning = ForsikringsPris * dage;
 				var kilometerOmkostning = KortKilometer.HasValue ? KilometerPris * KortKilometer.Value : 0;
 
-				return (DagligLeje * dage) + forsikringsOmkostning + kilometerOmkostning;
+				return (DagligLeje * dage) + forsikringsOmkostning + kilometerOmkostning +Selvrisiko;
 			}
         }
 

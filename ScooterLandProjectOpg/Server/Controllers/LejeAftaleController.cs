@@ -39,5 +39,54 @@ namespace ScooterLandProjectOpg.Server.Controllers
 
             return Ok(lejeaftale);
         }
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<LejeAftale>>> SearchLejeAftaler([FromQuery] string query)
+        {
+            var lejeAftaler = await _lejeaftaleRepository.SearchLejeAftalerAsync(query);
+            return Ok(lejeAftaler);
+        }
+
+        [HttpPut("{lejeId}/selvrisiko")]
+        public async Task<IActionResult> UpdateSelvrisiko(int lejeId, [FromBody] double selvrisiko)
+        {
+            try
+            {
+                await _lejeaftaleRepository.UpdateSelvrisikoAsync(lejeId, selvrisiko);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPut("{lejeId}/kilometer")]
+        public async Task<IActionResult> UpdateKortKilometer(int lejeId, [FromBody] int? kortKilometer)
+        {
+            try
+            {
+                await _lejeaftaleRepository.UpdateKortKilometerAsync(lejeId, kortKilometer);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<LejeAftale>>> GetAllLejeAftaler()
+        {
+            try
+            {
+                var lejeAftaler = await _lejeaftaleRepository.GetAllWithKundeAndScootersAsync();
+                return Ok(lejeAftaler);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Serverfejl: {ex.Message}");
+            }
+        }
+
+
     }
 }
