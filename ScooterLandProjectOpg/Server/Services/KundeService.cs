@@ -38,10 +38,18 @@ namespace ScooterLandProjectOpg.Server.Services
 				.ToListAsync();
 		}
 
-		public new async Task DeleteAsync(int id)
+		public async Task DeleteAsync(int id)
 		{
-			await base.DeleteAsync(id); // Brug af base klassen' DeleteAsync
+			var kunde = await _context.Kunder.FindAsync(id);
+			if (kunde == null)
+			{
+				throw new Exception($"Kunde med ID {id} blev ikke fundet.");
+			}
+
+			_context.Kunder.Remove(kunde); // Cascade delete håndterer relaterede data
+			await _context.SaveChangesAsync();
 		}
+
 
 		public new async Task UpdateAsync(Kunde entity)
 		{
@@ -62,20 +70,7 @@ namespace ScooterLandProjectOpg.Server.Services
                     .ThenInclude(oy => oy.Ydelse)
                 .ToListAsync();
         }
-		//public async Task<Kunde> GetKundeWithManyDetailsByIdAsync(int kundeId)
-		//{
-		//	return await _context.Kunder
-		//		.Include(k => k.Ordre)
-		//			.ThenInclude(o => o.OrdreYdelse)
-		//				.ThenInclude(oy => oy.Ydelse)
-		//		.Include(k => k.Ordre)
-		//			.ThenInclude(o => o.OrdreProdukter) 
-		//				.ThenInclude(op => op.Produkt) 
-		//		.Include(k => k.LejeAftale)
-		//			.ThenInclude(la => la.LejeScooter)
-		//		.Include(k => k.KundeScooter)
-		//		.FirstOrDefaultAsync(k => k.KundeId == kundeId);
-		//}
+		
 		public async Task<Kunde> GetKundeWithManyDetailsByIdAsync(int kundeId)
 		{
 			return await _context.Kunder

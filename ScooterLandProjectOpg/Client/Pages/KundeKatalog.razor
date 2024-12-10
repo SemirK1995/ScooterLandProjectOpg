@@ -473,6 +473,7 @@ else
 	}
 	private void VisBekræftSletModal()
 	{
+		kundeTilSletning = valgtKunde;
 		visBekræftSletModal = true;
 	}
 
@@ -573,13 +574,45 @@ else
 	}
 
 
+	// private async Task SletBekræftetKunde()
+	// {
+	// 	await Http.DeleteAsync($"api/Kunde/{kundeTilSletning.KundeId}");
+	// 	await HentAlleKunder();
+	// 	visModal = false; // Luk redigeringsvinduet
+	// 	visBekræftSletModal = false; // Luk bekræftelsesmodalen
+	// }
 	private async Task SletBekræftetKunde()
 	{
-		await Http.DeleteAsync($"api/Kunde/{kundeTilSletning.KundeId}");
-		await HentAlleKunder();
-		visModal = false; // Luk redigeringsvinduet
-		visBekræftSletModal = false; // Luk bekræftelsesmodalen
+		try
+		{
+			// Send DELETE-anmodning til API
+			var response = await Http.DeleteAsync($"api/Kunde/{kundeTilSletning.KundeId}");
+
+			if (response.IsSuccessStatusCode)
+			{
+				// Fjern kunden midlertidigt fra listen
+				kunder.Remove(kundeTilSletning);
+
+				// Opdater listen fra serveren i baggrunden
+				await HentAlleKunder();
+
+				// Luk modal
+				LukBekræftSletModal();
+			}
+			else
+			{
+				// Håndter fejl
+				var fejl = await response.Content.ReadAsStringAsync();
+				Console.WriteLine($"Fejl ved sletning: {fejl}");
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Fejl ved sletning af kunde: {ex.Message}");
+		}
 	}
+
+
 
 
 	private async Task OpdaterOrdreStatus(Ordre ordre)
@@ -631,5 +664,7 @@ else
 		visOrdreDetaljerModal = false;
 
 	}
+
+
 
 }

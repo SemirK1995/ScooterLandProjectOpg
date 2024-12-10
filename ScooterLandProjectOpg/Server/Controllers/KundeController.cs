@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using ScooterLandProjectOpg.Server.Interfaces;
 using ScooterLandProjectOpg.Server.Services;
@@ -93,15 +94,50 @@ namespace ScooterLandProjectOpg.Server.Controllers
 			return NoContent();
 		}
 
-		// DELETE: api/Kunde/5
+		
+		//// DELETE: api/Kunde/5
+
+		//[HttpDelete("{id}")]
+		//public async Task<IActionResult> Delete(int id)
+		//{
+		//	try
+		//	{
+		//		await _kundeRepository.DeleteAsync(id);
+		//		return NoContent();
+		//	}
+		//	catch (Exception ex)
+		//	{
+		//		Console.WriteLine($"Fejl ved sletning af kunde: {ex.Message}");
+		//		return StatusCode(500, "Der opstod en fejl ved sletning af kunden.");
+		//	}
+		//}
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> Delete(int id)
 		{
-			await _kundeRepository.DeleteAsync(id);
-			return NoContent();
+			try
+			{
+				// Kontroller, om kunden findes
+				var kunde = await _kundeRepository.GetByIdAsync(id);
+				if (kunde == null)
+				{
+					return NotFound($"Kunde med ID {id} blev ikke fundet.");
+				}
+
+				// Slet kunden
+				await _kundeRepository.DeleteAsync(id);
+
+				// Returner status 204 No Content, hvis alt lykkes
+				return NoContent();
+			}
+			catch (Exception ex)
+			{
+				// Log fejl
+				Console.WriteLine($"Fejl ved sletning af kunde: {ex.Message}");
+				return StatusCode(500, "Der opstod en fejl ved sletning af kunden.");
+			}
 		}
-		
-        [HttpGet("{kundeId}/ordrer")]
+
+		[HttpGet("{kundeId}/ordrer")]
         public async Task<ActionResult<IEnumerable<Ordre>>> GetKundeOrdrer(int kundeId)
         {
             var ordrer = await _kundeRepository.GetOrdrerForKundeAsync(kundeId);

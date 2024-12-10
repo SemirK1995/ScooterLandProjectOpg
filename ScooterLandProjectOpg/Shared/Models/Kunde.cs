@@ -16,7 +16,7 @@ namespace ScooterLandProjectOpg.Shared.Models
 		// Attributter
 
 		[Required(ErrorMessage = "Navn er påkrævet.")]
-        [StringLength(100, MinimumLength = 2, ErrorMessage = "Navn skal være mellem 2 og 100 tegn.")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Navn skal være mellem 2 og 50 tegn.")]
         [RegularExpression(@"^[A-Za-zÆØÅæøå\s-]+$", ErrorMessage = "Navn må kun indeholde bogstaver og mellemrum.")]
         public string? Navn { get; set; }
 

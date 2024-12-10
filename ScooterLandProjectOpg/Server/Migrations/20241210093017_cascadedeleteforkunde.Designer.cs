@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ScooterLandProjectOpg.Server.Context;
 
@@ -11,9 +12,11 @@ using ScooterLandProjectOpg.Server.Context;
 namespace ScooterLandProjectOpg.Server.Migrations
 {
     [DbContext(typeof(ScooterLandContext))]
-    partial class ScooterLandContextModelSnapshot : ModelSnapshot
+    [Migration("20241210093017_cascadedeleteforkunde")]
+    partial class cascadedeleteforkunde
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -427,8 +430,7 @@ namespace ScooterLandProjectOpg.Server.Migrations
                 {
                     b.HasOne("ScooterLandProjectOpg.Shared.Models.Ordre", "Ordre")
                         .WithMany("OrdreProdukter")
-                        .HasForeignKey("OrdreId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("OrdreId");
 
                     b.HasOne("ScooterLandProjectOpg.Shared.Models.Produkt", "Produkt")
                         .WithMany()
