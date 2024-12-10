@@ -2,34 +2,94 @@
 @using ScooterLandProjectOpg.Shared.Models
 @inject HttpClient Http
 
-<h3>Produkt og Ydelse Katalog</h3>
+<div class="card shadow mb-4">
+	<div class="card-header bg-primary text-white">
+		<h3 class="card-title text-center mb-0">Produkt og Ydelse Katalog</h3>
+	</div>
+	<style>
+		.nav-tabs .nav-link {
+			color: #495057; /* Neutral mørk farve for inaktive tabs */
+			background-color: #e9ecef; /* Lys baggrund */
+			border: 1px solid #dee2e6; /* Standard grå kant */
+			font-weight: bold; /* Fremhæv teksten */
+			border-radius: 0.5rem; /* Afrundede hjørner */
+			padding: 10px 20px; /* God størrelse for klikbarhed */
+			transition: all 0.3s ease; /* Glidende effekt */
+			text-align: center;
+		}
 
-<ul class="nav nav-tabs">
-	<li class="nav-item">
-		<a class="nav-link @(aktivTab == "ydelser" ? "active" : "")" @onclick="@(() => AktivTabSkift("ydelser"))">
-			Ydelser
-		</a>
-	</li>
-	<li class="nav-item">
-		<a class="nav-link @(aktivTab == "produkter" ? "active" : "")" @onclick="@(() => AktivTabSkift("produkter"))">
-			Produkter
-		</a>
-	</li>
-</ul>
+			.nav-tabs .nav-link:hover {
+				background-color: #007bff; /* Blå hover-baggrund */
+				color: #fff; /* Hvid tekst ved hover */
+				border-color: #0056b3; /* Mørkere blå kant */
+				transform: scale(1.05); /* Let forstørrelse ved hover */
+				box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Skygge */
+			}
+
+			.nav-tabs .nav-link.active {
+				color: #fff; /* Hvid tekst for aktiv tab */
+				background-color: #007bff; /* Blå baggrund for aktiv tab */
+				border-color: #0056b3; /* Mørkere blå kant */
+				font-size: 18px; /* Gør aktiv tab lidt større */
+				box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* Mere fremhævet skygge */
+			}
+
+		.nav-tabs {
+			justify-content: center; /* Centrer tabs */
+			margin-bottom: 20px; /* Mellemrum under tabs */
+		}
+	</style>
+
+	<!-- Tabs navigation -->
+	<ul class="nav nav-tabs d-flex">
+		<li class="nav-item">
+			<a class="nav-link @(aktivTab == "ydelser" ? "active" : "")" @onclick="@(() => AktivTabSkift("ydelser"))">
+				Ydelser
+			</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link @(aktivTab == "produkter" ? "active" : "")" @onclick="@(() => AktivTabSkift("produkter"))">
+				Produkter
+			</a>
+		</li>
+	</ul>
+
+
+</div>
+
+<style>
+	.nav-tabs .nav-link {
+		border: none;
+		font-size: 16px;
+		padding: 10px 15px;
+		transition: all 0.3s ease-in-out;
+	}
+	.nav-tabs .nav-link.active {
+		background-color: #e3f2fd; /* Light blue */
+		border-radius: 10px;
+	}
+	.nav-tabs .nav-link:hover {
+		color: #0d6efd; /* Primary blue on hover */
+	}
+</style>
 
 <div class="tab-content mt-4">
 	@if (aktivTab == "ydelser")
 	{
 		<div>
-			<button class="btn btn-success mb-3" @onclick="VisOpretYdelseModal">Opret Ydelse</button>
+			<div class="d-flex justify-content-center mb-4">
+				<button class="btn custom-btn" @onclick="VisOpretYdelseModal">Opret Ydelse</button>
+			</div>
 			@if (ydelser == null)
 			{
-				<p>Loading ydelser...</p>
+				<div class="text-center">
+					<p>Loading ydelser...</p>
+				</div>
 			}
 			else
 			{
-				<table class="table">
-					<thead>
+				<table class="table table-hover table-striped shadow-sm">
+					<thead class="table-light">
 						<tr>
 							<th>ID</th>
 							<th>Navn</th>
@@ -45,8 +105,8 @@
 								<td>@ydelse.Navn</td>
 								<td>@ydelse.StandardPris?.ToString("F2") kr.</td>
 								<td>
-									<button class="btn btn-primary" @onclick="() => VisRedigerYdelseModal(ydelse)">Rediger</button>
-									<button class="btn btn-danger" @onclick="() => BekræftSletYdelse(ydelse)">Slet</button>
+									<button class="btn btn-primary rounded-pill px-3" @onclick="() => VisRedigerYdelseModal(ydelse)">Rediger</button>
+									<button class="btn btn-danger rounded-pill px-3" @onclick="() => BekræftSletYdelse(ydelse)">Slet</button>
 								</td>
 							</tr>
 						}
@@ -58,15 +118,19 @@
 	else if (aktivTab == "produkter")
 	{
 		<div>
-			<button class="btn btn-success mb-3" @onclick="VisOpretProduktModal">Opret Produkt</button>
+			<div class="d-flex justify-content-center mb-4">
+				<button class="btn custom-btn" @onclick="VisOpretProduktModal">Opret Produkt</button>
+			</div>
 			@if (produkter == null)
 			{
-				<p>Loading produkter...</p>
+				<div class="text-center">
+					<p>Loading produkter...</p>
+				</div>
 			}
 			else
 			{
-				<table class="table">
-					<thead>
+				<table class="table table-hover table-striped shadow-sm">
+					<thead class="table-light">
 						<tr>
 							<th>ID</th>
 							<th>Navn</th>
@@ -84,8 +148,8 @@
 								<td>@produkt.Pris?.ToString("F2") kr.</td>
 								<td>@produkt.Antal</td>
 								<td>
-									<button class="btn btn-primary" @onclick="() => VisRedigerProduktModal(produkt)">Rediger</button>
-									<button class="btn btn-danger" @onclick="() => BekræftSletProdukt(produkt)">Slet</button>
+									<button class="btn btn-primary rounded-pill px-3" @onclick="() => VisRedigerProduktModal(produkt)">Rediger</button>
+									<button class="btn btn-danger rounded-pill px-3" @onclick="() => BekræftSletProdukt(produkt)">Slet</button>
 								</td>
 							</tr>
 						}
@@ -96,30 +160,51 @@
 	}
 </div>
 
-<!-- Modals -->
+<style>
+	.custom-btn {
+		background: linear-gradient(to bottom, #4f81bd, #1f4e79); /* Samme gradient som boksen */
+		color: white; /* Tekstfarve */
+		border: none; /* Fjern kant */
+		border-radius: 25px; /* Afrundede hjørner */
+		padding: 10px 20px; /* Størrelse på knappen */
+		font-size: 16px; /* Tekststørrelse */
+		box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Skygge */
+		transition: all 0.3s ease-in-out; /* Glidende hover-effekt */
+	}
+
+		.custom-btn:hover {
+			background: linear-gradient(to bottom, #1f4e79, #4f81bd); /* Omvendt gradient på hover */
+			transform: scale(1.1); /* Gør knappen lidt større */
+			box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3); /* Mere markant skygge */
+		}
+</style>
+
 @if (visYdelseModal)
 {
 	<EditForm Model="valgtYdelse" OnValidSubmit="GemYdelse">
 		<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content shadow">
+					<div class="modal-header bg-primary text-white">
 						<h5 class="modal-title">@ydelseModalTitel</h5>
-						<button type="button" class="btn-close" @onclick="LukYdelseModal"></button>
+						<button type="button" class="btn-close btn-close-white" @onclick="LukYdelseModal"></button>
 					</div>
 					<div class="modal-body">
 						<DataAnnotationsValidator />
 						<div class="mb-3">
-							<label>Navn:</label>
-							<InputText @bind-Value="valgtYdelse.Navn" class="form-control" />
+							<label for="navn" class="form-label">Navn</label>
+							<InputText id="navn" @bind-Value="valgtYdelse.Navn" class="form-control" placeholder="Indtast ydelsesnavn" />
+							<ValidationMessage For="@(() => valgtYdelse.Navn)" />
 						</div>
 						<div class="mb-3">
-							<label>Standard Pris:</label>
-							<InputNumber @bind-Value="valgtYdelse.StandardPris" class="form-control" />
+							<label for="pris" class="form-label">Standard Pris</label>
+							<InputNumber id="pris" @bind-Value="valgtYdelse.StandardPris" class="form-control" placeholder="Indtast standard pris" />
+							<ValidationMessage For="@(() => valgtYdelse.StandardPris)" />
 						</div>
 					</div>
-					<div class="modal-footer">
-						<button type="submit" class="btn btn-primary">Gem</button>
+					<div class="modal-footer d-flex justify-content-end">
+						<button type="button" class="btn btn-secondary rounded-pill px-4 me-2" @onclick="LukYdelseModal">Annuller</button>
+						<button type="submit" class="btn btn-success rounded-pill px-4">Gem</button>
 					</div>
 				</div>
 			</div>
@@ -131,29 +216,33 @@
 {
 	<EditForm Model="valgtProdukt" OnValidSubmit="GemProdukt">
 		<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content shadow">
+					<div class="modal-header bg-primary text-white">
 						<h5 class="modal-title">@produktModalTitel</h5>
-						<button type="button" class="btn-close" @onclick="LukProduktModal"></button>
+						<button type="button" class="btn-close btn-close-white" @onclick="LukProduktModal"></button>
 					</div>
 					<div class="modal-body">
 						<DataAnnotationsValidator />
 						<div class="mb-3">
-							<label>Navn:</label>
-							<InputText @bind-Value="valgtProdukt.ProduktNavn" class="form-control" />
+							<label for="navn" class="form-label">Navn</label>
+							<InputText id="navn" @bind-Value="valgtProdukt.ProduktNavn" class="form-control" placeholder="Indtast produktnavn" />
+							<ValidationMessage For="@(() => valgtProdukt.ProduktNavn)" />
 						</div>
 						<div class="mb-3">
-							<label>Pris:</label>
-							<InputNumber @bind-Value="valgtProdukt.Pris" class="form-control" />
+							<label for="pris" class="form-label">Pris</label>
+							<InputNumber id="pris" @bind-Value="valgtProdukt.Pris" class="form-control" placeholder="Indtast pris" />
+							<ValidationMessage For="@(() => valgtProdukt.Pris)" />
 						</div>
 						<div class="mb-3">
-							<label>Antal:</label>
-							<InputNumber @bind-Value="valgtProdukt.Antal" class="form-control" />
+							<label for="antal" class="form-label">Antal</label>
+							<InputNumber id="antal" @bind-Value="valgtProdukt.Antal" class="form-control" placeholder="Indtast antal" />
+							<ValidationMessage For="@(() => valgtProdukt.Antal)" />
 						</div>
 					</div>
-					<div class="modal-footer">
-						<button type="submit" class="btn btn-primary">Gem</button>
+					<div class="modal-footer d-flex justify-content-end">
+						<button type="button" class="btn btn-secondary rounded-pill px-4 me-2" @onclick="LukProduktModal">Annuller</button>
+						<button type="submit" class="btn btn-success rounded-pill px-4">Gem</button>
 					</div>
 				</div>
 			</div>
@@ -161,26 +250,28 @@
 	</EditForm>
 }
 
+
 @if (visBekræftSletModal)
 {
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content shadow">
+				<div class="modal-header bg-danger text-white">
 					<h5 class="modal-title">Bekræft Sletning</h5>
-					<button type="button" class="btn-close" @onclick="LukBekræftSletModal"></button>
+					<button type="button" class="btn-close btn-close-white" @onclick="LukBekræftSletModal"></button>
 				</div>
-				<div class="modal-body">
-					<p>Er du sikker på, at du vil slette "@bekræftModalTitel"?</p>
+				<div class="modal-body text-center">
+					<p class="fs-5">Er du sikker på, at du vil slette <strong>@bekræftModalTitel</strong>?</p>
 				</div>
-				<div class="modal-footer">
-					<button class="btn btn-danger" @onclick="BekræftSlet">Ja, Slet</button>
-					<button class="btn btn-secondary" @onclick="LukBekræftSletModal">Annuller</button>
+				<div class="modal-footer d-flex justify-content-center">
+					<button class="btn btn-secondary rounded-pill px-4 me-2" @onclick="LukBekræftSletModal">Annuller</button>
+					<button class="btn btn-danger rounded-pill px-4" @onclick="BekræftSlet">Ja, Slet</button>
 				</div>
 			</div>
 		</div>
 	</div>
 }
+
 <div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 150px;">
 	<div class="alert alert-light border rounded-3 shadow-sm text-center"
 		 style="max-width: 600px; width: 90%; padding: 15px; margin-bottom: 0;">

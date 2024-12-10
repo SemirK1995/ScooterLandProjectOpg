@@ -3,88 +3,121 @@
 @using ScooterLandProjectOpg.Shared.DTO
 @inject HttpClient Http
 
-<h3>Mekaniker Katalog</h3>
+<div class="card shadow-sm mt-4">
+	<div class="card-header bg-primary text-white">
+		<h3 class="card-title text-center">Mekaniker Katalog</h3>
+	</div>
+	<div class="card-body">
+		@if (mekanikere == null)
+		{
+			<div class="d-flex justify-content-center my-4">
+				<p>Loading...</p>
+			</div>
+		}
+		else
+		{
+			<div class="d-flex justify-content-center mb-4">
+				<button class="btn custom-btn" @onclick="VisOpretModal">Opret Mekaniker</button>
+			</div>
 
-@if (mekanikere == null)
-{
-	<p>Loading...</p>
-}
-else
-{
-	<button class="btn btn-success mb-3" @onclick="VisOpretModal">Opret Mekaniker</button>
+			<style>
+				.custom-btn {
+					background: linear-gradient(to bottom, #4f81bd, #1f4e79); /* Samme gradient som boksen */
+					color: white; /* Tekstfarve */
+					border: none; /* Fjern kant */
+					border-radius: 25px; /* Afrundede hjørner */
+					padding: 10px 20px; /* Størrelse på knappen */
+					font-size: 16px; /* Tekststørrelse */
+					box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Skygge */
+					transition: all 0.3s ease-in-out; /* Glidende hover-effekt */
+				}
 
-	<table class="table">
-		<thead>
-			<tr>
-				<th>ID</th>
-				<th>Navn</th>
-				<th>Speciale</th>
-				<th>Telefonnummer</th>
-				<th>Handlinger</th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach (var mekaniker in mekanikere)
-			{
-				<tr>
-					<td>@mekaniker.MekanikerId</td>
-					<td>@mekaniker.Navn</td>
-					<td>@mekaniker.Speciale</td>
-					<td>@mekaniker.Telefonnummer</td>
-					<td>
-						<button class="btn btn-primary" @onclick="() => VisRedigerModal(mekaniker)">Rediger</button>
-						<button class="btn btn-secondary" @onclick="() => VisTildelModal(mekaniker)">Book arbejdsopgave</button>
-						<button class="btn btn-info" @onclick="() => VisArbejdsopgaverModal(mekaniker)">Se arbejdsopgaver</button>
-					</td>
-				</tr>
-			}
-		</tbody>
-	</table>
-}
-<!-- Modal for visning af arbejdsopgaver -->
+					.custom-btn:hover {
+						background: linear-gradient(to bottom, #1f4e79, #4f81bd); /* Omvendt gradient på hover */
+						transform: scale(1.1); /* Gør knappen lidt større */
+						box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3); /* Mere markant skygge */
+					}
+			</style>
+
+
+			<table class="table table-striped table-bordered table-hover text-center">
+				<thead class="bg-primary text-white">
+					<tr>
+						<th>ID</th>
+						<th>Navn</th>
+						<th>Speciale</th>
+						<th>Telefonnummer</th>
+						<th>Handlinger</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var mekaniker in mekanikere)
+					{
+						<tr>
+							<td>@mekaniker.MekanikerId</td>
+							<td>@mekaniker.Navn</td>
+							<td>@mekaniker.Speciale</td>
+							<td>@mekaniker.Telefonnummer</td>
+							<td>
+								<div class="d-flex justify-content-evenly">
+									<button class="btn btn-primary btn-sm" @onclick="() => VisRedigerModal(mekaniker)">Rediger</button>
+									<button class="btn btn-secondary btn-sm" @onclick="() => VisTildelModal(mekaniker)">Book arbejdsopgave</button>
+									<button class="btn btn-info btn-sm" @onclick="() => VisArbejdsopgaverModal(mekaniker)">Se arbejdsopgaver</button>
+								</div>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	</div>
+</div>
+
 @if (visArbejdsopgaverModal)
 {
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-		<div class="modal-dialog modal-lg">
-			<div class="modal-content">
-				<div class="modal-header">
+		<div class="modal-dialog modal-dialog-centered modal-lg">
+			<div class="modal-content shadow">
+				<div class="modal-header bg-primary text-white">
 					<h5 class="modal-title">Arbejdsopgaver for @valgtMekaniker.Navn</h5>
-					<button type="button" class="btn-close" @onclick="LukArbejdsopgaverModal"></button>
+					<button type="button" class="btn-close btn-close-white" @onclick="LukArbejdsopgaverModal"></button>
 				</div>
 				<div class="modal-body">
 					@if (string.IsNullOrEmpty(emptyMessage))
 					{
-						<table class="table">
-							<thead>
-								<tr>
-									<th>Ydelse</th>
-									<th>Startdato</th>
-									<th>Slutdato</th>
-									<th>Scooter</th>
-									<th>Planlagte Timer</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var opgave in arbejdsopgaver)
-								{
+						<div class="table-responsive">
+							<table class="table table-striped align-middle">
+								<thead class="table-light">
 									<tr>
-										<td>@opgave.Ydelse?.Navn</td>
-										<td>@opgave.StartDato?.ToString("dd-MM-yyyy")</td>
-										<td>@opgave.SlutDato?.ToString("dd-MM-yyyy")</td>
-										<td>@($"{opgave.Scooter?.Maerke} {opgave.Scooter?.Model}")</td>
-										<td>@opgave.Timer</td>
+										<th>Ydelse</th>
+										<th>Startdato</th>
+										<th>Slutdato</th>
+										<th>Scooter</th>
+										<th>Planlagte Timer</th>
 									</tr>
-								}
-							</tbody>
-						</table>
+								</thead>
+								<tbody>
+									@foreach (var opgave in arbejdsopgaver)
+									{
+										<tr>
+											<td>@opgave.Ydelse?.Navn</td>
+											<td>@opgave.StartDato?.ToString("dd-MM-yyyy")</td>
+											<td>@opgave.SlutDato?.ToString("dd-MM-yyyy")</td>
+											<td>@($"{opgave.Scooter?.Maerke} {opgave.Scooter?.Model}")</td>
+											<td>@opgave.Timer</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
 					}
 					else
 					{
-						<p>@emptyMessage</p>
+						<p class="text-muted text-center">@emptyMessage</p>
 					}
 				</div>
-				<div class="modal-footer">
-					<button class="btn btn-secondary" @onclick="LukArbejdsopgaverModal">Luk</button>
+				<div class="modal-footer d-flex justify-content-center">
+					<button class="btn btn-secondary rounded-pill px-4" @onclick="LukArbejdsopgaverModal">Luk</button>
 				</div>
 			</div>
 		</div>
@@ -92,82 +125,86 @@ else
 }
 
 
-<!-- Modal for oprettelse/redigering -->
+
 @if (visModal)
 {
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content shadow">
+				<div class="modal-header bg-primary text-white">
 					<h5 class="modal-title">@modalTitel</h5>
-					<button type="button" class="btn-close" @onclick="LukModal"></button>
+					<button type="button" class="btn-close btn-close-white" @onclick="LukModal"></button>
 				</div>
 				<div class="modal-body">
 					<EditForm Model="valgtMekaniker" OnValidSubmit="GemMekaniker">
 						<DataAnnotationsValidator />
-						<div>
-							<label>Navn:</label>
-							<InputText @bind-Value="valgtMekaniker.Navn" class="form-control" />
+						<div class="mb-3">
+							<label for="navn" class="form-label">Navn:</label>
+							<InputText @bind-Value="valgtMekaniker.Navn" id="navn" class="form-control" />
+							<ValidationMessage For="@(() => valgtMekaniker.Navn)" />
 						</div>
-						<div>
-							<label>Speciale:</label>
-							<InputText @bind-Value="valgtMekaniker.Speciale" class="form-control" />
+						<div class="mb-3">
+							<label for="speciale" class="form-label">Speciale:</label>
+							<InputText @bind-Value="valgtMekaniker.Speciale" id="speciale" class="form-control" />
+							<ValidationMessage For="@(() => valgtMekaniker.Speciale)" />
 						</div>
-						<div>
-							<label>Telefonnummer:</label>
-							<InputNumber @bind-Value="valgtMekaniker.Telefonnummer" class="form-control" />
+						<div class="mb-3">
+							<label for="telefonnummer" class="form-label">Telefonnummer:</label>
+							<InputNumber @bind-Value="valgtMekaniker.Telefonnummer" id="telefonnummer" class="form-control" />
+							<ValidationMessage For="@(() => valgtMekaniker.Telefonnummer)" />
+						</div>
+						<div class="d-flex justify-content-end">
+							<button type="submit" class="btn btn-primary rounded-pill px-4">Gem</button>
 						</div>
 					</EditForm>
 				</div>
-				<div class="modal-footer">
-					<button class="btn btn-primary" @onclick="GemMekaniker">Gem</button>
+				<div class="modal-footer d-flex justify-content-between">
 					@if (valgtMekaniker.MekanikerId != 0)
 					{
-						<button class="btn btn-danger" @onclick="VisBekræftSletningModal">Slet</button>
+						<button class="btn btn-danger rounded-pill px-4" @onclick="VisBekræftSletningModal">Slet</button>
 					}
-					<button class="btn btn-secondary" @onclick="LukModal">Annuller</button>
+					<button class="btn btn-secondary rounded-pill px-4" @onclick="LukModal">Annuller</button>
 				</div>
 			</div>
 		</div>
 	</div>
 }
 
-<!-- Bekræftelsesmodal for sletning -->
+
 @if (visBekræftSletningModal)
 {
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content shadow">
+				<div class="modal-header bg-danger text-white">
 					<h5 class="modal-title">Bekræft Sletning</h5>
-					<button type="button" class="btn-close" @onclick="LukBekræftSletningModal"></button>
+					<button type="button" class="btn-close btn-close-white" @onclick="LukBekræftSletningModal"></button>
 				</div>
 				<div class="modal-body">
-					<p>Er du sikker på, at du vil slette mekanikeren "@valgtMekaniker.Navn"?</p>
+					<p class="text-center fs-5">Er du sikker på, at du vil slette mekanikeren <strong>@valgtMekaniker.Navn</strong>?</p>
 				</div>
-				<div class="modal-footer">
-					<button class="btn btn-danger" @onclick="SletMekaniker">Ja, Slet</button>
-					<button class="btn btn-secondary" @onclick="LukBekræftSletningModal">Annuller</button>
+				<div class="modal-footer d-flex justify-content-around">
+					<button class="btn btn-danger rounded-pill px-4" @onclick="SletMekaniker">Ja, Slet</button>
+					<button class="btn btn-secondary rounded-pill px-4" @onclick="LukBekræftSletningModal">Annuller</button>
 				</div>
 			</div>
 		</div>
 	</div>
 }
 
-<!-- Modal for tildeling af ordreydelse -->
 @if (visTildelModal)
 {
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-		<div class="modal-dialog modal-xl">
-			<div class="modal-content">
-				<div class="modal-header">
+		<div class="modal-dialog modal-xl modal-dialog-centered">
+			<div class="modal-content shadow">
+				<div class="modal-header bg-primary text-white">
 					<h5 class="modal-title">Tilføj arbejdsopgave til @mekanikerTilTildeling.Navn</h5>
-					<button type="button" class="btn-close" @onclick="LukTildelModal"></button>
+					<button type="button" class="btn-close btn-close-white" @onclick="LukTildelModal"></button>
 				</div>
 				<div class="modal-body" style="overflow-x: auto; max-height: 500px;">
 					<div class="table-responsive">
-						<table class="table" style="table-layout: auto;">
-							<thead>
+						<table class="table table-bordered align-middle">
+							<thead class="table-light">
 								<tr>
 									<th style="width: 10%;">Ordre Ydelse ID</th>
 									<th style="width: 20%;">Ydelse</th>
@@ -185,15 +222,32 @@ else
 										<td>@ordreYdelse.OrdreYdelseId</td>
 										<td>@ordreYdelse.YdelseNavn</td>
 										<td>@ordreYdelse.ScooterMaerke @ordreYdelse.ScooterModel</td>
-										<td><InputDate @bind-Value="ordreYdelse.StartDato" class="form-control" style="padding: 2px;" /></td>
-										<td><InputDate @bind-Value="ordreYdelse.SlutDato" class="form-control" style="padding: 2px;" /></td>
-										<td><InputNumber @bind-Value="ordreYdelse.Timer" class="form-control" style="padding: 2px;" /></td>
-										<td><button class="btn btn-primary" @onclick="() => VisBekræftTildelModal(ordreYdelse)">Book</button></td>
+										<td>
+											<InputDate @bind-Value="ordreYdelse.StartDato"
+													   class="form-control rounded-0" style="padding: 2px;" />
+										</td>
+										<td>
+											<InputDate @bind-Value="ordreYdelse.SlutDato"
+													   class="form-control rounded-0" style="padding: 2px;" />
+										</td>
+										<td>
+											<InputNumber @bind-Value="ordreYdelse.Timer"
+														 class="form-control rounded-0" style="padding: 2px;" />
+										</td>
+										<td>
+											<button class="btn btn-success rounded-pill px-3"
+													@onclick="() => VisBekræftTildelModal(ordreYdelse)">
+												Book
+											</button>
+										</td>
 									</tr>
 								}
 							</tbody>
 						</table>
 					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary rounded-pill px-4" @onclick="LukTildelModal">Luk</button>
 				</div>
 			</div>
 		</div>
@@ -204,23 +258,33 @@ else
 @if (visBekræftTildelModal)
 {
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content shadow">
+				<div class="modal-header bg-primary text-white">
 					<h5 class="modal-title">Bekræft Tildeling</h5>
-					<button type="button" class="btn-close" @onclick="LukBekræftTildelModal"></button>
+					<button type="button" class="btn-close btn-close-white" @onclick="LukBekræftTildelModal"></button>
 				</div>
 				<div class="modal-body">
-					<p>Er du sikker på, at du vil tilføje mekanikeren @mekanikerTilTildeling.Navn til ordreydelse: "@ordreYdelseTilBekræftelse?.YdelseNavn"?</p>
+					<p class="text-center fs-5">
+						Er du sikker på, at du vil tilføje mekanikeren
+						<strong>@mekanikerTilTildeling.Navn</strong> til ordreydelse:
+						<strong>"@ordreYdelseTilBekræftelse?.YdelseNavn"</strong>?
+					</p>
 				</div>
-				<div class="modal-footer">
-					<button class="btn btn-danger" @onclick="LukBekræftTildelModal">Annuller</button>
-					<button class="btn btn-success" @onclick="BekræftTildel">Bekræft</button>
+				<div class="modal-footer d-flex justify-content-center">
+					<button class="btn btn-secondary rounded-pill px-4 me-3" @onclick="LukBekræftTildelModal">
+						Annuller
+					</button>
+					<button class="btn btn-success rounded-pill px-4" @onclick="BekræftTildel">
+						Bekræft
+					</button>
 				</div>
 			</div>
 		</div>
 	</div>
 }
+
+
 <div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 150px;">
 	<div class="alert alert-light border rounded-3 shadow-sm text-center"
 		 style="max-width: 600px; width: 90%; padding: 15px; margin-bottom: 0;">
