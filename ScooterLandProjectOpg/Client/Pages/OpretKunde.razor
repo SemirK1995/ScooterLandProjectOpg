@@ -4,78 +4,98 @@
 
 <h3>Opret Kunde</h3>
 
-<EditForm Model="nyKunde" OnValidSubmit="VisBekræftelsesDialog">
-    <DataAnnotationsValidator />
-    <div class="mb-3">
-        <label for="navn">Navn:</label>
-        <InputText @bind-Value="nyKunde.Navn" id="navn" class="form-control" placeholder="Indtast navn" />
-        <ValidationMessage For="@(() => nyKunde.Navn)" />
-    </div>
-    <div class="mb-3">
-        <label for="email">Email:</label>
-        <InputText @bind-Value="nyKunde.Email" id="email" class="form-control" placeholder="Indtast email" />
-        <ValidationMessage For="@(() => nyKunde.Email)" />
-    </div>
-    <div class="mb-3">
-        <label for="telefon">Telefon:</label>
-        <InputNumber @bind-Value="nyKunde.Telefonnummer" id="telefon" class="form-control" placeholder="Indtast telefonnummer" />
-        <ValidationMessage For="@(() => nyKunde.Telefonnummer)" />
-    </div>
-    <div class="mb-3">
-        <label for="adresse">Adresse:</label>
-        <InputText @bind-Value="nyKunde.Adresse" id="adresse" class="form-control" placeholder="Indtast adresse" />
-        <ValidationMessage For="@(() => nyKunde.Adresse)" />
+
+    <!-- Sektion: Kundeoplysninger -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Kundeoplysninger</h5>
+        </div>
+        <div class="card-body">
+            <EditForm Model="nyKunde" OnValidSubmit="VisBekræftelsesDialog">
+                <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <label for="navn" class="form-label">Navn:</label>
+                    <InputText @bind-Value="nyKunde.Navn" id="navn" class="form-control" placeholder="Indtast navn" />
+                    <ValidationMessage For="@(() => nyKunde.Navn)" />
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <InputText @bind-Value="nyKunde.Email" id="email" class="form-control" placeholder="Indtast email" />
+                    <ValidationMessage For="@(() => nyKunde.Email)" />
+                </div>
+                <div class="mb-3">
+                    <label for="telefon" class="form-label">Telefon:</label>
+                    <InputNumber @bind-Value="nyKunde.Telefonnummer" id="telefon" class="form-control" placeholder="Indtast telefonnummer" />
+                    <ValidationMessage For="@(() => nyKunde.Telefonnummer)" />
+                </div>
+                <div class="mb-3">
+                    <label for="adresse" class="form-label">Adresse:</label>
+                    <InputText @bind-Value="nyKunde.Adresse" id="adresse" class="form-control" placeholder="Indtast adresse" />
+                    <ValidationMessage For="@(() => nyKunde.Adresse)" />
+                </div>
+            </EditForm>
+        </div>
     </div>
 
-    <h4>Tilføj Scootere</h4>
-    @if (scootere.Any())
-    {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Mærke</th>
-                    <th>Model</th>
-                    <th>Registreringsnummer</th>
-                    <th>Produktionsår</th>
-                    <th>Handling</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var scooter in scootere)
+    <EditForm Model="nyKunde" OnValidSubmit="VisBekræftelsesDialog">
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5>Tilføj Scootere</h5>
+            </div>
+            <div class="card-body">
+                @if (scootere.Any())
                 {
-                    <tr>
-                        <td>
-                            <InputText @bind-Value="scooter.Maerke" class="form-control" />
-                        </td>
-                        <td>
-                            <InputText @bind-Value="scooter.Model" class="form-control" />
-                        </td>
-                        <td>
-                            <InputText @bind-Value="scooter.RegistreringsNummer" class="form-control" />
-                            <ValidationMessage For="@(() => scooter.RegistreringsNummer)" />
-                        </td>
-                        <td>
-                            <InputNumber @bind-Value="scooter.ProduktionsAar" class="form-control" />
-                            <ValidationMessage For="@(() => scooter.ProduktionsAar)" />
-                        </td>
-                        <td>
-                            <button class="btn btn-danger" @onclick="() => FjernScooter(scooter)">Fjern</button>
-                        </td>
-                    </tr>
+                    <table class="table table-striped">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mærke</th>
+                                <th>Model</th>
+                                <th>Registreringsnummer</th>
+                                <th>Produktionsår</th>
+                                <th>Handling</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var scooter in scootere)
+                            {
+                                <tr>
+                                    <td><InputText @bind-Value="scooter.Maerke" class="form-control" /></td>
+                                    <td><InputText @bind-Value="scooter.Model" class="form-control" /></td>
+                                    <td>
+                                        <InputText @bind-Value="scooter.RegistreringsNummer" class="form-control" />
+                                        <ValidationMessage For="@(() => scooter.RegistreringsNummer)" />
+                                    </td>
+                                    <td>
+                                        <InputNumber @bind-Value="scooter.ProduktionsAar" class="form-control" />
+                                        <ValidationMessage For="@(() => scooter.ProduktionsAar)" />
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger" @onclick="() => FjernScooter(scooter)">
+                                            <i class="bi bi-trash"></i> Fjern
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <p>Ingen scootere tilføjet endnu.</p>
-    }
-    <div class="d-flex mt-3">
-        <button type="button" class="btn btn-secondary me-2" @onclick="TilføjScooter">Tilføj Scooter</button>
-        <button type="submit" class="btn btn-primary ms-2">Opret Kunde</button>
-    </div>
-    
-</EditForm>
+                else
+                {
+                    <p class="text-muted">Ingen scootere tilføjet endnu.</p>
+                }
+
+                <div class="d-flex mt-3">
+                    <button type="button" class="btn btn-secondary me-2" @onclick="TilføjScooter">
+                        <i class="bi bi-plus-circle"></i> Tilføj Scooter
+                    </button>
+                    <button type="submit" class="btn btn-primary ms-2">
+                        <i class="bi bi-save"></i> Opret Kunde
+                    </button>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+
 
 <!-- Bekræftelsesdialog -->
 @if (visBekræftelse)
