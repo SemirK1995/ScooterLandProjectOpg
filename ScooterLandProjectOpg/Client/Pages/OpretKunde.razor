@@ -2,50 +2,41 @@
 @using ScooterLandProjectOpg.Shared.Models
 @inject HttpClient Http
 
-<h3>Opret Kunde</h3>
-
-
-    <!-- Sektion: Kundeoplysninger -->
-    <div class="card mb-4">
+<div class="container mt-4">
+    <div class="card">
         <div class="card-header bg-primary text-white">
-            <h5>Kundeoplysninger</h5>
+            <h3>Opret Kunde</h3>
         </div>
         <div class="card-body">
             <EditForm Model="nyKunde" OnValidSubmit="VisBekræftelsesDialog">
                 <DataAnnotationsValidator />
-                <div class="mb-3">
-                    <label for="navn" class="form-label">Navn:</label>
-                    <InputText @bind-Value="nyKunde.Navn" id="navn" class="form-control" placeholder="Indtast navn" />
-                    <ValidationMessage For="@(() => nyKunde.Navn)" />
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="navn" class="form-label">Navn:</label>
+                        <InputText @bind-Value="nyKunde.Navn" id="navn" class="form-control" placeholder="Indtast navn" />
+                        <ValidationMessage For="@(() => nyKunde.Navn)" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">Email:</label>
+                        <InputText @bind-Value="nyKunde.Email" id="email" class="form-control" placeholder="Indtast email" />
+                        <ValidationMessage For="@(() => nyKunde.Email)" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="telefon" class="form-label">Telefon:</label>
+                        <InputNumber @bind-Value="nyKunde.Telefonnummer" id="telefon" class="form-control" placeholder="Indtast telefonnummer" />
+                        <ValidationMessage For="@(() => nyKunde.Telefonnummer)" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="adresse" class="form-label">Adresse:</label>
+                        <InputText @bind-Value="nyKunde.Adresse" id="adresse" class="form-control" placeholder="Indtast adresse" />
+                        <ValidationMessage For="@(() => nyKunde.Adresse)" />
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email:</label>
-                    <InputText @bind-Value="nyKunde.Email" id="email" class="form-control" placeholder="Indtast email" />
-                    <ValidationMessage For="@(() => nyKunde.Email)" />
-                </div>
-                <div class="mb-3">
-                    <label for="telefon" class="form-label">Telefon:</label>
-                    <InputNumber @bind-Value="nyKunde.Telefonnummer" id="telefon" class="form-control" placeholder="Indtast telefonnummer" />
-                    <ValidationMessage For="@(() => nyKunde.Telefonnummer)" />
-                </div>
-                <div class="mb-3">
-                    <label for="adresse" class="form-label">Adresse:</label>
-                    <InputText @bind-Value="nyKunde.Adresse" id="adresse" class="form-control" placeholder="Indtast adresse" />
-                    <ValidationMessage For="@(() => nyKunde.Adresse)" />
-                </div>
-            </EditForm>
-        </div>
-    </div>
 
-    <EditForm Model="nyKunde" OnValidSubmit="VisBekræftelsesDialog">
-        <div class="card mb-4">
-            <div class="card-header bg-secondary text-white">
-                <h5>Tilføj Scootere</h5>
-            </div>
-            <div class="card-body">
+                <h4 class="mt-4">Tilføj Scootere</h4>
                 @if (scootere.Any())
                 {
-                    <table class="table table-striped">
+                    <table class="table table-bordered mt-3">
                         <thead class="table-light">
                             <tr>
                                 <th>Mærke</th>
@@ -59,8 +50,12 @@
                             @foreach (var scooter in scootere)
                             {
                                 <tr>
-                                    <td><InputText @bind-Value="scooter.Maerke" class="form-control" /></td>
-                                    <td><InputText @bind-Value="scooter.Model" class="form-control" /></td>
+                                    <td>
+                                        <InputText @bind-Value="scooter.Maerke" class="form-control" />
+                                    </td>
+                                    <td>
+                                        <InputText @bind-Value="scooter.Model" class="form-control" />
+                                    </td>
                                     <td>
                                         <InputText @bind-Value="scooter.RegistreringsNummer" class="form-control" />
                                         <ValidationMessage For="@(() => scooter.RegistreringsNummer)" />
@@ -70,9 +65,7 @@
                                         <ValidationMessage For="@(() => scooter.ProduktionsAar)" />
                                     </td>
                                     <td>
-                                        <button class="btn btn-danger" @onclick="() => FjernScooter(scooter)">
-                                            <i class="bi bi-trash"></i> Fjern
-                                        </button>
+                                        <button class="btn btn-danger btn-sm" @onclick="() => FjernScooter(scooter)">Fjern</button>
                                     </td>
                                 </tr>
                             }
@@ -85,17 +78,13 @@
                 }
 
                 <div class="d-flex mt-3">
-                    <button type="button" class="btn btn-secondary me-2" @onclick="TilføjScooter">
-                        <i class="bi bi-plus-circle"></i> Tilføj Scooter
-                    </button>
-                    <button type="submit" class="btn btn-primary ms-2">
-                        <i class="bi bi-save"></i> Opret Kunde
-                    </button>
+                    <button type="button" class="btn btn-secondary me-2" @onclick="TilføjScooter">Tilføj Scooter</button>
+                    <button type="submit" class="btn btn-primary ms-2">Opret Kunde</button>
                 </div>
-            </div>
+            </EditForm>
         </div>
-    </EditForm>
-
+    </div>
+</div>
 
 <!-- Bekræftelsesdialog -->
 @if (visBekræftelse)
@@ -134,16 +123,7 @@
 {
     <div class="alert alert-success mt-3">@succesbesked</div>
 }
-<div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 150px;">
-    <div class="alert alert-light border rounded-3 shadow-sm text-center"
-         style="max-width: 600px; width: 90%; padding: 15px; margin-bottom: 0;">
-        <h6 class="text-primary fw-bold mb-2">Scooterland</h6>
-        <p class="mb-1"><strong>Adresse:</strong> Hovedgade 123, 4000 Roskilde</p>
-        <p class="mb-1"><strong>Telefon:</strong> 12 34 56 78</p>
-        <p class="mb-1"><strong>Email:</strong> kontakt@scooterland.dk</p>
-        <p class="mb-0"><strong>Dags dato:</strong> @DateTime.Now.ToString("dd-MM-yyyy")</p>
-    </div>
-</div>
+
 @code {
     private Kunde nyKunde = new();
     private List<KundeScooter> scootere = new();

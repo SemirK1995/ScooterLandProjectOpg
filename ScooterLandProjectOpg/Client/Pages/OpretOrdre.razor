@@ -3,283 +3,323 @@
 @using ScooterLandProjectOpg.Shared.Models
 @inject HttpClient Http
 
-<h3>Opret Ordre</h3>
+<div class="container mt-4">
+	<div class="card">
+		<div class="card-header bg-primary text-white">
+			<h3 class="card-title">Opret Ordre</h3>
+		</div>
+		<div class="card-body">
+			@if (valgtKunde != null)
+			{
+				<div class="alert alert-info">
+					<h5>Valgt Kunde</h5>
+					<p>
+						<strong>ID:</strong> @valgtKunde.KundeId<br />
+						<strong>Navn:</strong> @valgtKunde.Navn<br />
+						<strong>Telefon:</strong> @valgtKunde.Telefonnummer
+					</p>
+					<button class="btn btn-warning" @onclick="RydValgtKunde">Ryd Valg</button>
+				</div>
+			}
 
-@if (valgtKunde != null)
-{
-	<div class="alert alert-info">
-		<h5>Valgt Kunde</h5>
-		<p>
-			<strong>ID:</strong> @valgtKunde.KundeId<br />
-			<strong>Navn:</strong> @valgtKunde.Navn<br />
-			<strong>Telefon:</strong> @valgtKunde.Telefonnummer
-		</p>
-		<button class="btn btn-warning" @onclick="RydValgtKunde">Ryd Valg</button>
+			<style>
+				.nav-tabs .nav-link {
+					color: #555; /* Neutral farve for inaktive tabs */
+					background-color: #f8f9fa; /* Lys baggrund */
+					border: 1px solid #dee2e6;
+					font-weight: bold;
+					border-radius: 5px; /* Bløde hjørner */
+				}
+
+					.nav-tabs .nav-link:hover {
+						color: #0056b3; /* Blå hover-effekt */
+						background-color: #e9ecef; /* Lysere baggrund ved hover */
+						transition: all 0.3s ease;
+					}
+
+					.nav-tabs .nav-link.active {
+						color: #fff; /* Hvid tekst for aktiv tab */
+						background-color: #007bff; /* Blå baggrund for aktiv tab */
+						border-color: #0056b3; /* Mørkere blå kant */
+					}
+			</style>
+
+			<!-- Tabs navigation -->
+			<ul class="nav nav-tabs">
+				<li class="nav-item">
+					<a class="nav-link @(aktivTab == "ordre" ? "active" : "")" @onclick="@(() => AktivTabSkift("ordre"))">
+						Ordre
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link @(aktivTab == "lejeaftale" ? "active" : "")" @onclick="@(() => AktivTabSkift("lejeaftale"))">
+						Lejeaftale
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link @(aktivTab == "produkter" ? "active" : "")" @onclick="@(() => AktivTabSkift("produkter"))">
+						Produkter
+					</a>
+				</li>
+			</ul>
+
+
+			<div class="tab-content mt-4">
+				@if (aktivTab == "ordre")
+				{
+					<!-- Opret Ordre Form -->
+					<div class="card">
+						<div class="card-header bg-secondary text-white">
+							<h5>Søg Kunde</h5>
+						</div>
+						<div class="card-body">
+							<div class="form-group">
+								<input id="search" class="form-control" @bind="SøgeTekst" placeholder="Søg på Kunde ID, Navn eller Telefonnummer" />
+							</div>
+
+							@if (filtreredeKunder.Any())
+							{
+								<ul class="list-group mt-2">
+									@foreach (var kunde in filtreredeKunder)
+									{
+										<li class="list-group-item d-flex justify-content-between align-items-center">
+											<span>@($"{kunde.KundeId} - {kunde.Navn} ({kunde.Telefonnummer})")</span>
+											<button class="btn btn-primary btn-sm" @onclick="() => VælgKunde(kunde.KundeId)">Vælg</button>
+										</li>
+									}
+								</ul>
+							}
+							else if (!string.IsNullOrWhiteSpace(SøgeTekst))
+							{
+								<p class="text-muted mt-2">Ingen kunder matcher søgningen.</p>
+							}
+						</div>
+					</div>
+
+					<!-- Sektion: Tilgængelige Ydelser -->
+					@if (valgtKundeId > 0)
+					{
+						<div class="card mt-4">
+							<div class="card-header bg-secondary text-white">
+								<h5>Tilgængelige Ydelser</h5>
+							</div>
+							<div class="card-body">
+								@if (alleYdelser != null && alleYdelser.Any())
+								{
+									<table class="table table-striped">
+										<thead>
+											<tr>
+												<th>Ydelse</th>
+												<th>Standard Pris</th>
+												<th>Handling</th>
+											</tr>
+										</thead>
+										<tbody>
+											@foreach (var ydelse in alleYdelser)
+											{
+												<tr>
+													<td>@ydelse.Navn</td>
+													<td>@ydelse.StandardPris?.ToString("F2") kr.</td>
+													<td>
+														<button class="btn btn-success btn-sm" @onclick="() => TilføjYdelse(ydelse)">Tilføj</button>
+													</td>
+												</tr>
+											}
+										</tbody>
+									</table>
+								}
+								else
+								{
+									<p class="text-muted">Ingen ydelser tilgængelige.</p>
+								}
+							</div>
+						</div>
+
+						<div class="card mt-4">
+							<div class="card-header bg-success text-white">
+								<h5>Tilføjede Ydelser</h5>
+							</div>
+							<div class="card-body">
+								@if (valgteOrdreYdelser.Any())
+								{
+									<table class="table table-striped">
+										<thead>
+											<tr>
+												<th>Ydelse</th>
+												<th>Standard Pris</th>
+												<th>Aftalt Pris</th>
+												<th>Scooter</th>
+												<th>Handling</th>
+											</tr>
+										</thead>
+										<tbody>
+											@foreach (var ydelse in valgteOrdreYdelser)
+											{
+												<tr>
+													<td>@ydelse.Ydelse.Navn</td>
+													<td>@ydelse.Ydelse.StandardPris?.ToString("F2") kr.</td>
+													<td>
+														<InputNumber @bind-Value="ydelse.AftaltPris" class="form-control" />
+													</td>
+													<td>
+														<select class="form-control" @bind="ydelse.ScooterId">
+															<option value="">-- Vælg en scooter --</option>
+															@foreach (var scooter in kundeScootere)
+															{
+																<option value="@scooter.ScooterId">@($"{scooter.Maerke} {scooter.Model}")</option>
+															}
+														</select>
+													</td>
+													<td>
+														<button class="btn btn-danger btn-sm" @onclick="() => FjernYdelse(ydelse)">Fjern</button>
+													</td>
+												</tr>
+											}
+										</tbody>
+									</table>
+									<h5 class="mt-3">Totalpris: @TotalPris kr.</h5>
+									<button class="btn btn-primary mt-3" @onclick="VisBekræftelse">Gem Ordre</button>
+								}
+								else
+								{
+									<p class="text-muted">Ingen ydelser er tilføjet.</p>
+								}
+							</div>
+						</div>
+					}
+				}
+				else if (aktivTab == "lejeaftale")
+				{
+					<div class="card">
+						<div class="card-header bg-secondary text-white">
+							<h5>Opret Lejeaftale</h5>
+						</div>
+						<div class="card-body">
+							<div class="form-group">
+								<label for="startdato">Startdato:</label>
+								<input type="date" id="startdato" class="form-control" @bind="lejeaftale.StartDato" />
+							</div>
+							<div class="form-group">
+								<label for="slutdato">Slutdato:</label>
+								<input type="date" id="slutdato" class="form-control" @bind="lejeaftale.SlutDato" />
+							</div>
+							<div class="form-group">
+								<label for="dagligLeje">Daglig Leje:</label>
+								<input type="number" id="dagligLeje" class="form-control" @bind="lejeaftale.DagligLeje" />
+							</div>
+							<div class="form-group">
+								<label for="forsikringsPris">Forsikringspris pr. dag:</label>
+								<input type="number" id="forsikringsPris" class="form-control" @bind="lejeaftale.ForsikringsPris" readonly />
+								<small class="text-muted">Selvrisiko på 1000 kr. tilføjes kun i tilfælde af skade.</small>
+							</div>
+							<div class="form-group">
+								<label for="kortKilometer">Kort Kilometer:</label>
+								<input type="number" id="kortKilometer" class="form-control" @bind="lejeaftale.KortKilometer" />
+							</div>
+							<div class="form-group mt-3">
+								<label for="scooter">Vælg en ledig scooter:</label>
+								@if (ledigeScootere == null || !ledigeScootere.Any())
+								{
+									<p class="text-warning">Der er i øjeblikket ingen ledige scootere til lejeaftaler.</p>
+								}
+								else
+								{
+									<select id="scooter" class="form-control" @bind="valgtLejeScooterId">
+										<option value="">-- Vælg en scooter --</option>
+										@foreach (var scooter in ledigeScootere)
+										{
+											<option value="@scooter.LejeScooterId">@($"{scooter.ScooterMaerke} {scooter.ScooterModel} - {scooter.RegistreringsNummer}")</option>
+										}
+									</select>
+								}
+							</div>
+							<h5 class="mt-4">Samlet pris for lejeaftale: @BeregnLejeAftaleTotalPris() kr.</h5>
+							<p class="text-warning">Bemærk: Der er en Selvrisiko på 1000 kr., hvis scooteren returneres med skade.</p>
+						</div>
+					</div>
+				}
+
+				else if (aktivTab == "produkter")
+				{
+					<div class="card">
+						<div class="card-header bg-secondary text-white">
+							<h5>Tilføj Produkter</h5>
+						</div>
+						<div class="card-body">
+							<p class="text-muted">Vælg produkter, der skal inkluderes i ordren.</p>
+							@if (alleProdukter == null || !alleProdukter.Any())
+							{
+								<p>Ingen produkter tilgængelige.</p>
+							}
+							else
+							{
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th>Produkt</th>
+											<th>Pris</th>
+											<th>Antal</th>
+											<th>Handling</th>
+										</tr>
+									</thead>
+									<tbody>
+										@foreach (var produkt in alleProdukter)
+										{
+											<tr>
+												<td>@produkt.ProduktNavn</td>
+												<td>@produkt.Pris?.ToString("F2") kr.</td>
+												<td>
+													<InputNumber @bind-Value="produkt.Antal" class="form-control" />
+												</td>
+												<td>
+													<button class="btn btn-success btn-sm" @onclick="() => TilføjProdukt(produkt)">Tilføj</button>
+												</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							}
+							<h5 class="mt-4">Valgte Produkter:</h5>
+							@if (valgteProdukter.Any())
+							{
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th>Produkt</th>
+											<th>Pris</th>
+											<th>Antal</th>
+											<th>Handling</th>
+										</tr>
+									</thead>
+									<tbody>
+										@foreach (var produkt in valgteProdukter)
+										{
+											<tr>
+												<td>@produkt.ProduktNavn</td>
+												<td>@produkt.Pris?.ToString("F2") kr.</td>
+												<td>@produkt.Antal</td>
+												<td>
+													<button class="btn btn-danger btn-sm" @onclick="() => FjernProdukt(produkt)">Fjern</button>
+												</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+								<h5>Total pris for produkter: @TotalPrisForProdukter kr.</h5>
+							}
+							else
+							{
+								<p>Ingen produkter valgt.</p>
+							}
+						</div>
+					</div>
+				}
+
+			</div>
+		</div>
 	</div>
-}
-
-
-<!-- Tabs navigation -->
-<ul class="nav nav-tabs">
-	<li class="nav-item">
-		<a class="nav-link @(aktivTab == "ordre" ? "active" : "")" @onclick="@(() => AktivTabSkift("ordre"))">
-			Ordre
-		</a>
-	</li>
-	<li class="nav-item">
-		<a class="nav-link @(aktivTab == "lejeaftale" ? "active" : "")" @onclick="@(() => AktivTabSkift("lejeaftale"))">
-			Lejeaftale
-		</a>
-	</li>
-	<li class="nav-item">
-		<a class="nav-link @(aktivTab == "produkter" ? "active" : "")" @onclick="@(() => AktivTabSkift("produkter"))">
-			Produkter
-		</a>
-	</li>
-</ul>
-
-<div class="tab-content mt-4">
-	@if (aktivTab == "ordre")
-	{
-		<!-- Opret Ordre Form -->
-		<div>
-			<div class="form-group">
-				<input id="search" class="form-control" @bind="SøgeTekst" placeholder="Søg på Kunde ID, Navn eller Telefonnummer" />
-
-			</div>
-
-			@if (filtreredeKunder.Any())
-			{
-				<ul class="list-group mt-2">
-					@foreach (var kunde in filtreredeKunder)
-					{
-						<li class="list-group-item d-flex justify-content-between align-items-center">
-							<span>@($"{kunde.KundeId} - {kunde.Navn} ({kunde.Telefonnummer})")</span>
-							<button class="btn btn-primary btn-sm" @onclick="() => VælgKunde(kunde.KundeId)">Vælg</button>
-						</li>
-					}
-				</ul>
-			}
-			else if (!string.IsNullOrWhiteSpace(søgeTekst))
-			{
-				<p class="text-muted mt-2">Ingen kunder matcher søgningen.</p>
-			}
-			@if (valgtKundeId > 0)
-			{
-				<div>
-
-					@if (alleYdelser != null && alleYdelser.Any())
-					{
-						<table class="table">
-							<thead>
-								<tr>
-									<th>Ydelse</th>
-									<th>Standard Pris</th>
-									<th>Handlinger</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var ydelse in alleYdelser)
-								{
-									<tr>
-										<td>@ydelse.Navn</td>
-										<td>@ydelse.StandardPris?.ToString("F2") kr.</td>
-										<td>
-											<button class="btn btn-success" @onclick="() => TilføjYdelse(ydelse)">Tilføj</button>
-										</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<p>Ingen ydelser tilgængelige.</p>
-					}
-				</div>
-
-				<div class="mt-3">
-					<h5>Tilføjet Ydelser:</h5>
-					@if (valgteOrdreYdelser.Any())
-					{
-						<table class="table">
-							<thead>
-								<tr>
-									<th>Ydelse</th>
-									<th>Standard Pris</th>
-									<th>Aftalt Pris</th>
-									<th>Handlinger</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var ordreYdelse in valgteOrdreYdelser)
-								{
-									<tr>
-										<td>@ordreYdelse.Ydelse.Navn</td>
-										<td>@ordreYdelse.Ydelse.StandardPris?.ToString("F2") kr.</td>
-										<td>
-											<InputNumber @bind-Value="ordreYdelse.AftaltPris" class="form-control" />
-										</td>
-										<td>
-											<select class="form-control" @bind="ordreYdelse.ScooterId">
-												<option value="">-- Vælg en scooter --</option>
-												@foreach (var scooter in kundeScootere) // KundeScootere skal være tilgængelig
-												{
-													<option value="@scooter.ScooterId">@($"{scooter.Maerke} {scooter.Model}")</option>
-												}
-											</select>
-										</td>
-										<td>
-											<button class="btn btn-danger" @onclick="() => FjernYdelse(ordreYdelse)">Fjern</button>
-										</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-
-						<h5>Totalpris: @TotalPris kr.</h5>
-					}
-					else
-					{
-						<p>Ingen ydelser er tilføjet.</p>
-					}
-
-					<button class="btn btn-primary mt-3" @onclick="VisBekræftelse">Gem Ordre</button>
-				</div>
-			}
-			else
-			{
-				<p>Vælg en kunde for at se tilgængelige ydelser.</p>
-			}
-		</div>
-	}
-	else if (aktivTab == "lejeaftale")
-	{
-		<!-- Opret Lejeaftale Form -->
-		<div>
-			<h5>Opret Lejeaftale</h5>
-			<div class="form-group">
-				<label>Startdato:</label>
-				<input type="date" class="form-control" @bind="lejeaftale.StartDato" />
-			</div>
-			<div class="form-group">
-				<label>Slutdato:</label>
-				<input type="date" class="form-control" @bind="lejeaftale.SlutDato" />
-			</div>
-			<div class="form-group">
-				<label>Daglig Leje:</label>
-				<input type="number" class="form-control" @bind="lejeaftale.DagligLeje" />
-			</div>
-			<div class="form-group">
-				<label for="forsikringsPris">Forsikringspris pr. dag:</label>
-				<input type="number" class="form-control" @bind="lejeaftale.ForsikringsPris" readonly />
-				<small class="text-muted">Selvrisiko på 1000 kr. tilføjes kun i tilfælde af skade.</small>
-			</div>
-
-			<div class="form-group">
-				<label>Kort Kilometer:</label>
-				<input type="number" class="form-control" @bind="lejeaftale.KortKilometer" />
-			</div>
-
-			<div class="form-group mt-3">
-				<label for="scooter">Vælg en ledig scooter:</label>
-
-				@if (ledigeScootere == null || !ledigeScootere.Any())
-				{
-					<p class="text-warning">Der er i øjeblikket ingen ledige scootere til lejeaftaler.</p>
-				}
-				else
-				{
-					<select id="scooter" class="form-control" @bind="valgtLejeScooterId">
-						<option value="">-- Vælg en scooter --</option>
-						@foreach (var scooter in ledigeScootere)
-						{
-							<option value="@scooter.LejeScooterId">@($"{scooter.ScooterMaerke} {scooter.ScooterModel} - {scooter.RegistreringsNummer}")</option>
-						}
-					</select>
-				}
-			</div>
-
-
-			<h5>Samlet pris for lejeaftale: @BeregnLejeAftaleTotalPris() kr.</h5>
-			<p class="text-warning">
-				Bemærk: Der er en Selvrisiko på 1000 kr. Hvis scooteren returneres med skade.
-			</p>
-		</div>
-	}
-	else if (aktivTab == "produkter")
-	{
-		<!-- Indhold for Produkter-fanen -->
-		<div>
-			<h5>Tilføj Produkter</h5>
-			<p class="text-muted">Vælg produkter, der skal inkluderes i ordren.</p>
-			@if (alleProdukter == null || !alleProdukter.Any())
-			{
-				<p>Ingen produkter tilgængelige.</p>
-			}
-			else
-			{
-				<table class="table">
-					<thead>
-						<tr>
-							<th>Produkt</th>
-							<th>Pris</th>
-							<th>Antal</th>
-							<th>Handlinger</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var produkt in alleProdukter)
-						{
-							<tr>
-								<td>@produkt.ProduktNavn</td>
-								<td>@produkt.Pris?.ToString("F2") kr.</td>
-								<td>
-									<InputNumber @bind-Value="produkt.Antal" class="form-control" />
-								</td>
-								<td>
-									<button class="btn btn-success" @onclick="() => TilføjProdukt(produkt)">Tilføj</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			}
-			<h5>Valgte Produkter:</h5>
-			@if (valgteProdukter.Any())
-			{
-				<table class="table">
-					<thead>
-						<tr>
-							<th>Produkt</th>
-							<th>Pris</th>
-							<th>Antal</th>
-							<th>Handlinger</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var produkt in valgteProdukter)
-						{
-							<tr>
-								<td>@produkt.ProduktNavn</td>
-								<td>@produkt.Pris?.ToString("F2") kr.</td>
-								<td>@produkt.Antal</td>
-								<td>
-									<button class="btn btn-danger" @onclick="() => FjernProdukt(produkt)">Fjern</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-				<h5>Total pris for produkter: @TotalPrisForProdukter kr.</h5>
-			}
-			else
-			{
-				<p>Ingen produkter valgt.</p>
-			}
-		</div>
-	}
 </div>
+
 
 
 
@@ -396,7 +436,7 @@
 			ledigeScootere = new List<LejeScooter>();
 		}
 	}
-	
+
 	private void NulstilOrdreData()
 	{
 		valgteProdukter.Clear();
@@ -429,7 +469,7 @@
 			eksisterendeProdukt.Antal += produkt.Antal ?? 1; // Opdater antal
 		}
 	}
-	
+
 
 	private void FjernProdukt(Produkt produkt)
 	{
@@ -622,6 +662,5 @@
 			Console.WriteLine($"En undtagelse opstod: {ex.Message}");
 		}
 	}
-
-	}
+}
 

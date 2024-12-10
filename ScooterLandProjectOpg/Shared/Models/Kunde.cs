@@ -29,8 +29,8 @@ namespace ScooterLandProjectOpg.Shared.Models
 		public int? Telefonnummer { get; set; }
 
 		[Required(ErrorMessage = "Email er påkrævet.")]
-        [RegularExpression(@"^[A-Za-z0-9._%+-]{2,}@[A-Za-z0-9.-]{2,}.[A-Za-z]{2,}$",
-        ErrorMessage = "Ugyldig email")]
+        [RegularExpression(@"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+    ErrorMessage = "Ugyldig email-adresse. Eksempel: eksempel@mail.com")]
         public string? Email { get; set; }
 
 
