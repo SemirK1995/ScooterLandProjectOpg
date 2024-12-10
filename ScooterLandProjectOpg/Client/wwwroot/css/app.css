@@ -132,7 +132,6 @@ a, .btn-link {
             margin-bottom: 6px; /* Lidt mere afstand under første linje */
         }
 
-/* Hover-effekt til navigationselementer */
 .nav-link {
     transition: all 0.3s ease-in-out;
     color: #fff; /* Standard tekstfarve */
@@ -143,20 +142,23 @@ a, .btn-link {
     border-radius: 8px; /* For runde hjørner */
 }
 
+    .nav-link svg {
+        transition: all 0.3s ease-in-out; /* Smooth transition for icon */
+        stroke: #fff; /* Standard ikonfarve */
+    }
+
+    /* Hover-effekt */
     .nav-link:hover {
-        background-color: #004080 !important;
-        color: #ffd700 !important;
-        font-weight: bold !important;
+        background-color: #004080 !important; /* Mørkeblå baggrund */
+        color: #ffd700 !important; /* Gul tekstfarve */
+        font-weight: bold; /* Fremhæv teksten */
     }
 
+        /* Ikon ændrer farve og størrelse */
         .nav-link:hover svg {
-            stroke: #ffd700 !important; /* Ændrer farve på SVG-ikon */
+            stroke: #ffd700 !important; /* Gul ikonfarve */
+            transform: scale(1.2); /* Forstør ikonet en smule */
         }
-
-    .nav-link:hover svg {
-        stroke: #ffd700; /* Ændrer ikonfarve ved hover */
-        transform: scale(1.1); /* Forstør ikonet en smule ved hover */
-    }
 
 .frontpage .card {
     height: 250px; /* Justér denne værdi efter behov */
@@ -242,3 +244,74 @@ a, .btn-link {
 .btn i {
     margin-right: 5px;
 }
+/* Generel styling for alle knapper */
+button, .btn {
+    transition: all 0.3s ease-in-out; /* Glidende effekt */
+    border-radius: 8px; /* Afrundede hjørner */
+    font-weight: bold; /* Fed skrift */
+    padding: 8px 12px; /* Konsistent padding */
+}
+
+    /* Hover-effekt for alle knapper */
+    button:hover, .btn:hover {
+        transform: scale(1.05); /* Forstør knappen lidt */
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Let skygge */
+    }
+
+/* Specifik hover-effekt for blå knapper */
+.btn-primary:hover {
+    background-color: #004080 !important;
+    color: #ffd700 !important;
+}
+
+/* Specifik hover-effekt for grå knapper */
+.btn-secondary:hover {
+    background-color: #606060 !important;
+    color: #fff !important;
+}
+
+/* Specifik hover-effekt for turkis knapper */
+.btn-info:hover {
+    background-color: #0099cc !important;
+    color: #fff !important;
+}
+/* Generel styling for alle knapper */
+.btn-custom {
+    background-color: #007bff; /* Standard blå baggrund */
+    color: white; /* Hvid tekst */
+    font-weight: bold;
+    border: none;
+    border-radius: 0.5rem; /* Let afrundede hjørner */
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    .btn-custom:hover {
+        transform: scale(1.05); /* Let forstørrelse ved hover */
+    }
+
+/* Specifik styling for knapper med forskellige farver */
+.btn-custom-info {
+    background-color: #17a2b8; /* Info blå */
+}
+
+    .btn-custom-info:hover {
+        background-color: #138496; /* Mørkere info blå */
+    }
+
+.btn-custom-primary {
+    background-color: #007bff; /* Standard blå */
+}
+
+    .btn-custom-primary:hover {
+        background-color: #0056b3; /* Mørkere blå */
+    }
+
+.btn-custom-gray {
+    background-color: #6c757d; /* Grå baggrund */
+}
+
+    .btn-custom-gray:hover {
+        background-color: #5a6268; /* Mørkere grå */
+    }

@@ -96,3 +96,20 @@ main {
         padding-right: 1.5rem !important;
     }
 }
+::deep .navbar-brand {
+    font-size: 1.5rem; /* Skriftstørrelse */
+    font-weight: bold; /* Fed skrift */
+    margin: 0 auto; /* Centrerer teksten */
+    text-align: center; /* Sørger for, at teksten er centreret */
+    flex-grow: 1; /* Fylder mellem knappen og venstre kant */
+    color: white; /* Standardfarve */
+    text-decoration: none; /* Fjern understregning */
+    transition: all 0.3s ease; /* Glidende hover-effekt */
+}
+
+    ::deep .navbar-brand:hover {
+        color: #ffc107; /* Guld farve ved hover */
+        text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3); /* Let skygge for tekst */
+        transform: scale(1.1); /* Forstør let */
+    }
+

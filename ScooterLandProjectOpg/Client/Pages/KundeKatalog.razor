@@ -68,16 +68,35 @@
 						<td>@kunde.Telefonnummer</td>
 						<td>@kunde.Adresse</td>
 						<td>
-							<button class="btn btn-link text-decoration-none" @onclick="() => ToggleScooterVisning(kunde.KundeId)">
+							<button class="btn btn-light shadow-sm text-primary hover-highlight px-3 py-2" @onclick="() => ToggleScooterVisning(kunde.KundeId)">
 								<i class="bi bi-eye-fill"></i> Vis Scootere
 							</button>
+
+							<style>
+								.hover-highlight {
+									background-color: #f8f9fa; /* Lys baggrundsfarve */
+									border: 1px solid #ced4da; /* Let kant for at definere knappen */
+									transition: all 0.3s ease; /* Glidende effekt */
+									border-radius: 5px; /* Let afrunding af kanter */
+									font-weight: bold; /* Fremhæv tekst */
+								}
+
+									.hover-highlight:hover {
+										background-color: #e2e6ea; /* Mørkere baggrund ved hover */
+										border-color: #adb5bd; /* Fremhæv kanten ved hover */
+										color: #0056b3; /* Gør teksten blå ved hover */
+										transform: scale(1.05); /* Lidt større effekt ved hover */
+									}
+							</style>
+
 						</td>
 						<td>
-							<div class="btn-group">
-								<button class="btn btn-info" @onclick="() => ÅbnSidePanel(kunde.KundeId)">Se Ordrer</button>
-								<button class="btn btn-primary" @onclick="() => VisRedigerModal(kunde)">Rediger</button>
-								<button class="btn btn-secondary" @onclick="() => VisTilføjScooterModal(kunde)">Tilføj Scooter</button>
+							<div class="d-flex justify-content-evenly">
+								<button class="btn btn-primary btn-sm me-2" @onclick="() => ÅbnSidePanel(kunde.KundeId)">Se Ordrer</button>
+								<button class="btn btn-secondary btn-sm me-2" @onclick="() => VisRedigerModal(kunde)">Rediger</button>
+								<button class="btn btn-info btn-sm" @onclick="() => VisTilføjScooterModal(kunde)">Tilføj Scooter</button>
 							</div>
+
 						</td>
 					</tr>
 
@@ -443,6 +462,59 @@
 		padding: 20px;
 		z-index: 1050;
 	}
+</style>
+
+<div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 200px;">
+	<div class="alert border rounded-3 text-center"
+		 style="max-width: 700px; width: 90%; padding: 20px; background: linear-gradient(to bottom, #1D3557, #457B9D); color: white;">
+		<h4 class="fw-bold mb-3">
+			<i class="fas fa-motorcycle"></i> Scooterland
+		</h4>
+		<div class="d-flex justify-content-between">
+			<div class="text-start">
+				<p class="mb-2">
+					<strong><i class="fas fa-map-marker-alt"></i> Adresse:</strong> Hovedgade 123, 4000 Roskilde
+				</p>
+				<p class="mb-2">
+					<strong><i class="fas fa-phone-alt"></i> Telefon:</strong> 12 34 56 78
+				</p>
+			</div>
+			<div class="text-start">
+				<p class="mb-2">
+					<strong><i class="fas fa-envelope"></i> Email:</strong> kontakt@scooterland.dk
+				</p>
+				<p class="mb-0">
+					<strong><i class="fas fa-calendar-alt"></i> Dags dato:</strong> @DateTime.Now.ToString("dd-MM-yyyy")
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+<style>
+	.alert {
+		background: linear-gradient(to bottom, #1D3557, #457B9D); /* Match farve fra sidebar */
+		border: none; /* Fjern kant */
+	}
+
+		.alert h4 {
+			font-size: 1.75rem; /* Fremhæv overskriften */
+			color: white; /* Hvid tekst */
+		}
+
+		.alert p {
+			font-size: 1rem; /* Læsbar tekst */
+			color: white; /* Hvid tekst */
+		}
+
+		.alert i {
+			margin-right: 8px; /* Plads mellem ikon og tekst */
+			color: white; /* Hvid farve til ikoner */
+		}
+
+		.alert .text-start {
+			flex: 1; /* Fordel pladsen ligeligt */
+		}
 </style>
 
 
