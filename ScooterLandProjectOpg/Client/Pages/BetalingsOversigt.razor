@@ -5,127 +5,148 @@
 @inject IJSRuntime JSRuntime
 @inject HttpClient Http
 
-<h3>Betalingsoversigt</h3>
+<div class="card shadow-lg mb-4">
+    <div class="card-header bg-primary text-white text-center">
+        <h3 class="card-title">Betalingsoversigt</h3>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <input type="text" class="form-control mb-3 rounded-pill" placeholder="Søg efter Betalings ID, Ordre ID eller Kundens Navn"
+                   @bind="søgeFelt" @onkeypress="HandleSearchKeyPress" />
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-primary rounded-pill me-2 px-4" @onclick="SøgBetalinger">Søg</button>
+                <button class="btn btn-secondary rounded-pill px-4" @onclick="ResetSøgning">Nulstil</button>
+            </div>
+        </div>
+    </div>
 
-<div class="mb-3">
-    <input type="text" class="form-control" placeholder="Søg efter Betalings ID, Ordre ID eller Kundens navn"
-           @bind="søgeFelt" @onkeypress="HandleSearchKeyPress" />
-    <button class="btn btn-primary mt-2" @onclick="SøgBetalinger">Søg</button>
-    <button class="btn btn-secondary mt-2" @onclick="ResetSøgning">Nulstil</button>
+
 </div>
+
 
 @if (betalinger == null)
 {
-    <p>Indlæser betalinger...</p>
+    <div class="text-center my-4">
+        <p class="text-muted">Indlæser betalinger...</p>
+    </div>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Betalings ID</th>
-                <th>Ordre ID</th>
-                <th>Beløb</th>
-                <th>Betalingsmetode</th>
-                <th>Betalt</th>
-                <th>Betalingsdato</th>
-                <th>Handlinger</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var betaling in betalinger)
-            {
+    <div class="table-responsive">
+        <table class="table table-hover shadow-sm rounded">
+            <thead class="table-primary">
                 <tr>
-                    <td>@betaling.BetalingsId</td>
-                    <td>@betaling.OrdreId</td>
-                    <td>@betaling.Beløb?.ToString("F2") kr.</td>
-                    <td>
-                        <select class="form-control" @onchange="async e => await OpdaterBetalingsMetode(betaling.BetalingsId, e.Value.ToString())">
-                            @foreach (var metode in Enum.GetValues<BetalingsMetodeStatus>())
-                            {
-                                <option value="@metode.ToString()" selected="@(betaling.BetalingsMetode == metode ? "selected" : null)">
-                                    @metode
-                                </option>
-                            }
-                        </select>
-                    </td>
-                    <td>
-                        <select class="form-control" @onchange="async e => await OpdaterBetaltStatus(betaling.BetalingsId, e.Value.ToString())">
-                            <option value="true" selected="@(betaling.Betalt ? "true" : null)">Ja</option>
-                            <option value="false" selected="@(betaling.Betalt ? null : "false")">Nej</option>
-                        </select>
-                    </td>
-                    
-                   
-                    <td>
-                        <input type="date" class="form-control"
-                               value="@betaling.BetalingsDato?.ToString("yyyy-MM-dd")"
-                               disabled/>
-                    </td>
-
-                    <td>
-                        <button class="btn btn-info" @onclick="() => VisFakturaDetaljer(betaling.BetalingsId)">Vis Faktura</button>
-                        <button class="btn btn-primary" @onclick="async () => await DownloadFaktura(betaling.BetalingsId)">Download Faktura</button>
-                    </td>
+                    <th>Betalings ID</th>
+                    <th>Ordre ID</th>
+                    <th>Beløb</th>
+                    <th>Betalingsmetode</th>
+                    <th>Betalt</th>
+                    <th>Betalingsdato</th>
+                    <th>Handlinger</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var betaling in betalinger)
+                {
+                    <tr>
+                        <td>@betaling.BetalingsId</td>
+                        <td>@betaling.OrdreId</td>
+                        <td>@betaling.Beløb?.ToString("F2") kr.</td>
+                        <td>
+                            <select class="form-control form-select"
+                                    @onchange="async e => await OpdaterBetalingsMetode(betaling.BetalingsId, e.Value.ToString())">
+                                @foreach (var metode in Enum.GetValues<BetalingsMetodeStatus>())
+                                {
+                                    <option value="@metode.ToString()" selected="@(betaling.BetalingsMetode == metode ? "selected" : null)">
+                                        @metode
+                                    </option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control form-select"
+                                    @onchange="async e => await OpdaterBetaltStatus(betaling.BetalingsId, e.Value.ToString())">
+                                <option value="true" selected="@(betaling.Betalt ? "true" : null)">Ja</option>
+                                <option value="false" selected="@(betaling.Betalt ? null : "false")">Nej</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="date" class="form-control"
+                                   value="@betaling.BetalingsDato?.ToString("yyyy-MM-dd")"
+                                   disabled />
+                        </td>
+                        <td>
+                            <button class="btn btn-info rounded-pill px-3 mb-1" @onclick="() => VisFakturaDetaljer(betaling.BetalingsId)">Vis Faktura</button>
+                            <button class="btn btn-primary rounded-pill px-3" @onclick="async () => await DownloadFaktura(betaling.BetalingsId)">Download Faktura</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
-<!-- Modal til faktura -->
+
 @if (visFakturaModal)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Faktura Detaljer</h5>
-                    <button type="button" class="btn-close" @onclick="LukFakturaModal"></button>
+                    <button type="button" class="btn-close btn-close-white" @onclick="LukFakturaModal"></button>
                 </div>
                 <div class="modal-body">
                     @if (fakturaData != null)
                     {
-                        <p><strong>Kunde ID:</strong> @fakturaData.KundeId</p>
-                        <p><strong>Kunde Navn:</strong> @fakturaData.KundeNavn</p>
-                        <p><strong>Telefon:</strong> @fakturaData.KundeTelefon</p>
-                        <p><strong>Email:</strong> @fakturaData.KundeEmail</p>
-                        <p><strong>Adresse:</strong> @fakturaData.KundeAdresse</p>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary">Kundeoplysninger:</h6>
+                            <p><strong>Kunde ID:</strong> @fakturaData.KundeId</p>
+                            <p><strong>Navn:</strong> @fakturaData.KundeNavn</p>
+                            <p><strong>Telefon:</strong> @fakturaData.KundeTelefon</p>
+                            <p><strong>Email:</strong> @fakturaData.KundeEmail</p>
+                            <p><strong>Adresse:</strong> @fakturaData.KundeAdresse</p>
+                        </div>
                         <hr />
-                        <p><strong>Betalings ID:</strong> @fakturaData.BetalingsId</p>
-                        <p><strong>Ordre ID:</strong> @fakturaData.OrdreId</p>
-                        <p><strong>Beløb til betaling:</strong> @fakturaData.Beløb kr.</p>
-                        <p><strong>Betalings Metode:</strong> @fakturaData.BetalingsMetode</p>
-                        <p><strong>Betalingsstatus:</strong> @(fakturaData.Betalt ? "Betalt" : "Ikke betalt")</p>
-                        <p><strong>Betalingsdato:</strong> @fakturaData.BetalingsDato</p>
-                        <hr />
-                        <p><strong>Ordre Dato:</strong> @fakturaData.OrdreDato?.ToString("dd-MM-yyyy")</p>
+
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary">Betalingsoplysninger:</h6>
+                            <p><strong>Betalings ID:</strong> @fakturaData.BetalingsId</p>
+                            <p><strong>Ordre ID:</strong> @fakturaData.OrdreId</p>
+                            <p><strong>Beløb:</strong> @fakturaData.Beløb kr.</p>
+                            <p><strong>Metode:</strong> @fakturaData.BetalingsMetode</p>
+                            <p><strong>Status:</strong> @(fakturaData.Betalt ? "Betalt" : "Ikke betalt")</p>
+                            <p><strong>Dato:</strong> @fakturaData.BetalingsDato</p>
+                        </div>
                         <hr />
 
                         @if (fakturaData.Lejeaftale != null)
                         {
-                            <h6>Lejeaftale:</h6>
-                            <p><strong>Startdato:</strong> @fakturaData.Lejeaftale.StartDato?.ToString("dd-MM-yyyy")</p>
-                            <p><strong>Slutdato:</strong> @fakturaData.Lejeaftale.SlutDato?.ToString("dd-MM-yyyy")</p>
-                            <p><strong>Daglig Forsikringspris:</strong> @fakturaData.Lejeaftale.ForsikringsPris kr.</p>
-                            <p><strong>Daglig Leje:</strong> @fakturaData.Lejeaftale.DagligLeje kr.</p>
-                            <p><strong>Kilometer Pris:</strong> @fakturaData.Lejeaftale.KilometerPris kr.</p>
-                            <p><strong>Kilometer kørt:</strong> @fakturaData.Lejeaftale.KortKilometer?.ToString("F2") km</p>
-                            <p><strong>Selvrisiko:</strong> @fakturaData.Lejeaftale.Selvrisiko kr.</p>
-                            <ul>
-                                @foreach (var scooter in fakturaData.Lejeaftale.Scootere)
-                                {
-                                    <li>@scooter</li>
-                                }
-                            </ul>
+                            <div class="mb-4">
+                                <h6 class="fw-bold text-primary">Lejeaftale:</h6>
+                                <p><strong>Startdato:</strong> @fakturaData.Lejeaftale.StartDato?.ToString("dd-MM-yyyy")</p>
+                                <p><strong>Slutdato:</strong> @fakturaData.Lejeaftale.SlutDato?.ToString("dd-MM-yyyy")</p>
+                                <p><strong>Forsikringspris:</strong> @fakturaData.Lejeaftale.ForsikringsPris kr.</p>
+                                <p><strong>Daglig Leje:</strong> @fakturaData.Lejeaftale.DagligLeje kr.</p>
+                                <p><strong>Kilometer Pris:</strong> @fakturaData.Lejeaftale.KilometerPris kr.</p>
+                                <p><strong>Kørte Kilometer:</strong> @fakturaData.Lejeaftale.KortKilometer?.ToString("F2") km</p>
+                                <p><strong>Selvrisiko:</strong> @fakturaData.Lejeaftale.Selvrisiko kr.</p>
+                                <ul>
+                                    @foreach (var scooter in fakturaData.Lejeaftale.Scootere)
+                                    {
+                                        <li>@scooter</li>
+                                    }
+                                </ul>
+                            </div>
                             <hr />
                         }
-                        
+
                         @if (fakturaData.Ydelser != null && fakturaData.Ydelser.Any())
                         {
-                            <table class="table">
+                            <h6 class="fw-bold text-primary">Ydelser:</h6>
+                            <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>YdelseId</th>
+                                        <th>Ydelse ID</th>
                                         <th>Ydelsesnavn</th>
                                         <th>Scooter Mærke</th>
                                         <th>Scooter Model</th>
@@ -150,53 +171,54 @@ else
                         {
                             <p>Ingen ydelser tilføjet.</p>
                         }
+
+                        @if (fakturaData.Produkter != null && fakturaData.Produkter.Any())
+                        {
+                            <h6 class="fw-bold text-primary">Produkter:</h6>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Produkt ID</th>
+                                        <th>Produktnavn</th>
+                                        <th>Antal</th>
+                                        <th>Pris</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var produkt in fakturaData.Produkter)
+                                    {
+                                        <tr>
+                                            <td>@produkt.ProduktId</td>
+                                            <td>@produkt.ProduktNavn</td>
+                                            <td>@produkt.Antal</td>
+                                            <td>@produkt.Pris.ToString("F2") kr.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>Ingen produkter tilføjet.</p>
+                        }
+
+                        <div class="mt-4 text-end">
+                            <h5 class="fw-bold">Total Sum: @fakturaData.TotalPris kr.</h5>
+                        </div>
                     }
                     else
                     {
                         <p>Indlæser faktura...</p>
                     }
-                    
-                    @if (fakturaData.Produkter != null && fakturaData.Produkter.Any())
-                    {
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>ProduktId</th>
-                                    <th>Produktnavn</th>
-                                    <th>Antal</th>
-                                    <th>Pris</th>
-                                   
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var produkt in fakturaData.Produkter)
-                                {
-                                    <tr>
-                                        <td>@produkt.ProduktId</td>
-                                        <td>@produkt.ProduktNavn</td>
-                                        <td>@produkt.Antal</td>
-                                        <td>@produkt.Pris.ToString("F2") kr.</td>
-                                        
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
-                    else
-                    {
-                        <p>Ingen produkter tilføjet.</p>
-                    }
-                    <p><strong>Total Sum:</strong> @fakturaData.TotalPris kr.</p>
-
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" @onclick="LukFakturaModal">Luk</button>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button class="btn btn-secondary rounded-pill px-4" @onclick="LukFakturaModal">Luk</button>
                 </div>
             </div>
         </div>
     </div>
-
 }
+
 <div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 150px;">
     <div class="alert alert-light border rounded-3 shadow-sm text-center"
          style="max-width: 600px; width: 90%; padding: 15px; margin-bottom: 0;">

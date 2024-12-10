@@ -3,75 +3,71 @@
 @inject HttpClient Http
 
 <div class="card shadow mb-4">
+</div>
 	<div class="card-header bg-primary text-white">
 		<h3 class="card-title text-center mb-0">Produkt og Ydelse Katalog</h3>
 	</div>
-	<style>
-		.nav-tabs .nav-link {
-			color: #495057; /* Neutral mørk farve for inaktive tabs */
-			background-color: #e9ecef; /* Lys baggrund */
-			border: 1px solid #dee2e6; /* Standard grå kant */
-			font-weight: bold; /* Fremhæv teksten */
-			border-radius: 0.5rem; /* Afrundede hjørner */
-			padding: 10px 20px; /* God størrelse for klikbarhed */
-			transition: all 0.3s ease; /* Glidende effekt */
-			text-align: center;
-		}
-
-			.nav-tabs .nav-link:hover {
-				background-color: #007bff; /* Blå hover-baggrund */
-				color: #fff; /* Hvid tekst ved hover */
-				border-color: #0056b3; /* Mørkere blå kant */
-				transform: scale(1.05); /* Let forstørrelse ved hover */
-				box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Skygge */
-			}
-
-			.nav-tabs .nav-link.active {
-				color: #fff; /* Hvid tekst for aktiv tab */
-				background-color: #007bff; /* Blå baggrund for aktiv tab */
-				border-color: #0056b3; /* Mørkere blå kant */
-				font-size: 18px; /* Gør aktiv tab lidt større */
-				box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* Mere fremhævet skygge */
-			}
-
-		.nav-tabs {
-			justify-content: center; /* Centrer tabs */
-			margin-bottom: 20px; /* Mellemrum under tabs */
-		}
-	</style>
-
-	<!-- Tabs navigation -->
-	<ul class="nav nav-tabs d-flex">
-		<li class="nav-item">
-			<a class="nav-link @(aktivTab == "ydelser" ? "active" : "")" @onclick="@(() => AktivTabSkift("ydelser"))">
-				Ydelser
-			</a>
-		</li>
-		<li class="nav-item">
-			<a class="nav-link @(aktivTab == "produkter" ? "active" : "")" @onclick="@(() => AktivTabSkift("produkter"))">
-				Produkter
-			</a>
-		</li>
-	</ul>
-
-
-</div>
-
 <style>
 	.nav-tabs .nav-link {
-		border: none;
-		font-size: 16px;
-		padding: 10px 15px;
-		transition: all 0.3s ease-in-out;
+		color: #495057; /* Neutral mørk farve for inaktive tabs */
+		background-color: #f8f9fa; /* Lys baggrund */
+		border: 1px solid #dee2e6; /* Standard grå kant */
+		font-weight: bold; /* Fremhæv teksten */
+		border-radius: 0.5rem; /* Afrundede hjørner */
+		padding: 10px 20px; /* God størrelse for klikbarhed */
+		transition: all 0.3s ease; /* Glidende effekt */
+		text-align: center;
+		box-shadow: none; /* Fjern skygge for inaktive tabs */
 	}
-	.nav-tabs .nav-link.active {
-		background-color: #e3f2fd; /* Light blue */
-		border-radius: 10px;
-	}
-	.nav-tabs .nav-link:hover {
-		color: #0d6efd; /* Primary blue on hover */
+
+		.nav-tabs .nav-link:hover {
+			background-color: #007bff; /* Blå hover-baggrund */
+			color: #fff; /* Hvid tekst ved hover */
+			border-color: #0056b3; /* Mørkere blå kant */
+			transform: scale(1.05); /* Let forstørrelse ved hover */
+			box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Skygge */
+		}
+
+		.nav-tabs .nav-link.active {
+			color: #fff; /* Hvid tekst for aktiv tab */
+			background-color: #007bff; /* Blå baggrund for aktiv tab */
+			border-color: #0056b3; /* Mørkere blå kant */
+			font-size: 18px; /* Gør aktiv tab lidt større */
+			box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* Mere fremhævet skygge */
+		}
+
+		.nav-tabs .nav-link:not(.active) {
+			background-color: #e2e6ea; /* Lys grå baggrund for inaktive tabs */
+			color: #343a40; /* Mørk tekstfarve */
+			border-color: #ced4da; /* Lys kant for inaktive tabs */
+			opacity: 1; /* Fuld synlighed */
+			font-size: 16px; /* Ensartet tekststørrelse */
+			box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Svag skygge */
+		}
+
+	.nav-tabs {
+		justify-content: center; /* Centrer tabs */
+		margin-bottom: 20px; /* Mellemrum under tabs */
 	}
 </style>
+
+<!-- Tabs navigation -->
+<ul class="nav nav-tabs d-flex">
+	<li class="nav-item">
+		<a class="nav-link @(aktivTab == "ydelser" ? "active" : "")" @onclick="@(() => AktivTabSkift("ydelser"))">
+			Ydelser
+		</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link @(aktivTab == "produkter" ? "active" : "")" @onclick="@(() => AktivTabSkift("produkter"))">
+			Produkter
+		</a>
+	</li>
+</ul>
+
+
+	
+
 
 <div class="tab-content mt-4">
 	@if (aktivTab == "ydelser")
