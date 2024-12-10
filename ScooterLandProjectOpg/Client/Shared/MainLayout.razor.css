@@ -9,22 +9,39 @@ main {
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background: linear-gradient(180deg, #1D3557, #457B9D); /* Mørk til lys blå */
+    color: white;
 }
 
 .top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
-    height: 3.5rem;
-    display: flex;
-    align-items: center;
+    background-color: #1D3557; /* Mørk blå baggrund */
+    border-bottom: 1px solid #457B9D; /* Lys blå kant */
+    display: flex; /* Flexbox layout */
+    justify-content: space-between; /* Knappen og teksten får passende placering */
+    align-items: center; /* Vertikalt centreret */
+    height: 3.5rem; /* Højde */
+    padding: 0 1rem; /* Giver lidt plads til indhold */
+    color: white; /* Hvid tekst */
 }
 
+.navbar-brand {
+    font-size: 1.5rem; /* Skriftstørrelse */
+    font-weight: bold; /* Fed skrift */
+    margin: 0 auto; /* Centrerer teksten */
+    text-align: center; /* Sørger for, at teksten er centreret */
+    flex-grow: 1; /* Fylder mellem knappen og venstre kant */
+}
+
+.navbar-toggler {
+    margin-left: auto; /* Flytter knappen til højre */
+    position: relative; /* Holder knappen inden for layoutet */
+}
+
+
     .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
+        color: white; /* Hvid tekstfarve til links */
+        margin-left: 1rem; /* Mindre afstand mellem links */
+        text-decoration: none; /* Fjern understregning */
     }
 
     .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {

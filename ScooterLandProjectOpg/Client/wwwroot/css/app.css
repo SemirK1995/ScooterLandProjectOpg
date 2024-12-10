@@ -3,6 +3,9 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
+body {
+    background-color: #f0f0f0; /* Lys grå baggrund */
+}
 
 h1:focus {
     outline: none;
@@ -183,14 +186,13 @@ a, .btn-link {
     width: 100%;
 }
 
-/* Jumbotron styling */
 .jumbotron {
-    background: linear-gradient(90deg, #007bff, #0056b3); /* Ens farver som Bootstrap */
+    background: linear-gradient(180deg, #1D3557, #457B9D); /* Samme blå gradient som sidebar */
     color: white;
     text-align: center;
     padding: 40px;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Lidt skygge for dybde */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Let skygge */
 }
 
 /* Title styling */
@@ -213,4 +215,30 @@ a, .btn-link {
     opacity: 0.5;
     margin: 20px auto;
     width: 80%; /* Juster bredden */
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background: linear-gradient(180deg, #1D3557, #457B9D); /* Samme som .sidebar */
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f9f9f9;
+}
+
+.table-striped tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.btn i {
+    margin-right: 5px;
 }
