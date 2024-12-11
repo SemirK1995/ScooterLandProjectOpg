@@ -29,7 +29,7 @@ namespace ScooterLandProjectOpg.Server.Services
 				.Include(k => k.KundeScooter)
 				.FirstOrDefaultAsync(k => k.KundeId == id);
 		}
-
+		
 		// Søg efter kunde via navn.
 		public async Task<IEnumerable<Kunde>> SearchByNameAsync(string name)
 		{
