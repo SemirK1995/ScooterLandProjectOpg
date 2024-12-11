@@ -177,10 +177,8 @@
 											}
 										</tbody>
 									</table>
-									@* <h5 class="mt-3">Totalpris: @TotalPris kr.</h5>
-									<button class="btn btn-primary mt-3" @onclick="VisBekræftelse">Gem Ordre</button> *@
 								}
-								<!-- Indsæt koden her -->
+
 								@if (valgteOrdreYdelser.Any() || valgteProdukter.Any())
 								{
 									<h5 class="mt-3">Totalpris: @TotalPris kr.</h5>
@@ -478,36 +476,6 @@
 	private double TotalPrisForProdukter => valgteProdukter.Sum(p => (p.Pris ?? 0) * (p.KøbsAntal));
 
 
-	// protected override async Task OnInitializedAsync()
-	// {
-	// 	try
-	// 	{
-	// 		// Hent kunder og ydelser
-	// 		kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
-	// 		alleYdelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
-	// 		//Hent produkter
-	// 		alleProdukter = await Http.GetFromJsonAsync<List<Produkt>>("api/Produkt");
-	// 		// Hent ledige scootere
-	// 		ledigeScootere = await Http.GetFromJsonAsync<List<LejeScooter>>("api/lejescooter/available");
-
-	// 		// Hvis ingen scootere er tilgængelige, initialiser en tom liste og log besked
-	// 		if (ledigeScootere == null || !ledigeScootere.Any())
-	// 		{
-	// 			Console.WriteLine("Ingen ledige scootere fundet.");
-	// 			ledigeScootere = new List<LejeScooter>();
-	// 		}
-	// 	}
-	// 	catch (HttpRequestException ex)
-	// 	{
-	// 		Console.WriteLine($"Fejl ved hentning af data: {ex.Message}");
-	// 		ledigeScootere = new List<LejeScooter>(); // Initialiser som tom liste for at undgå fejl
-	// 	}
-	// 	catch (Exception ex)
-	// 	{
-	// 		Console.WriteLine($"Uventet fejl: {ex.Message}");
-	// 		ledigeScootere = new List<LejeScooter>();
-	// 	}
-	// }
 	protected override async Task OnInitializedAsync()
 	{
 		try

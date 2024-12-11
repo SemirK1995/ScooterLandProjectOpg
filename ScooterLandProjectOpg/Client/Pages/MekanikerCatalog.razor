@@ -236,7 +236,8 @@
 										</td>
 										<td>
 											<button class="btn btn-success rounded-pill px-3"
-													@onclick="() => VisBekræftTildelModal(ordreYdelse)">
+													@onclick="() => VisBekræftTildelModal(ordreYdelse)"
+												disabled="@(ordreYdelse.StartDato == null || ordreYdelse.SlutDato == null || ordreYdelse.Timer == null || ordreYdelse.Timer <= 0)">
 												Book
 											</button>
 										</td>

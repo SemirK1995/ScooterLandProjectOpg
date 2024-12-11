@@ -5,6 +5,12 @@
 @inject IJSRuntime JSRuntime
 @inject HttpClient Http
 
+<div class="d-flex justify-content-center mb-3">
+    <button class="btn @GetFaneKlasse("IkkeBetalte") me-2" @onclick="@(() => SkiftFane("IkkeBetalte"))">Ikke Betalte</button>
+    <button class="btn @GetFaneKlasse("Betalte")" @onclick="@(() => SkiftFane("Betalte"))">Betalte</button>
+</div>
+
+
 <div class="card shadow-lg mb-4">
     <div class="card-header bg-primary text-white text-center">
         <h3 class="card-title">Betalingsoversigt</h3>
@@ -32,62 +38,75 @@
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-hover shadow-sm rounded">
-            <thead class="table-primary">
-                <tr>
-                    <th>Betalings ID</th>
-                    <th>Ordre ID</th>
-                    <th>Beløb</th>
-                    <th>Betalingsmetode</th>
-                    <th>Betalt</th>
-                    <th>Betalingsdato</th>
-                    <th>Handlinger</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var betaling in betalinger)
-                {
-                    <tr>
-                        <td>@betaling.BetalingsId</td>
-                        <td>@betaling.OrdreId</td>
-                        <td>@betaling.Beløb?.ToString("F2") kr.</td>
-                        <td>
-                            <select class="form-control form-select"
-                                    @onchange="async e => await OpdaterBetalingsMetode(betaling.BetalingsId, e.Value.ToString())">
-                                @foreach (var metode in Enum.GetValues<BetalingsMetodeStatus>())
-                                {
-                                    <option value="@metode.ToString()" selected="@(betaling.BetalingsMetode == metode ? "selected" : null)">
-                                        @metode
-                                    </option>
-                                }
-                            </select>
-                        </td>
-                        <td>
-                            <select class="form-control form-select"
-                                    @onchange="async e => await OpdaterBetaltStatus(betaling.BetalingsId, e.Value.ToString())">
-                                <option value="true" selected="@(betaling.Betalt ? "true" : null)">Ja</option>
-                                <option value="false" selected="@(betaling.Betalt ? null : "false")">Nej</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="date" class="form-control"
-                                   value="@betaling.BetalingsDato?.ToString("yyyy-MM-dd")"
-                                   disabled />
-                        </td>
-                        <td>
-                            <div class="d-flex justify-content-evenly">
-                                <button class="btn btn-info btn-sm" @onclick="() => VisFakturaDetaljer(betaling.BetalingsId)">Vis Faktura</button>
-                                <button class="btn btn-primary btn-sm" @onclick="async () => await DownloadFaktura(betaling.BetalingsId)">Download Faktura</button>
-                            </div>
+    var filtreredeBetalinger = aktivFane == "IkkeBetalte"
+        ? betalinger.Where(b => !b.Betalt).ToList()
+        : betalinger.Where(b => b.Betalt).ToList();
 
-                        </td>
+    if (!filtreredeBetalinger.Any())
+    {
+        <div class="text-center my-4">
+            <p class="text-muted">Ingen betalinger fundet for denne kategori.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover shadow-sm rounded">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Betalings ID</th>
+                        <th>Ordre ID</th>
+                        <th>Beløb</th>
+                        <th>Betalingsmetode</th>
+                        <th>Betalt</th>
+                        <th>Betalingsdato</th>
+                        <th>Handlinger</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach (var betaling in filtreredeBetalinger)
+                    {
+                        <tr>
+                            <td>@betaling.BetalingsId</td>
+                            <td>@betaling.OrdreId</td>
+                            <td>@betaling.Beløb?.ToString("F2") kr.</td>
+                            <td>
+                                <select class="form-control form-select"
+                                        @onchange="async e => await OpdaterBetalingsMetode(betaling.BetalingsId, e.Value.ToString())">
+                                    @foreach (var metode in Enum.GetValues<BetalingsMetodeStatus>())
+                                    {
+                                        <option value="@metode.ToString()" selected="@(betaling.BetalingsMetode == metode ? "selected" : null)">
+                                            @metode
+                                        </option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <select class="form-control form-select"
+                                        @onchange="async e => await OpdaterBetaltStatus(betaling.BetalingsId, e.Value.ToString())">
+                                    <option value="true" selected="@(betaling.Betalt ? "true" : null)">Ja</option>
+                                    <option value="false" selected="@(betaling.Betalt ? null : "false")">Nej</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="date" class="form-control"
+                                       value="@betaling.BetalingsDato?.ToString("yyyy-MM-dd")"
+                                       disabled />
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-evenly">
+                                    <button class="btn btn-info btn-sm" @onclick="() => VisFakturaDetaljer(betaling.BetalingsId)">Vis Faktura</button>
+                                    <button class="btn btn-primary btn-sm" @onclick="async () => await DownloadFaktura(betaling.BetalingsId)">Download Faktura</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 }
+
 
 @if (visFakturaModal)
 {
@@ -305,6 +324,7 @@ else
     private FakturaDto? fakturaData; // Dynamisk objekt til faktura
     private bool visFakturaModal = false;
     private string søgeFelt = string.Empty; // Søgefelt
+    private string aktivFane = "IkkeBetalte"; //Default til ikke betalte
 
     protected override async Task OnInitializedAsync()
     {
@@ -332,6 +352,18 @@ else
             Console.WriteLine($"Søgefejl: {ex.Message}");
         }
     }
+
+    private void SkiftFane(string faneNavn)
+    {
+        aktivFane = faneNavn; // Opdater den aktive fane
+    }
+
+    private string GetFaneKlasse(string faneNavn)
+    {
+        return aktivFane == faneNavn ? "btn-primary" : "btn-outline-primary";
+    }
+
+
 
     private void ResetSøgning()
     {
