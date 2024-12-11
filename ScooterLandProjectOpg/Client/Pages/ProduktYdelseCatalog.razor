@@ -148,8 +148,8 @@
 								<td>@produkt.Pris?.ToString("F2") kr.</td>
 								<td>@produkt.Antal</td>
 								<td>
-									<button class="btn btn-primary rounded-pill px-3" @onclick="() => VisRedigerProduktModal(produkt)">Rediger</button>
-									<button class="btn btn-danger rounded-pill px-3" @onclick="() => BekræftSletProdukt(produkt)">Slet</button>
+									<button class="btn btn-primary btn-sm" @onclick="() => VisRedigerProduktModal(produkt)">Rediger</button>
+									<button class="btn btn-danger btn-sm" @onclick="() => BekræftSletProdukt(produkt)">Slet</button>
 								</td>
 							</tr>
 						}
