@@ -219,7 +219,7 @@
 								<tr>
 									<td>@ordre.OrdreId</td>
 									<td>@(ordre.Dato.HasValue ? ordre.Dato.Value.ToString("dd-MM-yyyy") : "N/A")</td>
-									<td>@ordre.TotalPris?.ToString("F2") kr.</td>
+									<td>@ordre.TotalPris? kr.</td>
 									<td>
 										<div class="d-flex align-items-center">
 											<select class="form-select form-select-sm me-2" @bind="ordre.Status">
@@ -278,7 +278,7 @@
 								{
 									<tr>
 										<td>@ydelse.Ydelse?.Navn</td>
-										<td>@ydelse.BeregnetPris.ToString("F2") kr.</td>
+										<td>@ydelse.BeregnetPris kr.</td>
 										<td>@ydelse.Scooter?.Maerke @ydelse.Scooter?.Model</td>
 									</tr>
 								}
@@ -309,8 +309,8 @@
 									<tr>
 										<td>@produkt.Produkt?.ProduktNavn</td>
 										<td>@produkt.Antal</td>
-										<td>@produkt.Pris.ToString("F2") kr.</td>
-										<td>@(produkt.Antal * produkt.Pris).ToString("F2") kr.</td>
+										<td>@produkt.Pris kr.</td>
+										<td>@(produkt.Antal * produkt.Pris) kr.</td>
 									</tr>
 								}
 							</tbody>
@@ -356,7 +356,7 @@
 
 					<!-- Total Pris -->
 					<h5 class="text-primary mt-4">Total Pris</h5>
-					<p class="fs-5"><strong>@valgtOrdre.TotalOrdrePris.ToString("F2") kr.</strong></p>
+					<p class="fs-5"><strong>@valgtOrdre.TotalOrdrePris kr.</strong></p>
 				</div>
 				<div class="modal-footer">
 					<button class="btn btn-secondary" @onclick="LukOrdreDetaljerModal">Luk</button>

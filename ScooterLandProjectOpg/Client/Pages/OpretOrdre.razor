@@ -269,7 +269,7 @@
 												<td>@produkt.ProduktNavn</td>
 												<td>@produkt.Pris?.ToString("F2") kr.</td>
 												<td>
-													<InputNumber @bind-Value="produkt.Antal" class="form-control" />
+													<InputNumber @bind-Value="produkt.KøbsAntal" class="form-control" />
 												</td>
 												<td>
 													<button class="btn btn-success btn-sm" @onclick="() => TilføjProdukt(produkt)">Tilføj</button>
@@ -297,7 +297,7 @@
 											<tr>
 												<td>@produkt.ProduktNavn</td>
 												<td>@produkt.Pris?.ToString("F2") kr.</td>
-												<td>@produkt.Antal</td>
+												<td>@produkt.KøbsAntal</td>
 												<td>
 													<button class="btn btn-danger btn-sm" @onclick="() => FjernProdukt(produkt)">Fjern</button>
 												</td>
@@ -469,9 +469,39 @@
 	}
 
 	private double TotalPris => valgteOrdreYdelser.Sum(oy => oy.AftaltPris ?? oy.Ydelse.StandardPris ?? 0) + BeregnLejeAftaleTotalPris() + TotalPrisForProdukter;
-	private double TotalPrisForProdukter => valgteProdukter.Sum(p => (p.Pris ?? 0) * (p.Antal ?? 1));
+	private double TotalPrisForProdukter => valgteProdukter.Sum(p => (p.Pris ?? 0) * (p.KøbsAntal));
 
 
+	// protected override async Task OnInitializedAsync()
+	// {
+	// 	try
+	// 	{
+	// 		// Hent kunder og ydelser
+	// 		kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
+	// 		alleYdelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
+	// 		//Hent produkter
+	// 		alleProdukter = await Http.GetFromJsonAsync<List<Produkt>>("api/Produkt");
+	// 		// Hent ledige scootere
+	// 		ledigeScootere = await Http.GetFromJsonAsync<List<LejeScooter>>("api/lejescooter/available");
+
+	// 		// Hvis ingen scootere er tilgængelige, initialiser en tom liste og log besked
+	// 		if (ledigeScootere == null || !ledigeScootere.Any())
+	// 		{
+	// 			Console.WriteLine("Ingen ledige scootere fundet.");
+	// 			ledigeScootere = new List<LejeScooter>();
+	// 		}
+	// 	}
+	// 	catch (HttpRequestException ex)
+	// 	{
+	// 		Console.WriteLine($"Fejl ved hentning af data: {ex.Message}");
+	// 		ledigeScootere = new List<LejeScooter>(); // Initialiser som tom liste for at undgå fejl
+	// 	}
+	// 	catch (Exception ex)
+	// 	{
+	// 		Console.WriteLine($"Uventet fejl: {ex.Message}");
+	// 		ledigeScootere = new List<LejeScooter>();
+	// 	}
+	// }
 	protected override async Task OnInitializedAsync()
 	{
 		try
@@ -479,16 +509,23 @@
 			// Hent kunder og ydelser
 			kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
 			alleYdelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
-			//Hent produkter
-			alleProdukter = await Http.GetFromJsonAsync<List<Produkt>>("api/Produkt");
+
+			// Hent produkter
+			alleProdukter = await Http.GetFromJsonAsync<List<Produkt>>("api/Produkt") ?? new List<Produkt>();
+
+			// Sæt standardværdien for antal, hvis den ikke allerede er sat
+			foreach (var produkt in alleProdukter)
+			{
+				produkt.KøbsAntal = 1;
+			}
+
 			// Hent ledige scootere
-			ledigeScootere = await Http.GetFromJsonAsync<List<LejeScooter>>("api/lejescooter/available");
+			ledigeScootere = await Http.GetFromJsonAsync<List<LejeScooter>>("api/lejescooter/available") ?? new List<LejeScooter>();
 
 			// Hvis ingen scootere er tilgængelige, initialiser en tom liste og log besked
-			if (ledigeScootere == null || !ledigeScootere.Any())
+			if (!ledigeScootere.Any())
 			{
 				Console.WriteLine("Ingen ledige scootere fundet.");
-				ledigeScootere = new List<LejeScooter>();
 			}
 		}
 		catch (HttpRequestException ex)
@@ -502,6 +539,7 @@
 			ledigeScootere = new List<LejeScooter>();
 		}
 	}
+
 
 	private void NulstilOrdreData()
 	{
@@ -527,12 +565,12 @@
 					ProduktId = produkt.ProduktId,
 					ProduktNavn = produkt.ProduktNavn,
 					Pris = produkt.Pris,
-					Antal = produkt.Antal ?? 1
+					KøbsAntal = produkt.KøbsAntal
 				});
 		}
 		else
 		{
-			eksisterendeProdukt.Antal += produkt.Antal ?? 1; // Opdater antal
+			eksisterendeProdukt.KøbsAntal += produkt.KøbsAntal; // Opdater antal
 		}
 	}
 
@@ -705,7 +743,7 @@
 				OrdreProdukter = valgteProdukter.Select(p => new CreateOrdreProduktDto
 				{
 					ProduktId = p.ProduktId,
-					Antal = p.Antal ?? 1,
+					KøbsAntal = p.KøbsAntal,
 					Pris = p.Pris ?? 0
 				}).ToList() // Tilføj produkterne
 			};

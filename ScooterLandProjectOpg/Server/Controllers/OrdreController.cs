@@ -109,20 +109,20 @@ namespace ScooterLandProjectOpg.Server.Controllers
 					{
 						var produkt = await _context.Produkter.FindAsync(produktDTO.ProduktId);
 						if (produkt == null) return BadRequest($"Produkt med ID {produktDTO.ProduktId} findes ikke.");
-						if (produkt.Antal < produktDTO.Antal) return BadRequest($"Ikke nok på lager for produkt: {produkt.ProduktNavn}.");
+						if (produkt.LagerAntal < produktDTO.KøbsAntal) return BadRequest($"Ikke nok på lager for produkt: {produkt.ProduktNavn}.");
 
-						produkt.Antal -= produktDTO.Antal;
+						produkt.LagerAntal -= produktDTO.KøbsAntal;
 						_context.Produkter.Update(produkt);
 
 						var ordreProdukt = new OrdreProdukt
 						{
 							ProduktId = produkt.ProduktId,
 							OrdreId = ordre.OrdreId,
-							Antal = produktDTO.Antal,
+							Antal = produktDTO.KøbsAntal,
 							Pris = produkt.Pris ?? 0
 						};
 						_context.OrdreProdukter.Add(ordreProdukt);
-						ordre.TotalPris += (produkt.Pris ?? 0) * produktDTO.Antal;
+						ordre.TotalPris += (produkt.Pris ?? 0) * produktDTO.KøbsAntal;
 					}
 				}
 

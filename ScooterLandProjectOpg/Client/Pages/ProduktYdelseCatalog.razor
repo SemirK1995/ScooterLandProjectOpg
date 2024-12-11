@@ -146,7 +146,7 @@
 								<td>@produkt.ProduktId</td>
 								<td>@produkt.ProduktNavn</td>
 								<td>@produkt.Pris?.ToString("F2") kr.</td>
-								<td>@produkt.Antal</td>
+								<td>@produkt.LagerAntal</td>
 								<td>
 									<button class="btn btn-primary btn-sm" @onclick="() => VisRedigerProduktModal(produkt)">Rediger</button>
 									<button class="btn btn-danger btn-sm" @onclick="() => BekræftSletProdukt(produkt)">Slet</button>
@@ -236,8 +236,8 @@
 						</div>
 						<div class="mb-3">
 							<label for="antal" class="form-label">Antal</label>
-							<InputNumber id="antal" @bind-Value="valgtProdukt.Antal" class="form-control" placeholder="Indtast antal" />
-							<ValidationMessage For="@(() => valgtProdukt.Antal)" />
+							<InputNumber id="antal" @bind-Value="valgtProdukt.LagerAntal" class="form-control" placeholder="Indtast antal" />
+							<ValidationMessage For="@(() => valgtProdukt.LagerAntal)" />
 						</div>
 					</div>
 					<div class="modal-footer d-flex justify-content-end">

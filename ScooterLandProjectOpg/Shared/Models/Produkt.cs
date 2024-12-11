@@ -17,7 +17,8 @@ namespace ScooterLandProjectOpg.Shared.Models
 		//Attributter
 		public string? ProduktNavn { get; set; }
 		public double? Pris { get; set; }
-		public int? Antal { get; set; }
+		public int? LagerAntal { get; set; }
+		public int KøbsAntal { get; set; } = 1;
 
 		public Produkt()
 		{

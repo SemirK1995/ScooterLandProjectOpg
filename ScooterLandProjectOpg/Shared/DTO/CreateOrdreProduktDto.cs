@@ -9,7 +9,7 @@ namespace ScooterLandProjectOpg.Shared.DTO
 	public class CreateOrdreProduktDto
 	{
 		public int ProduktId { get; set; } 
-		public int Antal { get; set; } 
+		public int KøbsAntal { get; set; } 
 		public double? Pris { get; set; } 
 	}
 }
