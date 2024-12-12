@@ -389,7 +389,7 @@
 	{
 		mekanikere = await Http.GetFromJsonAsync<List<Mekaniker>>("api/Mekaniker");
 	}
-	
+
 	private async Task VisArbejdsopgaverModal(Mekaniker mekaniker)
 	{
 		try
@@ -480,6 +480,7 @@
 
 	private void LukTildelModal()
 	{
+		NulstilOrdreYdelser();
 		visTildelModal = false;
 	}
 
@@ -541,4 +542,18 @@
 	{
 		visModal = false;
 	}
+
+	private void NulstilOrdreYdelser()
+	{
+		if (ordreYdelser != null)
+		{
+			foreach (var ydelse in ordreYdelser)
+			{
+				ydelse.StartDato = null;
+				ydelse.SlutDato = null;
+				ydelse.Timer = null;
+			}
+		}
+	}
+
 }

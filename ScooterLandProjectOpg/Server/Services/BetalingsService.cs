@@ -11,19 +11,13 @@ namespace ScooterLandProjectOpg.Server.Services
 	public class BetalingsService : Repository<Betaling>, IBetalingRepository
 	{
 		private readonly ScooterLandContext _context;
+		private readonly IOrdreRepository _ordreRepository;
 
-		public BetalingsService(ScooterLandContext context) : base(context)
+		public BetalingsService(ScooterLandContext context, IOrdreRepository ordreRepository) : base(context)
 		{
 			_context = context;
+			_ordreRepository = ordreRepository;
 		}
-		//// Override to include related orders
-		//public async Task<IEnumerable<Betaling>> GetAllAsync()
-		//{
-		//	return await _context.Set<Betaling>()
-		//		.Include(b => b.Ordre)
-		//		.ToListAsync();
-		//}
-		// Override to include related orders and calculate correct payment amount
 		public async Task<IEnumerable<Betaling>> GetAllAsync()
 		{
 			var betalinger = await _context.Set<Betaling>()
@@ -72,27 +66,64 @@ namespace ScooterLandProjectOpg.Server.Services
                     (!isNumeric && b.Ordre.Kunde.Navn.Contains(query))) // Søg på kundens navn
                 .ToListAsync();
         }
-        public async Task UpdateBetalingsStatusAsync(int betalingsId, BetalingUpdateDto betalingUpdate)
-        {
-            var betaling = await _context.Betalinger.FindAsync(betalingsId);
-            if (betaling == null)
-                throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
+		//public async Task UpdateBetalingsStatusAsync(int betalingsId, BetalingUpdateDto betalingUpdate)
+		//{
+		//    var betaling = await _context.Betalinger.FindAsync(betalingsId);
+		//    if (betaling == null)
+		//        throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
 
-            // Kun sæt betalingsdato, hvis Betalt er true
-            betaling.Betalt = betalingUpdate.Betalt;
-            if (betalingUpdate.Betalt)
-            {
-                betaling.BetalingsDato = DateTime.Now;
-            }
-            else
-            {
-                betaling.BetalingsDato = null; // Slet dato, hvis ikke betalt
-            }
+		//    // Kun sæt betalingsdato, hvis Betalt er true
+		//    betaling.Betalt = betalingUpdate.Betalt;
+		//    if (betalingUpdate.Betalt)
+		//    {
+		//        betaling.BetalingsDato = DateTime.Now;
+		//    }
+		//    else
+		//    {
+		//        betaling.BetalingsDato = null; // Slet dato, hvis ikke betalt
+		//    }
 
-            _context.Betalinger.Update(betaling);
-            await _context.SaveChangesAsync();
-        }
-        public async Task UpdateBetalingsMetodeAsync(int betalingsId, BetalingsMetodeStatus nyMetode)
+		//    _context.Betalinger.Update(betaling);
+		//    await _context.SaveChangesAsync();
+		//}
+		public async Task UpdateBetalingsStatusAsync(int betalingsId, BetalingUpdateDto betalingUpdate)
+		{
+			var betaling = await _context.Betalinger.FindAsync(betalingsId);
+			if (betaling == null)
+				throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
+
+			// Kun sæt betalingsdato, hvis Betalt er true
+			betaling.Betalt = betalingUpdate.Betalt;
+			if (betalingUpdate.Betalt)
+			{
+				betaling.BetalingsDato = DateTime.Now;
+
+				// Hent relateret ordre
+				var ordre = await _context.Ordrer
+					.Include(o => o.Betalinger)
+					.FirstOrDefaultAsync(o => o.OrdreId == betaling.OrdreId);
+
+				if (ordre == null)
+					throw new KeyNotFoundException($"Ordre med ID {betaling.OrdreId} blev ikke fundet.");
+
+				// Tjek om alle betalinger for ordren er betalt
+				var alleBetalingerBetalt = ordre.Betalinger.All(b => b.Betalt);
+				if (alleBetalingerBetalt)
+				{
+					// Opdater ordrestatus til "Betalt"
+					await _ordreRepository.UpdateOrdreStatusAsync(ordre.OrdreId, OrdreStatus.Betalt);
+				}
+			}
+			else
+			{
+				betaling.BetalingsDato = null; // Slet dato, hvis ikke betalt
+			}
+
+			_context.Betalinger.Update(betaling);
+			await _context.SaveChangesAsync();
+		}
+
+		public async Task UpdateBetalingsMetodeAsync(int betalingsId, BetalingsMetodeStatus nyMetode)
         {
             var betaling = await _context.Betalinger.FindAsync(betalingsId);
             if (betaling == null)

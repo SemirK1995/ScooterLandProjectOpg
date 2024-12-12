@@ -174,19 +174,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
                 return BadRequest($"Fejl ved generering af faktura: {ex.Message}");
             }
         }
-        [HttpPost("opret-betalinger-til-eksisterende-ordrer")]
-        public async Task<IActionResult> OpretBetalingerTilEksisterendeOrdrer()
-        {
-            try
-            {
-                var antalBetalingerOprettet = await _betalingRepository.OpretBetalingerTilEksisterendeOrdrerAsync();
-                return Ok($"Der blev oprettet betalinger for {antalBetalingerOprettet} ordrer.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Fejl under oprettelse af betalinger: {ex.Message}");
-            }
-        }
         [HttpPut("{betalingsId}/dato")]
         public async Task<IActionResult> UpdateBetalingsDato(int betalingsId, [FromBody] DateTime? nyDato)
         {
