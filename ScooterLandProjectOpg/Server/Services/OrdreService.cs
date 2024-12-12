@@ -65,9 +65,29 @@ namespace ScooterLandProjectOpg.Server.Services
                 {
                     ydelse.MekanikerId = null; // Fjern mekanikertildeling
                 }
+				if (nyStatus == OrdreStatus.Betalt)
+				{
+					// Frigiv lejeaftalen
+					if (ordre.LejeAftale != null)
+					{
+						// 1: Frigør scootere i lejeaftalen
+						if (ordre.LejeAftale.LejeScooter != null)
+						{
+							foreach (var scooter in ordre.LejeAftale.LejeScooter)
+							{
+								scooter.ErTilgængelig = true; // Sæt tilgængelighed til true
+								scooter.LejeId = null; // Fjern LejeId fra scooteren
+							}
+							_context.LejeScootere.UpdateRange(ordre.LejeAftale.LejeScooter);
+						}
 
-                // Hvis status er Annulleret, udfør sletning i den specifikke rækkefølge
-                if (nyStatus == OrdreStatus.Annulleret)
+						ordre.LejeAftale.Status = LejeAftaleStatus.Afsluttet;
+						_context.LejeAftaler.Update(ordre.LejeAftale);
+					}
+				}
+
+				// Hvis status er Annulleret, udfør sletning i den specifikke rækkefølge
+				if (nyStatus == OrdreStatus.Annulleret)
                 {
                     // 1: Opdater LejeScootere
                     if (ordre.LejeAftale?.LejeScooter != null)

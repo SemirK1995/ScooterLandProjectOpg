@@ -66,6 +66,12 @@ namespace ScooterLandProjectOpg.Server.Controllers
 					}).ToList()
 				};
 
+				// Valider, at alle ydelser har en scooter valgt
+				if (ordre.OrdreYdelse != null && ordre.OrdreYdelse.Any(oy => oy.ScooterId == null))
+				{
+					return BadRequest("Alle ydelser skal have en tilknyttet scooter.");
+				}
+
 				// Beregn totalpris fra ydelser
 				if (ordre.OrdreYdelse != null && ordre.OrdreYdelse.Any())
 				{
@@ -159,109 +165,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
 				return StatusCode(500, $"Fejl under oprettelse af ordre: {ex.Message}");
 			}
 		}
-		//public async Task<ActionResult<Ordre>> Add([FromBody] CreateOrdreDto ordreDTO)
-		//{
-		//	if (ordreDTO == null || ordreDTO.KundeId == 0)
-		//	{
-		//		return BadRequest("Ordre data is invalid.");
-		//	}
-
-		//	try
-		//	{
-		//		var ordre = new Ordre
-		//		{
-		//			KundeId = ordreDTO.KundeId,
-		//			Dato = ordreDTO.Dato,
-		//			TotalPris = 0, // Start med 0 og beregn totalen senere
-		//			OrdreYdelse = ordreDTO.OrdreYdelser?.Select(oy => new OrdreYdelse
-		//			{
-		//				YdelseId = oy.YdelseId,
-		//				AftaltPris = oy.AftaltPris ?? 0,
-		//				Dato = oy.Dato ?? DateTime.Now,
-		//				ScooterId = oy.ScooterId
-		//			}).ToList()
-		//		};
-
-		//		// Beregn totalpris fra ydelser
-		//		if (ordre.OrdreYdelse != null && ordre.OrdreYdelse.Any())
-		//		{
-		//			foreach (var ydelse in ordre.OrdreYdelse)
-		//			{
-		//				// Brug AftaltPris hvis tilgængelig, ellers StandardPris
-		//				var ydelsePris = ydelse.AftaltPris > 0
-		//					? ydelse.AftaltPris
-		//					: (await _context.Ydelser.FindAsync(ydelse.YdelseId))?.StandardPris ?? 0;
-
-		//				ordre.TotalPris += ydelsePris;
-		//			}
-		//		}
-
-		//		// Håndter lejeaftale, hvis der er en
-		//		if (ordreDTO.LejeAftale != null)
-		//		{
-		//			var lejeAftale = new LejeAftale
-		//			{
-		//				KundeId = ordreDTO.KundeId,
-		//				StartDato = ordreDTO.LejeAftale.StartDato,
-		//				SlutDato = ordreDTO.LejeAftale.SlutDato,
-		//				DagligLeje = ordreDTO.LejeAftale.DagligLeje,
-		//				ForsikringsPris = ordreDTO.LejeAftale.ForsikringsPris,
-		//				KilometerPris = ordreDTO.LejeAftale.KilometerPris,
-		//				KortKilometer = ordreDTO.LejeAftale.KortKilometer
-		//			};
-		//			_context.LejeAftaler.Add(lejeAftale);
-		//			await _context.SaveChangesAsync();
-
-		//			ordre.LejeId = lejeAftale.LejeId;
-		//			ordre.TotalPris += lejeAftale.TotalPris;
-		//		}
-
-		//		_context.Ordrer.Add(ordre);
-		//		await _context.SaveChangesAsync();
-
-		//		// Håndter produkter
-		//		if (ordreDTO.OrdreProdukter != null && ordreDTO.OrdreProdukter.Any())
-		//		{
-		//			foreach (var produktDTO in ordreDTO.OrdreProdukter)
-		//			{
-		//				var produkt = await _context.Produkter.FindAsync(produktDTO.ProduktId);
-		//				if (produkt == null) return BadRequest($"Produkt med ID {produktDTO.ProduktId} findes ikke.");
-		//				if (produkt.LagerAntal < produktDTO.KøbsAntal) return BadRequest($"Ikke nok på lager for produkt: {produkt.ProduktNavn}.");
-
-		//				produkt.LagerAntal -= produktDTO.KøbsAntal;
-		//				_context.Produkter.Update(produkt);
-
-		//				var ordreProdukt = new OrdreProdukt
-		//				{
-		//					ProduktId = produkt.ProduktId,
-		//					OrdreId = ordre.OrdreId,
-		//					Antal = produktDTO.KøbsAntal,
-		//					Pris = produkt.Pris ?? 0
-		//				};
-		//				_context.OrdreProdukter.Add(ordreProdukt);
-		//				ordre.TotalPris += (produkt.Pris ?? 0) * produktDTO.KøbsAntal;
-		//			}
-		//		}
-
-		//		await _context.SaveChangesAsync();
-
-		//		var betaling = new Betaling
-		//		{
-		//			OrdreId = ordre.OrdreId,
-		//			Beløb = ordre.TotalPris,
-		//			Betalt = false
-		//		};
-		//		_context.Betalinger.Add(betaling);
-		//		await _context.SaveChangesAsync();
-
-		//		return CreatedAtAction(nameof(GetById), new { id = ordre.OrdreId }, ordre);
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		return StatusCode(500, $"Fejl under oprettelse af ordre: {ex.Message}");
-		//	}
-		//}
-
 
 		// API-endpoint til opdatering af ordrestatus
 		[HttpPut("{ordreId}/status")]

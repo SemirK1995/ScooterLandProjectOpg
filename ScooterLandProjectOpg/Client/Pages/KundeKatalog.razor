@@ -219,7 +219,7 @@
 								<tr>
 									<td>@ordre.OrdreId</td>
 									<td>@(ordre.Dato.HasValue ? ordre.Dato.Value.ToString("dd-MM-yyyy") : "N/A")</td>
-									<td>@ordre.TotalPris? kr.</td>
+									<td>@ordre.TotalPris kr.</td>
 									<td>
 										<div class="d-flex align-items-center">
 											<select class="form-select form-select-sm me-2" @bind="ordre.Status">

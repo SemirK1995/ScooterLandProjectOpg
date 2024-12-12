@@ -44,6 +44,7 @@ else
 					<th>Kørte Kilometer</th>
 					<th>Daglig Leje</th>
 					<th>Selvrisiko</th>
+					<th>Leje Status</th>
 					<th>Total Pris</th>
 					<th>Handlinger</th>
 				</tr>
@@ -61,7 +62,7 @@ else
 							<input type="number" class="form-control form-control-sm mx-auto"
 								   style="max-width: 120px;"
 								   value="@lejeAftale.KortKilometer"
-								   @oninput="async e => await OpdaterKortKilometer(lejeAftale.LejeId, int.TryParse(e.Value.ToString(), out var result) ? result : lejeAftale.KortKilometer)" />
+								   @oninput="async e => await OpdaterKortKilometer(lejeAftale.LejeId ?? 0, int.TryParse(e.Value.ToString(), out var result) ? result : lejeAftale.KortKilometer)" />
 						</td>
 						<td>@lejeAftale.DagligLeje.ToString("F2") kr.</td>
 						<td>
@@ -69,13 +70,14 @@ else
 								   checked="@(lejeAftale.Selvrisiko > 0)"
 								   @onchange="async e =>
                                    {
-                                   await OpdaterSelvrisiko(lejeAftale.LejeId, (bool)((ChangeEventArgs)e).Value ? 1000 : 0);
+                                   await OpdaterSelvrisiko(lejeAftale.LejeId ?? 0, (bool)((ChangeEventArgs)e).Value ? 1000 : 0);
                                    await HentLejeAftaler();
                                    }" />
 						</td>
+						<td>@lejeAftale.Status</td>
 						<td>@lejeAftale.TotalPris.ToString("F2") kr.</td>
 						<td>
-							<button class="btn btn-primary btn-sm me-2" @onclick="() => VisDetaljer(lejeAftale.LejeId)">Vis Detaljer</button>
+							<button class="btn btn-primary btn-sm me-2" @onclick="() => VisDetaljer(lejeAftale.LejeId ?? 0)">Vis Detaljer</button>
 
 						</td>
 					</tr>

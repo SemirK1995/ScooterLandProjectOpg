@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ScooterLandProjectOpg.Shared.Enum;
 
 namespace ScooterLandProjectOpg.Shared.Models
 {
@@ -12,7 +13,7 @@ namespace ScooterLandProjectOpg.Shared.Models
     {
         // Primary Key
         [Key]
-        public int LejeId { get; set; }
+        public int? LejeId { get; set; }
 
         // Foreign Key
         public int KundeId { get; set; }
@@ -49,8 +50,10 @@ namespace ScooterLandProjectOpg.Shared.Models
         [Range(0, int.MaxValue, ErrorMessage = "Kort kilometer skal være et positivt tal.")]
         public int? KortKilometer { get; set; }
 
-        
-        [NotMapped]
+		public LejeAftaleStatus? Status { get; set; } // Nyt statusfelt
+
+
+		[NotMapped]
         public double TotalPris
         {
             get

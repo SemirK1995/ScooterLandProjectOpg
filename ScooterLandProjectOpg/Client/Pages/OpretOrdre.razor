@@ -178,6 +178,13 @@
 										</tbody>
 									</table>
 								}
+								<!-- Alert om manglende scootervalg -->
+								@if (valgteOrdreYdelser.Any(ydelse => ydelse.ScooterId == null))
+								{
+									<div class="alert alert-danger mt-2">
+										Alle ydelser skal have en tilknyttet scooter, før du kan gemme ordren.
+									</div>
+								}
 
 								@if (valgteOrdreYdelser.Any() || valgteProdukter.Any())
 								{
@@ -673,8 +680,16 @@
 
 	private void VisBekræftelse()
 	{
+		// Valider, om alle ydelser har en scooter valgt
+		if (valgteOrdreYdelser.Any(ydelse => ydelse.ScooterId == null))
+		{
+			Console.WriteLine("Alle ydelser skal have en tilknyttet scooter.");
+			return; // Forhindr, at modal vises
+		}
+
 		visBekræftelsesModal = true;
 	}
+
 
 	private void LukBekræftelsesModal()
 	{
