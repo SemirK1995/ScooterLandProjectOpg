@@ -145,20 +145,90 @@ namespace ScooterLandProjectOpg.Server.Controllers
 			}
 		}
 
-		[HttpPut("{ordreId}/status")]
-        public async Task<IActionResult> UpdateOrdreStatus(int ordreId, [FromBody] OrdreStatus nyStatus)
+        //[HttpPut("{ordreId}/status")]
+        //      public async Task<IActionResult> UpdateOrdreStatus(int ordreId, [FromBody] OrdreStatus nyStatus)
+        //      {
+        //	var ordre = await _ordreRepository.GetByIdAsync(ordreId);
+        //	if (ordre == null)
+        //	{
+        //		return NotFound($"Ordre med ID {ordreId} blev ikke fundet.");
+        //	}
+
+        //	ordre.Status = nyStatus;
+        //	await _ordreRepository.UpdateAsync(ordre);
+
+        //	return NoContent();
+        //}
+        public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
         {
-			var ordre = await _ordreRepository.GetByIdAsync(ordreId);
-			if (ordre == null)
-			{
-				return NotFound($"Ordre med ID {ordreId} blev ikke fundet.");
-			}
+            // Hent ordren med relaterede data
+            var ordre = await _context.Ordrer
+                .Include(o => o.OrdreYdelse) // Inkluder arbejdsopgaver
+                .Include(o => o.OrdreProdukter) // Inkluder ordreprodukter
+                .Include(o => o.Betalinger) // Inkluder betalinger
+                .Include(o => o.LejeAftale) // Inkluder lejeaftale
+                .ThenInclude(la => la.LejeScooter) // Inkluder lejescootere
+                .FirstOrDefaultAsync(o => o.OrdreId == ordreId);
 
-			ordre.Status = nyStatus;
-			await _ordreRepository.UpdateAsync(ordre);
+            if (ordre == null)
+                throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
 
-			return NoContent();
-		}
+            // Opdater ordrestatus
+            ordre.Status = nyStatus;
+
+            // Fjern arbejdsopgaver for status Betalt eller Annulleret
+            if (nyStatus == OrdreStatus.Betalt || nyStatus == OrdreStatus.Annulleret)
+            {
+                foreach (var ydelse in ordre.OrdreYdelse)
+                {
+                    ydelse.MekanikerId = null; // Fjern mekanikertildeling
+                }
+            }
+
+            // Hvis status er Annulleret, fjern alle relaterede data
+            if (nyStatus == OrdreStatus.Annulleret)
+            {
+                // Fjern betalinger
+                if (ordre.Betalinger != null && ordre.Betalinger.Any())
+                {
+                    _context.Betalinger.RemoveRange(ordre.Betalinger);
+                }
+
+                // Fjern ordreprodukter
+                if (ordre.OrdreProdukter != null && ordre.OrdreProdukter.Any())
+                {
+                    _context.OrdreProdukter.RemoveRange(ordre.OrdreProdukter);
+                }
+
+                // Fjern ordreydelser
+                if (ordre.OrdreYdelse != null && ordre.OrdreYdelse.Any())
+                {
+                    _context.OrdreYdelser.RemoveRange(ordre.OrdreYdelse);
+                }
+
+                // Fjern lejeaftale og relaterede lejescootere
+                if (ordre.LejeAftale != null)
+                {
+                    if (ordre.LejeAftale.LejeScooter != null && ordre.LejeAftale.LejeScooter.Any())
+                    {
+                        _context.LejeScootere.RemoveRange(ordre.LejeAftale.LejeScooter);
+                    }
+                    _context.LejeAftaler.Remove(ordre.LejeAftale);
+                }
+
+                // Fjern selve ordren
+                _context.Ordrer.Remove(ordre);
+            }
+            else
+            {
+                // Hvis status ikke er Annulleret, opdater ordren
+                _context.Ordrer.Update(ordre);
+            }
+
+            // Gem ændringer i databasen
+            await _context.SaveChangesAsync();
+        }
+
 
         [HttpPut("{ordreId}/selvrisiko")]
         public async Task<IActionResult> TilføjSelvrisiko(int ordreId)

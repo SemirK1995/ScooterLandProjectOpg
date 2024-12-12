@@ -54,7 +54,7 @@ namespace ScooterLandProjectOpg.Server.Services
 			ordre.Status = nyStatus;
 
 			// Hvis status er Afsluttet, Betalt eller Annulleret, fjern arbejdsopgaver
-			if (nyStatus == OrdreStatus.Afsluttet || nyStatus == OrdreStatus.Betalt || nyStatus == OrdreStatus.Annulleret)
+			if (nyStatus == OrdreStatus.Betalt || nyStatus == OrdreStatus.Annulleret)
 			{
 				foreach (var ydelse in ordre.OrdreYdelse)
 				{

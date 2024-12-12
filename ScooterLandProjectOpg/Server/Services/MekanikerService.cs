@@ -70,7 +70,6 @@ namespace ScooterLandProjectOpg.Server.Services
 				.Include(oy => oy.Scooter) // Inkluder oplysninger om scooteren
 				.Include(oy => oy.Ordre) // Inkluder relateret ordre for at filtrere status
 				.Where(oy => oy.MekanikerId == mekanikerId &&
-							 oy.Ordre.Status != OrdreStatus.Afsluttet &&
 							 oy.Ordre.Status != OrdreStatus.Betalt &&
 							 oy.Ordre.Status != OrdreStatus.Annulleret)
 				.ToListAsync();

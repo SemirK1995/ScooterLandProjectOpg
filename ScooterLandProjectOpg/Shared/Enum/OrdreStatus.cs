@@ -10,7 +10,6 @@ namespace ScooterLandProjectOpg.Shared.Enum
 	{
 		Oprettet,
 		Behandles,
-		Afsluttet,
 		Annulleret,
 		Betalt
 	}
