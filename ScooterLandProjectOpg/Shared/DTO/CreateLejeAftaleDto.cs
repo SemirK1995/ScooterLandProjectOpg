@@ -26,5 +26,7 @@ namespace ScooterLandProjectOpg.Shared.DTO
 		public double ForsikringsPris { get; set; } = 50;
 		public double KilometerPris { get; set; } = 0.53;
         public int? KortKilometer { get; set; }
-    }
+
+		public List<int> Scootere { get; set; } = new List<int>();
+	}
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ScooterLandProjectOpg.Client;
 using ScooterLandProjectOpg.Server.Context;
 using ScooterLandProjectOpg.Server.Interfaces;
 using ScooterLandProjectOpg.Shared.DTO;
@@ -40,7 +41,7 @@ namespace ScooterLandProjectOpg.Server.Controllers
         public async Task<ActionResult<IEnumerable<Ordre>>> GetAll()
         {
             var ordre = await _ordreRepository.GetAllAsync();
-            return Ok(ordre);
+			return Ok(ordre);
         }
 		public async Task<ActionResult<Ordre>> Add([FromBody] CreateOrdreDto ordreDTO)
 		{
@@ -78,11 +79,10 @@ namespace ScooterLandProjectOpg.Server.Controllers
 						ordre.TotalPris += ydelsePris;
 					}
 				}
-
 				// Håndter lejeaftale, hvis der er en
 				if (ordreDTO.LejeAftale != null)
 				{
-					var lejeAftale = new LejeAftale
+					var nyLejeAftale = new LejeAftale
 					{
 						KundeId = ordreDTO.KundeId,
 						StartDato = ordreDTO.LejeAftale.StartDato,
@@ -92,14 +92,29 @@ namespace ScooterLandProjectOpg.Server.Controllers
 						KilometerPris = ordreDTO.LejeAftale.KilometerPris,
 						KortKilometer = ordreDTO.LejeAftale.KortKilometer
 					};
-					_context.LejeAftaler.Add(lejeAftale);
+					_context.LejeAftaler.Add(nyLejeAftale);
 					await _context.SaveChangesAsync();
 
-					ordre.LejeId = lejeAftale.LejeId;
-					ordre.TotalPris += lejeAftale.TotalPris;
+					ordre.LejeId = nyLejeAftale.LejeId;
+					ordre.TotalPris += nyLejeAftale.TotalPris;
 				}
 
 				_context.Ordrer.Add(ordre);
+				await _context.SaveChangesAsync();
+
+				if (ordreDTO.LejeAftale?.LejeScooterId != null)
+				{
+					var lejeScooter = await _context.LejeScootere.FindAsync(ordreDTO.LejeAftale.LejeScooterId);
+					if (lejeScooter == null)
+					{
+						return BadRequest($"Scooter med ID {ordreDTO.LejeAftale.LejeScooterId} findes ikke.");
+					}
+
+					lejeScooter.LejeId = ordre.LejeId;
+					lejeScooter.ErTilgængelig = false; // Scooteren er nu ikke længere tilgængelig
+					_context.LejeScootere.Update(lejeScooter);
+				}
+
 				await _context.SaveChangesAsync();
 
 				// Håndter produkter
@@ -144,89 +159,127 @@ namespace ScooterLandProjectOpg.Server.Controllers
 				return StatusCode(500, $"Fejl under oprettelse af ordre: {ex.Message}");
 			}
 		}
+		//public async Task<ActionResult<Ordre>> Add([FromBody] CreateOrdreDto ordreDTO)
+		//{
+		//	if (ordreDTO == null || ordreDTO.KundeId == 0)
+		//	{
+		//		return BadRequest("Ordre data is invalid.");
+		//	}
 
-        //[HttpPut("{ordreId}/status")]
-        //      public async Task<IActionResult> UpdateOrdreStatus(int ordreId, [FromBody] OrdreStatus nyStatus)
-        //      {
-        //	var ordre = await _ordreRepository.GetByIdAsync(ordreId);
-        //	if (ordre == null)
-        //	{
-        //		return NotFound($"Ordre med ID {ordreId} blev ikke fundet.");
-        //	}
+		//	try
+		//	{
+		//		var ordre = new Ordre
+		//		{
+		//			KundeId = ordreDTO.KundeId,
+		//			Dato = ordreDTO.Dato,
+		//			TotalPris = 0, // Start med 0 og beregn totalen senere
+		//			OrdreYdelse = ordreDTO.OrdreYdelser?.Select(oy => new OrdreYdelse
+		//			{
+		//				YdelseId = oy.YdelseId,
+		//				AftaltPris = oy.AftaltPris ?? 0,
+		//				Dato = oy.Dato ?? DateTime.Now,
+		//				ScooterId = oy.ScooterId
+		//			}).ToList()
+		//		};
 
-        //	ordre.Status = nyStatus;
-        //	await _ordreRepository.UpdateAsync(ordre);
+		//		// Beregn totalpris fra ydelser
+		//		if (ordre.OrdreYdelse != null && ordre.OrdreYdelse.Any())
+		//		{
+		//			foreach (var ydelse in ordre.OrdreYdelse)
+		//			{
+		//				// Brug AftaltPris hvis tilgængelig, ellers StandardPris
+		//				var ydelsePris = ydelse.AftaltPris > 0
+		//					? ydelse.AftaltPris
+		//					: (await _context.Ydelser.FindAsync(ydelse.YdelseId))?.StandardPris ?? 0;
 
-        //	return NoContent();
-        //}
-        public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
+		//				ordre.TotalPris += ydelsePris;
+		//			}
+		//		}
+
+		//		// Håndter lejeaftale, hvis der er en
+		//		if (ordreDTO.LejeAftale != null)
+		//		{
+		//			var lejeAftale = new LejeAftale
+		//			{
+		//				KundeId = ordreDTO.KundeId,
+		//				StartDato = ordreDTO.LejeAftale.StartDato,
+		//				SlutDato = ordreDTO.LejeAftale.SlutDato,
+		//				DagligLeje = ordreDTO.LejeAftale.DagligLeje,
+		//				ForsikringsPris = ordreDTO.LejeAftale.ForsikringsPris,
+		//				KilometerPris = ordreDTO.LejeAftale.KilometerPris,
+		//				KortKilometer = ordreDTO.LejeAftale.KortKilometer
+		//			};
+		//			_context.LejeAftaler.Add(lejeAftale);
+		//			await _context.SaveChangesAsync();
+
+		//			ordre.LejeId = lejeAftale.LejeId;
+		//			ordre.TotalPris += lejeAftale.TotalPris;
+		//		}
+
+		//		_context.Ordrer.Add(ordre);
+		//		await _context.SaveChangesAsync();
+
+		//		// Håndter produkter
+		//		if (ordreDTO.OrdreProdukter != null && ordreDTO.OrdreProdukter.Any())
+		//		{
+		//			foreach (var produktDTO in ordreDTO.OrdreProdukter)
+		//			{
+		//				var produkt = await _context.Produkter.FindAsync(produktDTO.ProduktId);
+		//				if (produkt == null) return BadRequest($"Produkt med ID {produktDTO.ProduktId} findes ikke.");
+		//				if (produkt.LagerAntal < produktDTO.KøbsAntal) return BadRequest($"Ikke nok på lager for produkt: {produkt.ProduktNavn}.");
+
+		//				produkt.LagerAntal -= produktDTO.KøbsAntal;
+		//				_context.Produkter.Update(produkt);
+
+		//				var ordreProdukt = new OrdreProdukt
+		//				{
+		//					ProduktId = produkt.ProduktId,
+		//					OrdreId = ordre.OrdreId,
+		//					Antal = produktDTO.KøbsAntal,
+		//					Pris = produkt.Pris ?? 0
+		//				};
+		//				_context.OrdreProdukter.Add(ordreProdukt);
+		//				ordre.TotalPris += (produkt.Pris ?? 0) * produktDTO.KøbsAntal;
+		//			}
+		//		}
+
+		//		await _context.SaveChangesAsync();
+
+		//		var betaling = new Betaling
+		//		{
+		//			OrdreId = ordre.OrdreId,
+		//			Beløb = ordre.TotalPris,
+		//			Betalt = false
+		//		};
+		//		_context.Betalinger.Add(betaling);
+		//		await _context.SaveChangesAsync();
+
+		//		return CreatedAtAction(nameof(GetById), new { id = ordre.OrdreId }, ordre);
+		//	}
+		//	catch (Exception ex)
+		//	{
+		//		return StatusCode(500, $"Fejl under oprettelse af ordre: {ex.Message}");
+		//	}
+		//}
+
+
+		// API-endpoint til opdatering af ordrestatus
+		[HttpPut("{ordreId}/status")]
+        public async Task<IActionResult> UpdateOrdreStatus(int ordreId, [FromBody] OrdreStatus nyStatus)
         {
-            // Hent ordren med relaterede data
-            var ordre = await _context.Ordrer
-                .Include(o => o.OrdreYdelse) // Inkluder arbejdsopgaver
-                .Include(o => o.OrdreProdukter) // Inkluder ordreprodukter
-                .Include(o => o.Betalinger) // Inkluder betalinger
-                .Include(o => o.LejeAftale) // Inkluder lejeaftale
-                .ThenInclude(la => la.LejeScooter) // Inkluder lejescootere
-                .FirstOrDefaultAsync(o => o.OrdreId == ordreId);
-
-            if (ordre == null)
-                throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
-
-            // Opdater ordrestatus
-            ordre.Status = nyStatus;
-
-            // Fjern arbejdsopgaver for status Betalt eller Annulleret
-            if (nyStatus == OrdreStatus.Betalt || nyStatus == OrdreStatus.Annulleret)
+            try
             {
-                foreach (var ydelse in ordre.OrdreYdelse)
-                {
-                    ydelse.MekanikerId = null; // Fjern mekanikertildeling
-                }
+                await _ordreRepository.UpdateOrdreStatusAsync(ordreId, nyStatus);
+                return Ok(new { message = "Ordrestatus opdateret med succes." });
             }
-
-            // Hvis status er Annulleret, fjern alle relaterede data
-            if (nyStatus == OrdreStatus.Annulleret)
+            catch (KeyNotFoundException ex)
             {
-                // Fjern betalinger
-                if (ordre.Betalinger != null && ordre.Betalinger.Any())
-                {
-                    _context.Betalinger.RemoveRange(ordre.Betalinger);
-                }
-
-                // Fjern ordreprodukter
-                if (ordre.OrdreProdukter != null && ordre.OrdreProdukter.Any())
-                {
-                    _context.OrdreProdukter.RemoveRange(ordre.OrdreProdukter);
-                }
-
-                // Fjern ordreydelser
-                if (ordre.OrdreYdelse != null && ordre.OrdreYdelse.Any())
-                {
-                    _context.OrdreYdelser.RemoveRange(ordre.OrdreYdelse);
-                }
-
-                // Fjern lejeaftale og relaterede lejescootere
-                if (ordre.LejeAftale != null)
-                {
-                    if (ordre.LejeAftale.LejeScooter != null && ordre.LejeAftale.LejeScooter.Any())
-                    {
-                        _context.LejeScootere.RemoveRange(ordre.LejeAftale.LejeScooter);
-                    }
-                    _context.LejeAftaler.Remove(ordre.LejeAftale);
-                }
-
-                // Fjern selve ordren
-                _context.Ordrer.Remove(ordre);
+                return NotFound(new { message = ex.Message });
             }
-            else
+            catch (Exception ex)
             {
-                // Hvis status ikke er Annulleret, opdater ordren
-                _context.Ordrer.Update(ordre);
+                return StatusCode(500, new { message = "Der opstod en fejl under opdatering af ordrestatus.", error = ex.Message });
             }
-
-            // Gem ændringer i databasen
-            await _context.SaveChangesAsync();
         }
 
 

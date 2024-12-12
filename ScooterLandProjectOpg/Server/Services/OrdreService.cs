@@ -41,34 +41,86 @@ namespace ScooterLandProjectOpg.Server.Services
 			await _context.SaveChangesAsync();
 			return ordre;
 		}
-		public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
-		{
-			var ordre = await _context.Ordrer
-				.Include(o => o.OrdreYdelse)
-				.FirstOrDefaultAsync(o => o.OrdreId == ordreId);
+        public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
+        {
+            // Hent ordren med relaterede data
+            var ordre = await _context.Ordrer
+                .Include(o => o.OrdreYdelse) // Inkluder arbejdsopgaver
+                .Include(o => o.OrdreProdukter) // Inkluder ordreprodukter
+                .Include(o => o.Betalinger) // Inkluder betalinger
+                .Include(o => o.LejeAftale) // Inkluder lejeaftale
+                .ThenInclude(la => la.LejeScooter) // Inkluder lejescootere
+                .FirstOrDefaultAsync(o => o.OrdreId == ordreId);
 
-			if (ordre == null)
-				throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
+            if (ordre == null)
+                throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
 
-			// Opdater ordrestatus
-			ordre.Status = nyStatus;
+            // Opdater ordrestatus
+            ordre.Status = nyStatus;
 
-			// Hvis status er Afsluttet, Betalt eller Annulleret, fjern arbejdsopgaver
-			if (nyStatus == OrdreStatus.Betalt || nyStatus == OrdreStatus.Annulleret)
-			{
-				foreach (var ydelse in ordre.OrdreYdelse)
-				{
-					ydelse.MekanikerId = null; // Fjern mekanikertildelingen
-				}
-			}
+            // Fjern arbejdsopgaver for status Betalt eller Annulleret
+            if (nyStatus == OrdreStatus.Betalt || nyStatus == OrdreStatus.Annulleret)
+            {
+                foreach (var ydelse in ordre.OrdreYdelse)
+                {
+                    ydelse.MekanikerId = null; // Fjern mekanikertildeling
+                }
 
-			_context.Ordrer.Update(ordre);
-			await _context.SaveChangesAsync();
-		}
+                // Hvis status er Annulleret, udfør sletning i den specifikke rækkefølge
+                if (nyStatus == OrdreStatus.Annulleret)
+                {
+                    // 1: Opdater LejeScootere
+                    if (ordre.LejeAftale?.LejeScooter != null)
+                    {
+                        foreach (var scooter in ordre.LejeAftale.LejeScooter)
+                        {
+                            scooter.ErTilgængelig = true; // Sæt tilgængelighed til true
+                            scooter.LejeId = null; // Fjern LejeId
+                        }
+                        _context.LejeScootere.UpdateRange(ordre.LejeAftale.LejeScooter);
+                    }
+
+                    // 2: Slet relaterede data
+                    if (ordre.Betalinger != null && ordre.Betalinger.Any())
+                        _context.Betalinger.RemoveRange(ordre.Betalinger);
+
+                    if (ordre.OrdreProdukter != null && ordre.OrdreProdukter.Any())
+                        _context.OrdreProdukter.RemoveRange(ordre.OrdreProdukter);
+
+                    if (ordre.OrdreYdelse != null && ordre.OrdreYdelse.Any())
+                        _context.OrdreYdelser.RemoveRange(ordre.OrdreYdelse);
+
+                    // 3: Fjern LejeId fra ordren
+                    ordre.LejeId = null;
+
+                    // 4: Slet lejeaftalen
+                    if (ordre.LejeAftale != null)
+                    {
+                        _context.LejeAftaler.Remove(ordre.LejeAftale);
+                    }
+
+                    // 5: Slet selve ordren
+                    _context.Ordrer.Remove(ordre);
+                }
+                else
+                {
+                    // Hvis status er Betalt, gem ændringer uden at slette ordren
+                    _context.Ordrer.Update(ordre);
+                }
+            }
+            else
+            {
+                // Hvis status ikke er Annulleret eller Betalt, gem kun statusopdateringen
+                _context.Ordrer.Update(ordre);
+            }
+
+            // Gem ændringer i databasen
+            await _context.SaveChangesAsync();
+        }
 
 
-		//Tilføj Selvrisiko til en ordrer
-		public async Task TilføjSelvrisikoAsync(int ordreId)
+        //Tilføj Selvrisiko til en ordrer
+        public async Task TilføjSelvrisikoAsync(int ordreId)
         {
             var ordre = await _context.Ordrer.FindAsync(ordreId);
             if (ordre == null)

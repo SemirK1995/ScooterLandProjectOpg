@@ -752,21 +752,48 @@
 		}
 	}
 
-
-
-
+	// private async Task OpdaterOrdreStatus(Ordre ordre)
+	// {
+	// 	var response = await Http.PutAsJsonAsync($"api/Ordre/{ordre.OrdreId}/status", ordre.Status);
+	// 	if (response.IsSuccessStatusCode)
+	// 	{
+	// 		Console.WriteLine($"Ordrestatus for ID {ordre.OrdreId} opdateret til {ordre.Status}.");
+	// 	}
+	// 	else
+	// 	{
+	// 		Console.WriteLine("Fejl ved opdatering af ordrestatus.");
+	// 	}
+	// }
 	private async Task OpdaterOrdreStatus(Ordre ordre)
 	{
-		var response = await Http.PutAsJsonAsync($"api/Ordre/{ordre.OrdreId}/status", ordre.Status);
-		if (response.IsSuccessStatusCode)
+		try
 		{
-			Console.WriteLine($"Ordrestatus for ID {ordre.OrdreId} opdateret til {ordre.Status}.");
+			var response = await Http.PutAsJsonAsync($"api/Ordre/{ordre.OrdreId}/status", ordre.Status);
+
+			if (response.IsSuccessStatusCode)
+			{
+				Console.WriteLine($"Ordrestatus for ID {ordre.OrdreId} opdateret til {ordre.Status}.");
+
+				// Tjek, om status er Annulleret eller Betalt
+				if (ordre.Status == OrdreStatus.Annulleret || ordre.Status == OrdreStatus.Betalt)
+				{
+					Console.WriteLine("Udfører yderligere handlinger for status: " + ordre.Status);
+				}
+
+				// Opdater listen over kunder eller ordrer, hvis det er nødvendigt
+				await HentKundeDetaljer(ordre.KundeId);
+			}
+			else
+			{
+				Console.WriteLine($"Fejl ved opdatering af ordrestatus for ID {ordre.OrdreId}.");
+			}
 		}
-		else
+		catch (Exception ex)
 		{
-			Console.WriteLine("Fejl ved opdatering af ordrestatus.");
+			Console.WriteLine($"En fejl opstod ved opdatering af status: {ex.Message}");
 		}
 	}
+
 
 	private async Task VisOrdreDetaljer(int ordreId)
 	{
