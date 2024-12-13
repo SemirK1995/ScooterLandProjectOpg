@@ -49,8 +49,6 @@ namespace ScooterLandProjectOpg.Server.Services
 			_context.Kunder.Remove(kunde); // Cascade delete håndterer relaterede data
 			await _context.SaveChangesAsync();
 		}
-
-
 		public new async Task UpdateAsync(Kunde entity)
 		{
 			await base.UpdateAsync(entity); // Brug af base klassen' UpdateAsync

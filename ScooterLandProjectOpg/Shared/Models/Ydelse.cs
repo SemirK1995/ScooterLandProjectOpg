@@ -17,11 +17,9 @@ namespace ScooterLandProjectOpg.Shared.Models
 		public string? Navn { get; set; }
 		public double? StandardPris { get; set; }
 
-
 		// Navigation property til en liste af OrdreYdelse
 		public List<OrdreYdelse>? OrdreYdelse { get; set; } = new List<OrdreYdelse>();
 
-		
 		public Ydelse()
 		{
 		}

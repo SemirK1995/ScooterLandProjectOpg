@@ -184,38 +184,5 @@ namespace ScooterLandProjectOpg.Server.Controllers
                 return StatusCode(500, new { message = "Der opstod en fejl under opdatering af ordrestatus.", error = ex.Message });
             }
         }
-
-
-        [HttpPut("{ordreId}/selvrisiko")]
-        public async Task<IActionResult> TilføjSelvrisiko(int ordreId)
-        {
-            try
-            {
-                await _ordreRepository.TilføjSelvrisikoAsync(ordreId);
-                return Ok($"Selvrisiko tilføjet til ordre ID {ordreId}.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-		[HttpPut("{ordreId}/remove-selvrisiko")]
-		public async Task<IActionResult> FjernSelvrisiko(int ordreId)
-		{
-			try
-			{
-				await _ordreRepository.FjernSelvrisikoAsync(ordreId); // Kald den forenklede service-metode
-				return Ok($"Selvrisiko fjernet fra ordre ID {ordreId}.");
-			}
-			catch (KeyNotFoundException ex)
-			{
-				return NotFound(ex.Message); // Returner en 404-fejl, hvis ordren ikke findes
-			}
-			catch (Exception ex)
-			{
-				return BadRequest($"En fejl opstod: {ex.Message}"); // Håndter andre fejl
-			}
-		}
 	}
 }

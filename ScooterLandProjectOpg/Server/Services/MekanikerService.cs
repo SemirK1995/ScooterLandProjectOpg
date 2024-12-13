@@ -53,16 +53,7 @@ namespace ScooterLandProjectOpg.Server.Services
 				await _context.SaveChangesAsync();
 			}
 		}
-		//Hent arbejdsopgaver for en mekaniker
-		//public async Task<IEnumerable<OrdreYdelse>> GetArbejdsopgaverForMekanikerAsync(int mekanikerId)
-		//{
-		//	return await _context.OrdreYdelser
-		//		.Include(oy => oy.Ydelse) // Inkluderer oplysninger om ydelsen
-		//		.Include(oy => oy.Scooter) // Inkluderer oplysninger om kundens scooter
-		//		.Where(oy => oy.MekanikerId == mekanikerId)
-		//		.ToListAsync();
-		//}
-		// Hent kun aktive arbejdsopgaver for en mekaniker
+		
 		public async Task<IEnumerable<OrdreYdelse>> GetAktiveArbejdsopgaverForMekanikerAsync(int mekanikerId)
 		{
 			return await _context.OrdreYdelser
@@ -74,7 +65,6 @@ namespace ScooterLandProjectOpg.Server.Services
 							 oy.Ordre.Status != OrdreStatus.Annulleret)
 				.ToListAsync();
 		}
-
 	}
 }
 

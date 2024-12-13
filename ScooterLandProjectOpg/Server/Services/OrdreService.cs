@@ -137,35 +137,5 @@ namespace ScooterLandProjectOpg.Server.Services
             // Gem ændringer i databasen
             await _context.SaveChangesAsync();
         }
-
-
-        //Tilføj Selvrisiko til en ordrer
-        public async Task TilføjSelvrisikoAsync(int ordreId)
-        {
-            var ordre = await _context.Ordrer.FindAsync(ordreId);
-            if (ordre == null)
-            {
-                throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
-            }
-
-            ordre.TotalPris += 1000; // Tilføj 1000 kr. for selvrisiko
-            await _context.SaveChangesAsync();
-        }
-		public async Task FjernSelvrisikoAsync(int ordreId)
-		{
-			var ordre = await _context.Ordrer.FindAsync(ordreId);
-			if (ordre == null)
-			{
-				throw new KeyNotFoundException($"Ordre med ID {ordreId} blev ikke fundet.");
-			}
-
-			// Træk selvrisiko fra totalpris, hvis den er tilføjet
-			if (ordre.TotalPris != null && ordre.TotalPris >= 1000)
-			{
-				ordre.TotalPris -= 1000;
-			}
-
-			await _context.SaveChangesAsync();
-		}
 	}
 }

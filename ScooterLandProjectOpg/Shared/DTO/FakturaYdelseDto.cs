@@ -14,7 +14,7 @@ namespace ScooterLandProjectOpg.Shared.DTO
         public double? BeregnetPris { get; set; }
         public string? ScooterMaerke { get; set; }
         public string? ScooterModel { get; set; }
-		public string? MekanikerNavn { get; set; } // Mekanikerens navn
-		public double? MekanikerTimer { get; set; } // Mekanikerens timer på ydelsen
+		public string? MekanikerNavn { get; set; } 
+		public double? MekanikerTimer { get; set; } 
 	}
 }

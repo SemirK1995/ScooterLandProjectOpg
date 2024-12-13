@@ -40,18 +40,7 @@ namespace ScooterLandProjectOpg.Server.Services
 							 la.LejeId.ToString().Contains(query))
 				.ToListAsync();
 		}
-		//public async Task UpdateSelvrisikoAsync(int lejeId, double selvrisiko)
-		//{
-		//	var lejeAftale = await _context.Set<LejeAftale>().FindAsync(lejeId);
-		//	if (lejeAftale == null)
-		//	{
-		//		throw new KeyNotFoundException($"Lejeaftale med ID {lejeId} blev ikke fundet.");
-		//	}
-
-		//	lejeAftale.Selvrisiko = selvrisiko;
-		//	_context.Update(lejeAftale);
-		//	await _context.SaveChangesAsync();
-		//}
+		
 		public async Task<Ordre> UpdateSelvrisikoAsync(int lejeId, double selvrisiko)
 		{
 			var lejeAftale = await _context.Set<LejeAftale>()
@@ -74,19 +63,6 @@ namespace ScooterLandProjectOpg.Server.Services
 				.FirstOrDefaultAsync(o => o.OrdreId == lejeAftale.Ordre.OrdreId);
 		}
 
-
-		//public async Task UpdateKortKilometerAsync(int lejeId, int? kortKilometer)
-		//{
-		//	var lejeAftale = await _context.Set<LejeAftale>().FindAsync(lejeId);
-		//	if (lejeAftale == null)
-		//	{
-		//		throw new KeyNotFoundException($"Lejeaftale med ID {lejeId} blev ikke fundet.");
-		//	}
-
-		//	lejeAftale.KortKilometer = kortKilometer;
-		//	_context.Update(lejeAftale);
-		//	await _context.SaveChangesAsync();
-		//}
 		public async Task<LejeAftale?> UpdateKortKilometerAsync(int lejeId, int? kortKilometer)
 		{
 			// Hent LejeAftale med relaterede data, hvis nødvendigt

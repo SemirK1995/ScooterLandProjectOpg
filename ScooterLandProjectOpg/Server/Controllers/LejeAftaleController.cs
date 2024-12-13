@@ -59,20 +59,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
                 return NotFound(ex.Message);
             }
         }
-
-		//[HttpPut("{lejeId}/kilometer")]
-		//public async Task<IActionResult> UpdateKortKilometer(int lejeId, [FromBody] int kortKilometer)
-		//{
-		//    try
-		//    {
-		//        await _lejeaftaleRepository.UpdateKortKilometerAsync(lejeId, kortKilometer);
-		//        return NoContent();
-		//    }
-		//    catch (KeyNotFoundException ex)
-		//    {
-		//        return NotFound(ex.Message);
-		//    }
-		//}
 		[HttpPut("{lejeId}/kilometer")]
 		public async Task<IActionResult> UpdateKortKilometer(int lejeId, [FromBody] int kortKilometer)
 		{
@@ -98,7 +84,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
 				return StatusCode(500, $"Der opstod en fejl: {ex.Message}");
 			}
 		}
-
 		[HttpGet]
         public async Task<ActionResult<IEnumerable<LejeAftale>>> GetAllLejeAftaler()
         {
@@ -112,7 +97,5 @@ namespace ScooterLandProjectOpg.Server.Controllers
                 return StatusCode(500, $"Serverfejl: {ex.Message}");
             }
         }
-
-
     }
 }

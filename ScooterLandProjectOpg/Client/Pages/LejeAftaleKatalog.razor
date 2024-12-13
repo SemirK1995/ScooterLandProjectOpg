@@ -261,15 +261,6 @@ else
 		}
 
 	}
-	// private async Task OpdaterKortKilometer(int lejeId, int? kortKilometer)
-	// {
-	// 	var response = await Http.PutAsJsonAsync($"api/LejeAftale/{lejeId}/kilometer", kortKilometer);
-	// 	if (response.IsSuccessStatusCode)
-	// 	{
-	// 		await HentLejeAftaler();
-	// 	}
-		
-	// }
 	private async Task OpdaterKortKilometer(int lejeId, int? kortKilometer)
 	{
 		var response = await Http.PutAsJsonAsync($"api/LejeAftale/{lejeId}/kilometer", kortKilometer);

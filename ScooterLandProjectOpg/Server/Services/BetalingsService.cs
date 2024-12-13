@@ -115,26 +115,6 @@ namespace ScooterLandProjectOpg.Server.Services
             betaling.BetalingsMetode = nyMetode;
             await _context.SaveChangesAsync();
         }
-
-		//public async Task<Betaling> GetFakturaDetaljerAsync(int betalingsId)
-		//{
-		//    return await _context.Betalinger
-		//        .Include(b => b.Ordre)
-		//            .ThenInclude(o => o.LejeAftale)
-		//                .ThenInclude(la => la.LejeScooter)
-		//        .Include(b => b.Ordre)
-		//            .ThenInclude(o => o.OrdreYdelse)
-		//                .ThenInclude(oy => oy.Scooter)
-		//        .Include(b => b.Ordre)
-		//            .ThenInclude(o => o.OrdreYdelse)
-		//                .ThenInclude(oy => oy.Ydelse)
-		//        .Include(b => b.Ordre)
-		//            .ThenInclude(o => o.Kunde)
-		//        .Include(b => b.Ordre) // Tilføj produkterne
-		//            .ThenInclude(o => o.OrdreProdukter)
-		//                .ThenInclude(op => op.Produkt)
-		//        .FirstOrDefaultAsync(b => b.BetalingsId == betalingsId);
-		//}
 		public async Task<Betaling> GetFakturaDetaljerAsync(int betalingsId)
 		{
 			return await _context.Betalinger
