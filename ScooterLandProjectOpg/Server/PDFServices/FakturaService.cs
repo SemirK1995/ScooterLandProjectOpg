@@ -1,7 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using ScooterLandProjectOpg.Server.Context;
+using ScooterLandProjectOpg.Shared.Models;
+using SixLabors.Fonts;
+using System.Reflection.Metadata;
 
 namespace ScooterLandProjectOpg.Server.PDFServices
 {
@@ -17,17 +21,24 @@ namespace ScooterLandProjectOpg.Server.PDFServices
 		public async Task<byte[]> GenererFakturaPdfAsync(int betalingsId)
 		{
 			var betaling = await _context.Betalinger
-				.Include(b => b.Ordre)
-					.ThenInclude(o => o.LejeAftale)
-				.Include(b => b.Ordre)
-					.ThenInclude(o => o.OrdreYdelse)
-					.ThenInclude(oy => oy.Ydelse)
-				.Include(b => b.Ordre)
-					.ThenInclude(o => o.OrdreProdukter)
-					.ThenInclude(op => op.Produkt)
-				.Include(b => b.Ordre)
-					.ThenInclude(o => o.Kunde)
-				.FirstOrDefaultAsync(b => b.BetalingsId == betalingsId);
+				 .Include(b => b.Ordre)
+			.ThenInclude(o => o.LejeAftale)
+				.ThenInclude(la => la.LejeScooter)
+		.Include(b => b.Ordre)
+			.ThenInclude(o => o.OrdreYdelse)
+				.ThenInclude(oy => oy.Scooter)
+		.Include(b => b.Ordre)
+			.ThenInclude(o => o.OrdreYdelse)
+				.ThenInclude(oy => oy.Ydelse)
+		.Include(b => b.Ordre)
+			.ThenInclude(o => o.OrdreYdelse)
+				.ThenInclude(oy => oy.Mekaniker) // Tilføj denne linje for mekanikeroplysninger
+		.Include(b => b.Ordre)
+			.ThenInclude(o => o.Kunde)
+		.Include(b => b.Ordre) // Tilføj produkterne
+			.ThenInclude(o => o.OrdreProdukter)
+				.ThenInclude(op => op.Produkt)
+		.FirstOrDefaultAsync(b => b.BetalingsId == betalingsId);
 
 			if (betaling == null)
 				throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
@@ -127,17 +138,34 @@ namespace ScooterLandProjectOpg.Server.PDFServices
 					yPoint += 10;
 				}
 
+
 				// Produkter
 				if (ordre.OrdreProdukter?.Any() == true)
 				{
-					gfx.DrawString("Produkter", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-					yPoint += 30;
-					foreach (var produkt in ordre.OrdreProdukter)
-					{
-						gfx.DrawString($"- {produkt.Produkt?.ProduktNavn} x {produkt.Antal}: {produkt.Pris * produkt.Antal} kr.", normalFont, darkBrush, 40, yPoint);
-						yPoint += 15;
-					}
-				}
+                    gfx.DrawString("Ydelser", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                    yPoint += 30;
+
+                    foreach (var ydelse in ordre.OrdreYdelse)
+                    {
+                        gfx.DrawString($"- {ydelse.Ydelse?.Navn}: {ydelse.BeregnetPris.ToString("F2")} kr.", normalFont, darkBrush, 40, yPoint);
+                        yPoint += 15;
+
+                        // Mekanikeroplysninger
+                        if (ydelse.Mekaniker != null)
+                        {
+                            gfx.DrawString($"  Mekaniker: {ydelse.Mekaniker.Navn}", normalFont, XBrushes.Gray, 60, yPoint);
+                            yPoint += 15;
+                        }
+
+                        // Timer arbejdet
+                        if (ydelse.Timer.HasValue)
+                        {
+                            gfx.DrawString($"  Timer: {ydelse.Timer.Value:F2}", normalFont, XBrushes.Gray, 60, yPoint);
+                            yPoint += 15;
+                        }
+                    }
+                    yPoint += 10;
+                }
 
 				// Beregn totalpris
 				double totalPris = ordre.TotalPris ?? 0;
@@ -155,5 +183,7 @@ namespace ScooterLandProjectOpg.Server.PDFServices
 				return ms.ToArray();
 			}
 		}
+
+
 	}
 }

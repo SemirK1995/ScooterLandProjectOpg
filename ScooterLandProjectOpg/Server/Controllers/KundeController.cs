@@ -94,23 +94,6 @@ namespace ScooterLandProjectOpg.Server.Controllers
 			return NoContent();
 		}
 
-		
-		//// DELETE: api/Kunde/5
-
-		//[HttpDelete("{id}")]
-		//public async Task<IActionResult> Delete(int id)
-		//{
-		//	try
-		//	{
-		//		await _kundeRepository.DeleteAsync(id);
-		//		return NoContent();
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		Console.WriteLine($"Fejl ved sletning af kunde: {ex.Message}");
-		//		return StatusCode(500, "Der opstod en fejl ved sletning af kunden.");
-		//	}
-		//}
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> Delete(int id)
 		{

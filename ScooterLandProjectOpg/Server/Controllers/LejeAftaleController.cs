@@ -60,20 +60,46 @@ namespace ScooterLandProjectOpg.Server.Controllers
             }
         }
 
-        [HttpPut("{lejeId}/kilometer")]
-        public async Task<IActionResult> UpdateKortKilometer(int lejeId, [FromBody] int? kortKilometer)
-        {
-            try
-            {
-                await _lejeaftaleRepository.UpdateKortKilometerAsync(lejeId, kortKilometer);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
-        [HttpGet]
+		//[HttpPut("{lejeId}/kilometer")]
+		//public async Task<IActionResult> UpdateKortKilometer(int lejeId, [FromBody] int kortKilometer)
+		//{
+		//    try
+		//    {
+		//        await _lejeaftaleRepository.UpdateKortKilometerAsync(lejeId, kortKilometer);
+		//        return NoContent();
+		//    }
+		//    catch (KeyNotFoundException ex)
+		//    {
+		//        return NotFound(ex.Message);
+		//    }
+		//}
+		[HttpPut("{lejeId}/kilometer")]
+		public async Task<IActionResult> UpdateKortKilometer(int lejeId, [FromBody] int kortKilometer)
+		{
+			try
+			{
+				// Opdater kilometer og hent den opdaterede lejeaftale
+				var lejeAftale = await _lejeaftaleRepository.UpdateKortKilometerAsync(lejeId, kortKilometer);
+
+				if (lejeAftale == null)
+				{
+					return NotFound($"Lejeaftale med ID {lejeId} blev ikke fundet.");
+				}
+
+				// Returner den opdaterede lejeaftale eller ordre
+				return Ok(lejeAftale.Ordre);
+			}
+			catch (KeyNotFoundException ex)
+			{
+				return NotFound(ex.Message);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Der opstod en fejl: {ex.Message}");
+			}
+		}
+
+		[HttpGet]
         public async Task<ActionResult<IEnumerable<LejeAftale>>> GetAllLejeAftaler()
         {
             try

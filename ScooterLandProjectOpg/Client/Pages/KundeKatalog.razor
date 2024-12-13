@@ -94,34 +94,38 @@
 						{
 							<tr>
 								<td colspan="7" class="bg-light">
-									<table class="table table-bordered mt-3">
-										<thead class="table-secondary">
-											<tr>
-												<th>Mærke</th>
-												<th>Model</th>
-												<th>Registreringsnummer</th>
-											</tr>
-										</thead>
-										<tbody>
-											@foreach (var scooter in scootere)
-											{
+									@if (scootere != null && scootere.Any())
+									{
+										<table class="table table-bordered mt-3">
+											<thead class="table-secondary">
 												<tr>
-													<td>@scooter.Maerke</td>
-													<td>@scooter.Model</td>
-													<td>@scooter.RegistreringsNummer</td>
+													<th>Mærke</th>
+													<th>Model</th>
+													<th>Registreringsnummer</th>
 												</tr>
-											}
-											@if (!scootere.Any())
-											{
-												<tr>
-													<td colspan="3" class="text-center text-muted">Ingen scootere fundet for denne kunde.</td>
-												</tr>
-											}
-										</tbody>
-									</table>
+											</thead>
+											<tbody>
+												@foreach (var scooter in scootere)
+												{
+													<tr>
+														<td>@scooter.Maerke</td>
+														<td>@scooter.Model</td>
+														<td>@scooter.RegistreringsNummer</td>
+													</tr>
+												}
+											</tbody>
+										</table>
+									}
+									else
+									{
+										<div class="text-center text-muted py-2">
+											Kunde har ingen scooter.
+										</div>
+									}
 								</td>
 							</tr>
 						}
+
 					}
 				}
 				else
@@ -134,147 +138,6 @@
 		</table>
 	}
 </div>
-
-
-@* <div class="container my-4">
-	<div class="card-header bg-primary text-white text-center">
-		<h3 class="card-title">Kunde Katalog</h3>
-	</div>
-
-	<div class="form-group mt-3 d-flex">
-		<input id="search" type="text" class="form-control me-2"
-			   @bind="søgeTekst"
-			   placeholder="Søg på Kunde ID, Navn eller Telefonnummer" />
-		<button class="btn btn-primary me-2" @onclick="SøgKunder">Søg</button>
-		<button class="btn btn-secondary" @onclick="RydSøgning">Ryd</button>
-	</div>
-
-
-
-	@if (kunder == null)
-	{
-		<div class="text-center">
-			<p class="text-muted">Loading...</p>
-		</div>
-	}
-	else
-	{
-		<div class="text-center my-3">
-			<button class="btn custom-btn" @onclick="VisOpretModal">Opret Kunde</button>
-		</div>
-		<style>
-			.custom-btn {
-				background: linear-gradient(to bottom, #4f81bd, #1f4e79); /* Samme gradient som boksen */
-				color: white; /* Tekstfarve */
-				border: none; /* Fjern kant */
-				border-radius: 25px; /* Afrundede hjørner */
-				padding: 10px 20px; /* Størrelse på knappen */
-				font-size: 16px; /* Tekststørrelse */
-				box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Skygge */
-				transition: all 0.3s ease-in-out; /* Glidende hover-effekt */
-			}
-
-				.custom-btn:hover {
-					background: linear-gradient(to bottom, #1f4e79, #4f81bd); /* Omvendt gradient på hover */
-					transform: scale(1.1); /* Gør knappen lidt større */
-					box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3); /* Mere markant skygge */
-				}
-		</style>
-		<table class="table table-striped table-hover">
-			<thead class="table-primary">
-				<tr>
-					<th>ID</th>
-					<th>Navn</th>
-					<th>Email</th>
-					<th>Telefon</th>
-					<th>Adresse</th>
-					<th>Scootere</th>
-					<th>Handlinger</th>
-				</tr>
-			</thead>
-			<tbody>
-				@if (filtreredeKunder.Any())
-				{
-					@foreach (var kunde in filtreredeKunder)
-					{
-						<tr>
-							<td>@kunde.KundeId</td>
-							<td>@kunde.Navn</td>
-							<td>@kunde.Email</td>
-							<td>@kunde.Telefonnummer</td>
-							<td>@kunde.Adresse</td>
-							<td>
-								<button class="btn btn-light shadow-sm text-primary hover-highlight px-3 py-2" @onclick="() => ToggleScooterVisning(kunde.KundeId)">
-									<i class="bi bi-eye-fill"></i> Vis Scootere
-								</button>
-
-								<style>
-									.hover-highlight {
-										background-color: #f8f9fa; /* Lys baggrundsfarve */
-										border: 1px solid #ced4da; /* Let kant for at definere knappen */
-										transition: all 0.3s ease; /* Glidende effekt */
-										border-radius: 5px; /* Let afrunding af kanter */
-										font-weight: bold; /* Fremhæv tekst */
-									}
-
-										.hover-highlight:hover {
-											background-color: #e2e6ea; /* Mørkere baggrund ved hover */
-											border-color: #adb5bd; /* Fremhæv kanten ved hover */
-											color: #0056b3; /* Gør teksten blå ved hover */
-											transform: scale(1.05); /* Lidt større effekt ved hover */
-										}
-								</style>
-
-							</td>
-							<td>
-								<div class="d-flex justify-content-evenly">
-									<button class="btn btn-primary btn-sm me-2" @onclick="() => ÅbnSidePanel(kunde.KundeId)">Se Ordrer</button>
-									<button class="btn btn-secondary btn-sm me-2" @onclick="() => VisRedigerModal(kunde)">Rediger</button>
-									<button class="btn btn-info btn-sm" @onclick="() => VisTilføjScooterModal(kunde)">Tilføj Scooter</button>
-								</div>
-
-							</td>
-						</tr>
-
-						@if (kundeScootere.TryGetValue(kunde.KundeId, out var scootere) && visScooterKundeId == kunde.KundeId)
-						{
-							<tr>
-								<td colspan="7" class="bg-light">
-									<table class="table table-bordered mt-3">
-										<thead class="table-secondary">
-											<tr>
-												<th>Mærke</th>
-												<th>Model</th>
-												<th>Registreringsnummer</th>
-											</tr>
-										</thead>
-										<tbody>
-											@foreach (var scooter in scootere)
-											{
-												<tr>
-													<td>@scooter.Maerke</td>
-													<td>@scooter.Model</td>
-													<td>@scooter.RegistreringsNummer</td>
-												</tr>
-											}
-											@if (!scootere.Any())
-											{
-												<tr>
-													<td colspan="3" class="text-center text-muted">Ingen scootere fundet for denne kunde.</td>
-												</tr>
-											}
-										</tbody>
-									</table>
-								</td>
-							</tr>
-						}
-					}
-				</tbody>
-			</table>
-				}
-	</div>
- *@
-
 
 		@if (visTilføjScooterModal)
 		{
@@ -317,9 +180,6 @@
 			</div>
 		</div>
 		}
-
-
-
 
 		@if (visSidePanel)
 		{
@@ -575,19 +435,7 @@
 			</div>
 		</div>
 		}
-	<div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: auto;">
-		<div class="card shadow-sm border-0" style="max-width: 600px; width: 90%;">
-			<div class="card-body text-center">
-				<h5 class="card-title text-primary fw-bold">Scooterland</h5>
-				<p class="card-text">
-					<strong>Adresse:</strong> Hovedgade 123, 4000 Roskilde<br />
-					<strong>Telefon:</strong> 12 34 56 78<br />
-					<strong>Email:</strong> <a href="mailto:kontakt@scooterland.dk" class="text-decoration-none">kontakt@scooterland.dk</a><br />
-					<strong>Dags dato:</strong> @DateTime.Now.ToString("dd-MM-yyyy")
-				</p>
-			</div>
-		</div>
-	</div>
+	
 	<style>
 		.sidepanel {
 			position: fixed;
@@ -729,47 +577,52 @@
 			// Du kan implementere en modal eller navigere til en anden side
 		}
 
-		private async Task ToggleScooterVisning(int kundeId)
+	private async Task ToggleScooterVisning(int kundeId)
+	{
+		if (visScooterKundeId == kundeId)
 		{
-			if (visScooterKundeId == kundeId)
+			visScooterKundeId = null; // Skjul
+		}
+		else
+		{
+			try
 			{
-				visScooterKundeId = null; // Skjul
-			}
-			else
-			{
-				try
+				// Hent scootere for kunden fra serveren
+				var response = await Http.GetAsync($"api/KundeScooter/{kundeId}/scootere");
+
+				if (response.IsSuccessStatusCode)
 				{
-					// Hent scootere for kunden fra serveren
-					var scootere = await Http.GetFromJsonAsync<List<KundeScooter>>($"api/KundeScooter/{kundeId}/scootere");
+					var scootere = await response.Content.ReadFromJsonAsync<List<KundeScooter>>();
 					kundeScootere[kundeId] = scootere ?? new List<KundeScooter>();
-					visScooterKundeId = kundeId; // Vis for valgt kunde
 				}
-				catch (Exception ex)
+				else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
 				{
-					Console.WriteLine($"Fejl ved hentning af scootere for kunde {kundeId}: {ex.Message}");
+					// Håndter situationen hvor kunden ikke har nogen scootere
 					kundeScootere[kundeId] = new List<KundeScooter>();
 				}
+				else
+				{
+					Console.WriteLine($"Fejl ved hentning af scootere for kunde {kundeId}: {response.StatusCode}");
+				}
+
+				visScooterKundeId = kundeId; // Vis for valgt kunde
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Fejl ved hentning af scootere for kunde {kundeId}: {ex.Message}");
+				kundeScootere[kundeId] = new List<KundeScooter>();
 			}
 		}
+
+		StateHasChanged(); // Sørg for, at UI opdateres
+	}
+
 
 		protected override async Task OnInitializedAsync()
 		{
 			await HentAlleKunder(); // Hent kun kunder
 
 		}
-
-		// private async Task HentAlleKunder()
-		// {
-		// 	try
-		// 	{
-		// 		kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
-		// 	}
-		// 	catch (Exception ex)
-		// 	{
-		// 		Console.WriteLine($"Fejl ved hentning af kunder: {ex.Message}");
-		// 		kunder = new List<Kunde>();
-		// 	}
-		// }
 
 		private async Task HentAlleKunder()
 		{
@@ -976,43 +829,65 @@
 			}
 		}
 
-		private async Task VisOrdreDetaljer(int ordreId)
+		// private async Task VisOrdreDetaljer(int ordreId)
+		// {
+		// 	try
+		// 	{
+		// 		valgtOrdre = søgeResultatKunde.Ordre
+		// 			.FirstOrDefault(o => o.OrdreId == ordreId);
+
+		// 		if (valgtOrdre == null)
+		// 		{
+		// 			Console.WriteLine($"Ingen ordre fundet med ID {ordreId}.");
+		// 			return;
+		// 		}
+
+		// 		// Hent detaljer om ordreprodukter, hvis nødvendigt
+		// 		if (valgtOrdre.OrdreProdukter == null || !valgtOrdre.OrdreProdukter.Any())
+		// 		{
+		// 			var response = await Http.GetFromJsonAsync<Ordre>($"api/Ordre/{ordreId}");
+		// 			if (response != null)
+		// 			{
+		// 				valgtOrdre = response; // Opdater valgt ordre med detaljer fra server
+		// 			}
+		// 		}
+
+		// 		visOrdreDetaljerModal = true; // Åbn modal
+		// 	}
+		// 	catch (Exception ex)
+		// 	{
+		// 		Console.WriteLine($"Fejl ved hentning af ordredetaljer: {ex.Message}");
+		// 	}
+		// }
+	private async Task VisOrdreDetaljer(int ordreId)
+	{
+		try
 		{
-			try
+			valgtOrdre = søgeResultatKunde.Ordre.FirstOrDefault(o => o.OrdreId == ordreId);
+
+			if (valgtOrdre == null)
 			{
-				valgtOrdre = søgeResultatKunde.Ordre
-					.FirstOrDefault(o => o.OrdreId == ordreId);
-
-				if (valgtOrdre == null)
-				{
-					Console.WriteLine($"Ingen ordre fundet med ID {ordreId}.");
-					return;
-				}
-
-				// Hent detaljer om ordreprodukter, hvis nødvendigt
-				if (valgtOrdre.OrdreProdukter == null || !valgtOrdre.OrdreProdukter.Any())
-				{
-					var response = await Http.GetFromJsonAsync<Ordre>($"api/Ordre/{ordreId}");
-					if (response != null)
-					{
-						valgtOrdre = response; // Opdater valgt ordre med detaljer fra server
-					}
-				}
-
-				visOrdreDetaljerModal = true; // Åbn modal
+				Console.WriteLine($"Ingen ordre fundet med ID {ordreId}.");
+				return;
 			}
-			catch (Exception ex)
+
+			var response = await Http.GetFromJsonAsync<Ordre>($"api/Ordre/{ordreId}");
+			if (response != null)
 			{
-				Console.WriteLine($"Fejl ved hentning af ordredetaljer: {ex.Message}");
+				valgtOrdre = response; // Opdater valgtOrdre
 			}
+
+			visOrdreDetaljerModal = true;
 		}
-
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Fejl ved hentning af ordredetaljer: {ex.Message}");
+		}
+	}
 		private void LukOrdreDetaljerModal()
 		{
 			visOrdreDetaljerModal = false;
 
 		}
-
-
 
 }

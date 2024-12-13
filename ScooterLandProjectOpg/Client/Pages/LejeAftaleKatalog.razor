@@ -259,14 +259,31 @@ else
 		{
 			await HentLejeAftaler();
 		}
-	}
 
+	}
+	// private async Task OpdaterKortKilometer(int lejeId, int? kortKilometer)
+	// {
+	// 	var response = await Http.PutAsJsonAsync($"api/LejeAftale/{lejeId}/kilometer", kortKilometer);
+	// 	if (response.IsSuccessStatusCode)
+	// 	{
+	// 		await HentLejeAftaler();
+	// 	}
+		
+	// }
 	private async Task OpdaterKortKilometer(int lejeId, int? kortKilometer)
 	{
 		var response = await Http.PutAsJsonAsync($"api/LejeAftale/{lejeId}/kilometer", kortKilometer);
 		if (response.IsSuccessStatusCode)
 		{
-			await HentLejeAftaler();
+			// Find og opdater lokalt uden at hente fra serveren
+			var lejeAftale = lejeAftaler.FirstOrDefault(l => l.LejeId == lejeId);
+			if (lejeAftale != null)
+			{
+				lejeAftale.KortKilometer = kortKilometer;
+
+				// Genberegning hvis nødvendigt
+				StateHasChanged();
+			}
 		}
 	}
 

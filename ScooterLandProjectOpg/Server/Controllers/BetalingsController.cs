@@ -120,7 +120,9 @@ namespace ScooterLandProjectOpg.Server.Controllers
 					{
 						YdelseId = oy.YdelseId,
 						YdelseNavn = oy.Ydelse?.Navn,
-						BeregnetPris = oy.BeregnetPris,
+                        MekanikerNavn = oy.Mekaniker?.Navn, // Mekanikerens navn
+                        MekanikerTimer = oy.Timer, // Timer arbejdet
+                        BeregnetPris = oy.BeregnetPris,
 						ScooterMaerke = oy.Scooter?.Maerke, // Forudsat at relationen findes
 						ScooterModel = oy.Scooter?.Model    // Forudsat at relationen findes
 					}).ToList(),

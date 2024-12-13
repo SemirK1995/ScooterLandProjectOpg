@@ -7,7 +7,7 @@ namespace ScooterLandProjectOpg.Server.Interfaces
 		Task<IEnumerable<LejeAftale>> GetAllWithKundeAndScootersAsync();
 		Task<LejeAftale> GetLejeAftaleWithDetailsAsync(int id);
         Task<IEnumerable<LejeAftale>> SearchLejeAftalerAsync(string query);
-        Task UpdateSelvrisikoAsync(int lejeId, double selvrisiko);
-        Task UpdateKortKilometerAsync(int lejeId, int? kortKilometer);
+        Task <Ordre> UpdateSelvrisikoAsync(int lejeId, double selvrisiko);
+        Task<LejeAftale?> UpdateKortKilometerAsync(int lejeId, int? kortKilometer);
     }
 }
