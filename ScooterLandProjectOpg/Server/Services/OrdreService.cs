@@ -23,18 +23,21 @@ namespace ScooterLandProjectOpg.Server.Services
 				.Include(o => o.OrdreYdelse)  // Inlluderer OrdreYdelse
 				.ToListAsync();
 		}
-
 		public async Task<Ordre> GetWithDetailsByIdAsync(int id)
 		{
 			return await _context.Ordrer
-				.Include(o => o.Kunde)           // Kundeoplysninger
-				.Include(o => o.Betalinger)      // Betalinger
+				.Include(o => o.Kunde)             // Kundeoplysninger
+				.Include(o => o.Betalinger)        // Betalinger
 				.Include(o => o.OrdreYdelse)
-					.ThenInclude(oy => oy.Ydelse) // Tilføj Ydelse-detaljer
-				.Include(o => o.LejeAftale)      // Tilføj LejeAftale
-					.ThenInclude(la => la.LejeScooter) // Tilføj LejeScooter, hvis relevant
+					.ThenInclude(oy => oy.Ydelse)  // Tilføj Ydelse-detaljer
+				.Include(o => o.OrdreYdelse)
+					.ThenInclude(oy => oy.Scooter) // Inkluder Scooter-detaljer for Ydelser
+				.Include(o => o.LejeAftale)
+					.ThenInclude(la => la.LejeScooter)
+				.Include(o => o.OrdreProdukter)
+					.ThenInclude(op => op.Produkt)
 				.FirstOrDefaultAsync(o => o.OrdreId == id);
-		}
+		}*
 		public async Task<Ordre> AddAsync(Ordre ordre)
 		{
 			_context.Ordrer.Add(ordre);

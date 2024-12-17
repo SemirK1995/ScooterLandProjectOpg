@@ -126,13 +126,13 @@ namespace ScooterLandProjectOpg.Server.PDFServices
 				}
 
 				// Ydelser
-				if (ordre.OrdreYdelse?.Any() == true)
+				if (ordre.OrdreProdukter?.Any() == true)
 				{
-					gfx.DrawString("Ydelser", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+					gfx.DrawString("Produkter", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
 					yPoint += 30;
-					foreach (var ydelse in ordre.OrdreYdelse)
+					foreach (var produkt in ordre.OrdreProdukter)
 					{
-						gfx.DrawString($"- {ydelse.Ydelse?.Navn}: {ydelse.BeregnetPris.ToString("F2")} kr.", normalFont, darkBrush, 40, yPoint);
+						gfx.DrawString($"- Produkt ID {produkt.ProduktId}: {produkt.Produkt.ProduktNavn}, Pris: {produkt.Pris.ToString("F2")} kr.", normalFont, darkBrush, 40, yPoint);
 						yPoint += 15;
 					}
 					yPoint += 10;
@@ -140,7 +140,7 @@ namespace ScooterLandProjectOpg.Server.PDFServices
 
 
 				// Produkter
-				if (ordre.OrdreProdukter?.Any() == true)
+				if (ordre.OrdreYdelse?.Any() == true)
 				{
                     gfx.DrawString("Ydelser", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
                     yPoint += 30;
