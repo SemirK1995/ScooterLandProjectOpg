@@ -37,7 +37,7 @@ namespace ScooterLandProjectOpg.Server.Services
 				.Include(o => o.OrdreProdukter)
 					.ThenInclude(op => op.Produkt)
 				.FirstOrDefaultAsync(o => o.OrdreId == id);
-		}*
+		}
 		public async Task<Ordre> AddAsync(Ordre ordre)
 		{
 			_context.Ordrer.Add(ordre);
