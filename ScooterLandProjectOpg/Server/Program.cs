@@ -29,7 +29,7 @@ builder.Services.AddScoped<IYdelseRepository, YdelseService>();
 builder.Services.AddScoped<IProduktRepository, ProduktService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
-//Denne tilføjes fordi vi har en seperat fil som generere faktura. 
+//Denne tilføjes fordi vi har en seperat fil som generere faktura. 0
 builder.Services.AddTransient<FakturaService>();
 
 
