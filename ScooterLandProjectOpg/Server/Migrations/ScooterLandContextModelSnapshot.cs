@@ -10,511 +10,533 @@ using ScooterLandProjectOpg.Server.Context;
 
 namespace ScooterLandProjectOpg.Server.Migrations
 {
-    [DbContext(typeof(ScooterLandContext))]
+    [DbContext(typeof(ScooterLandContext))] // Angiver, at denne klasse er et snapshot af ScooterLandContext.
     partial class ScooterLandContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder) // Bygger modellen for databasekonfigurationen.
         {
-#pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+#pragma warning disable 612, 618 // Ignorerer advarsler om forældede API'er, der muligvis bruges her.
+            modelBuilder // Sætter metadata som produktversion og maks. længde for identifier til SQL Server.
+                .HasAnnotation("ProductVersion", "9.0.0") // Angiver EF Core version.
+                .HasAnnotation("Relational:MaxIdentifierLength", 128); // Maksimal længde for SQL Server identifiers.
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder); // Aktiverer brugen af identity columns til SQL Server for autoinkrementering.
 
+            // Definerer entiteten `Betaling`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Betaling", b =>
                 {
-                    b.Property<int>("BetalingsId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<int>("BetalingsId") // Primærnøglen for `Betaling`.
+                        .ValueGeneratedOnAdd() // Automatisk genereret værdi.
+                        .HasColumnType("int"); // Datatype for kolonnen.
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BetalingsId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BetalingsId")); // Konfigurerer autoinkrementering for `BetalingsId`.
 
-                    b.Property<double?>("Beløb")
+                    b.Property<double?>("Beløb") // Angiver beløbet for betalingen.
                         .HasColumnType("float");
 
-                    b.Property<DateTime?>("BetalingsDato")
+                    b.Property<DateTime?>("BetalingsDato") // Dato for betalingen.
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("BetalingsMetode")
+                    b.Property<int?>("BetalingsMetode") // Enum eller kode for betalingsmetoden.
                         .HasColumnType("int");
 
-                    b.Property<bool>("Betalt")
+                    b.Property<bool>("Betalt") // Angiver om betalingen er gennemført.
                         .HasColumnType("bit");
 
-                    b.Property<int>("OrdreId")
+                    b.Property<int>("OrdreId") // Fremmednøgle til `Ordre`.
                         .HasColumnType("int");
+                     
+                    b.HasKey("BetalingsId"); // Angiver primærnøglen.
 
-                    b.HasKey("BetalingsId");
+                    b.HasIndex("OrdreId"); // Indekserer fremmednøglen for hurtigere søgninger.
 
-                    b.HasIndex("OrdreId");
-
-                    b.ToTable("Betalinger");
+                    b.ToTable("Betalinger"); // Angiver tabelnavnet i databasen.
                 });
 
+            // Definerer entiteten `Kunde`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Kunde", b =>
-                {
-                    b.Property<int>("KundeId")
+                { 
+                    b.Property<int>("KundeId") // Primærnøglen for `Kunde`.
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KundeId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KundeId")); // Konfigurerer autoinkrementering for `KundeId`.
 
-                    b.Property<string>("Adresse")
-                        .IsRequired()
-                        .HasMaxLength(200)
+                    b.Property<string>("Adresse") // Adresse på kunden.
+                        .IsRequired() // Feltet er obligatorisk.
+                        .HasMaxLength(200) // Maksimal længde på 200 tegn.
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("Email") // Kundens e-mailadresse
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Navn")
+                    b.Property<string>("Navn") // Kundens navn.
                         .IsRequired()
-                        .HasMaxLength(100)
+                        .HasMaxLength(100) // Maksimal længde på 100 tegn.
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("Telefonnummer")
+                    b.Property<int>("Telefonnummer") // Kundens telefonnummer.
                         .HasColumnType("int");
 
                     b.HasKey("KundeId");
 
-                    b.ToTable("Kunder");
+                    b.ToTable("Kunder"); // Navnet på databastabellen for kunder.
                 });
 
+            // Definerer entiteten `KundeScooter`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.KundeScooter", b =>
                 {
-                    b.Property<int>("ScooterId")
+                    b.Property<int>("ScooterId") // Primærnøglen for `KundeScooter`. 
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScooterId"));
 
-                    b.Property<int>("KundeId")
+                    b.Property<int>("KundeId") // Definerer `KundeId` som en fremmednøgle, der knytter scooteren til en kunde.
                         .HasColumnType("int");
 
-                    b.Property<string>("Maerke")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Maerke") // Definerer en egenskab `Maerke` til at gemme scooterens mærke.
+                        .HasColumnType("nvarchar(max)"); // Sætter datatypen til nvarchar med maksimal længde.
 
-                    b.Property<string>("Model")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Model") // Definerer en egenskab `Model` til at gemme scooterens modelnavn.
+                        .HasColumnType("nvarchar(max)"); // Sætter datatypen til nvarchar med maksimal længde.
 
-                    b.Property<int>("ProduktionsAar")
+                    b.Property<int>("ProduktionsAar") // Definerer en egenskab `ProduktionsAar` til at gemme produktionsåret for scooteren
                         .HasColumnType("int");
 
-                    b.Property<string>("RegistreringsNummer")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("RegistreringsNummer") // Definerer en egenskab `RegistreringsNummer` til at gemme scooterens registreringsnummer og gør feltet obligatorisk.
+                        .IsRequired() // Angiver, at feltet ikke må være null.
+                        .HasColumnType("nvarchar(max)"); // Sætter datatypen til nvarchar med maksimal længde.
 
-                    b.HasKey("ScooterId");
+                    b.HasKey("ScooterId"); // Angiver `ScooterId` som primærnøglen for entiteten `KundeScooter`.
 
-                    b.HasIndex("KundeId");
+                    b.HasIndex("KundeId"); // Opretter et indeks for `KundeId` for at optimere søgninger og relationer med denne fremmednøgle.
 
-                    b.ToTable("KunderScootere");
+                    b.ToTable("KunderScootere"); // Angiver tabelnavnet som "KunderScootere" i databasen for entiteten `KundeScooter`.
                 });
 
+            // Definerer entiteten `LejeAftale`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.LejeAftale", b =>
                 {
-                    b.Property<int>("LejeId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("LejeId") // Definerer `LejeId` som primærnøglen for `LejeAftale` og gør det til en automatisk genereret værdi.
+                        .ValueGeneratedOnAdd() // Værdien genereres automatisk ved tilføjelse.
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LejeId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LejeId")); // Konfigurerer `LejeId` som en identity column for SQL Server.
 
-                    b.Property<double>("DagligLeje")
+                    b.Property<double>("DagligLeje") // Definerer egenskaben `DagligLeje`, som repræsenterer prisen per dag for lejeaftalen.
                         .HasColumnType("float");
 
-                    b.Property<double>("ForsikringsPris")
+                    b.Property<double>("ForsikringsPris") // Definerer egenskaben `ForsikringsPris`, som repræsenterer forsikringsomkostningen for lejeaftalen.
                         .HasColumnType("float");
 
-                    b.Property<double>("KilometerPris")
+                    b.Property<double>("KilometerPris") // Definerer egenskaben `KilometerPris`, som repræsenterer prisen per kilometer.
                         .HasColumnType("float");
 
-                    b.Property<int?>("KortKilometer")
+                    b.Property<int?>("KortKilometer") // Definerer egenskaben `KortKilometer`, som angiver det inkluderede antal kilometer, hvis relevant.
+                        .HasColumnType("int"); // Tillader null-værdi, da det ikke er obligatorisk.
+
+                    b.Property<int>("KundeId") // Definerer `KundeId` som en fremmednøgle, der forbinder lejeaftalen med en kunde.
                         .HasColumnType("int");
 
-                    b.Property<int>("KundeId")
-                        .HasColumnType("int");
+                    b.Property<int?>("OrdreId") // Definerer `OrdreId` som en fremmednøgle, der kan forbinde lejeaftalen med en ordre, hvis relevant.
+                        .HasColumnType("int"); // Tillader null, da en lejeaftale ikke nødvendigvis skal være knyttet til en ordre.
 
-                    b.Property<int?>("OrdreId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Selvrisiko")
+                    b.Property<double>("Selvrisiko") // Definerer egenskaben `Selvrisiko`, som angiver beløbet for selvrisiko i lejeaftalen.
                         .HasColumnType("float");
 
-                    b.Property<DateTime>("SlutDato")
+                    b.Property<DateTime>("SlutDato") // Definerer `SlutDato`, som angiver slutdatoen for lejeaftalen.
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("StartDato")
+                    b.Property<DateTime>("StartDato") // Definerer `StartDato`, som angiver startdatoen for lejeaftalen.
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("Status")
-                        .HasColumnType("int");
+                    b.Property<int?>("Status") // Definerer egenskaben `Status`, som repræsenterer status for lejeaftalen, typisk som en enum eller kode.
+                        .HasColumnType("int"); // Tillader null, hvis status ikke er påkrævet.
 
-                    b.HasKey("LejeId");
+                    b.HasKey("LejeId"); // Angiver `LejeId` som primærnøglen for entiteten.
 
-                    b.HasIndex("KundeId");
+                    b.HasIndex("KundeId"); // Opretter et indeks på `KundeId` for at optimere søgninger baseret på kunde-relationen.
 
-                    b.HasIndex("OrdreId");
+                    b.HasIndex("OrdreId"); // Opretter et indeks på `OrdreId` for at optimere søgninger baseret på ordre-relationen.
 
-                    b.ToTable("LejeAftaler");
+                    b.ToTable("LejeAftaler"); // Angiver tabelnavnet for `LejeAftale` som "LejeAftaler" i databasen.
                 });
 
+            // Definerer entiteten `LejeScooter`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.LejeScooter", b =>
                 {
-                    b.Property<int>("LejeScooterId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("LejeScooterId") // Definerer `LejeScooterId` som primærnøglen for `LejeScooter` og gør det til en automatisk genereret værdi.
+                        .ValueGeneratedOnAdd() // Automatisk genereret ved tilføjelse.
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LejeScooterId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LejeScooterId")); // Konfigurerer `LejeScooterId` som en identity column for SQL Server.
 
-                    b.Property<bool>("ErTilgængelig")
-                        .HasColumnType("bit");
+                    b.Property<bool>("ErTilgængelig") // Definerer egenskaben `ErTilgængelig`, som angiver, om scooteren er tilgængelig for leje.
+                        .HasColumnType("bit"); // Sætter datatypen til bit (boolean i SQL Server).
 
-                    b.Property<int?>("LejeId")
-                        .HasColumnType("int");
+                    b.Property<int?>("LejeId") // Definerer `LejeId` som en fremmednøgle, der kan forbinde scooteren til en lejeaftale, hvis relevant.
+                        .HasColumnType("int"); // Tillader null, da scooteren ikke nødvendigvis er lejet ud.
 
-                    b.Property<string>("RegistreringsNummer")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("RegistreringsNummer") // Definerer egenskaben `RegistreringsNummer`, som repræsenterer scooterens registreringsnummer.
+                        .HasColumnType("nvarchar(max)"); // Sætter datatypen til nvarchar med maksimal længde.
 
-                    b.Property<string>("ScooterMaerke")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ScooterMaerke") // Definerer egenskaben `ScooterMaerke`, som repræsenterer scooterens mærke og gør feltet obligatorisk.
+                        .IsRequired() // Feltet må ikke være null.
+                        .HasColumnType("nvarchar(max)"); // Sætter datatypen til nvarchar med maksimal længde.
 
-                    b.Property<string>("ScooterModel")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ScooterModel") // Definerer egenskaben `ScooterModel`, som repræsenterer scooterens model og gør feltet obligatorisk.
+                        .IsRequired() // Feltet må ikke være null.
+                        .HasColumnType("nvarchar(max)"); // Sætter datatypen til nvarchar med maksimal længde.
 
-                    b.Property<DateTime?>("SlutDato")
+                    b.Property<DateTime?>("SlutDato") // Definerer `SlutDato`, som repræsenterer slutdatoen for en lejeperiode, hvis scooteren er lejet.
+                        .HasColumnType("datetime2"); // Sætter datatypen til datetime2 for præcis håndtering af dato og tid.
+
+                    b.Property<DateTime?>("StartDato") // Definerer `StartDato`, som repræsenterer startdatoen for en lejeperiode, hvis scooteren er lejet.
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("StartDato")
-                        .HasColumnType("datetime2");
+                    b.HasKey("LejeScooterId"); // Angiver `LejeScooterId` som primærnøglen for entiteten.
 
-                    b.HasKey("LejeScooterId");
+                    b.HasIndex("LejeId"); // Opretter et indeks på `LejeId` for at optimere søgninger baseret på relationen til en lejeaftale.
 
-                    b.HasIndex("LejeId");
-
-                    b.ToTable("LejeScootere");
+                    b.ToTable("LejeScootere"); // Angiver tabelnavnet for `LejeScooter` som "LejeScootere" i databasen.
                 });
 
+            // Definerer entiteten `Mekaniker`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Mekaniker", b =>
                 {
-                    b.Property<int>("MekanikerId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("MekanikerId") // Definerer `MekanikerId` som primærnøglen for `Mekaniker` og gør det til en automatisk genereret værdi.
+                        .ValueGeneratedOnAdd() // Automatisk genereret ved tilføjelse.
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MekanikerId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MekanikerId")); // Konfigurerer `MekanikerId` som en identity column for SQL Server.
 
-                    b.Property<string>("Navn")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Navn") // Definerer egenskaben `Navn`, som repræsenterer mekanikerens navn.
+                        .HasColumnType("nvarchar(max)"); // Sætter datatypen til nvarchar med maksimal længde.
 
-                    b.Property<string>("Speciale")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Telefonnummer")
+                    b.Property<string>("Speciale") // Definerer egenskaben `Speciale`, som repræsenterer mekanikerens specialisering.
+                        .HasColumnType("nvarchar(max)"); // Sætter datatypen til nvarchar med maksimal længde.
+                     
+                    b.Property<int?>("Telefonnummer") // Definerer egenskaben `Telefonnummer`, som repræsenterer mekanikerens telefonnummer.
                         .HasColumnType("int");
 
-                    b.HasKey("MekanikerId");
+                    b.HasKey("MekanikerId"); // Angiver `MekanikerId` som primærnøglen for entiteten.
 
-                    b.ToTable("Mekanikere");
+                    b.ToTable("Mekanikere");  // Angiver tabelnavnet for `Mekaniker` som "Mekanikere" i databasen.
                 });
 
+            // Definerer entiteten `Ordre`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Ordre", b =>
                 {
-                    b.Property<int>("OrdreId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("OrdreId") // Definerer `OrdreId` som primærnøglen for `Ordre` og gør det til en automatisk genereret værdi.
+                        .ValueGeneratedOnAdd() // Automatisk genereret ved tilføjelse.
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrdreId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrdreId")); // Konfigurerer `OrdreId` som en identity column for SQL Server.
 
-                    b.Property<DateTime?>("Dato")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("Dato") // Definerer egenskaben `Dato`, som repræsenterer datoen for oprettelsen af ordren.
+                        .HasColumnType("datetime2"); // Sætter datatypen til datetime2 for præcise datoer og tidspunkter.
 
-                    b.Property<int>("KundeId")
+                    b.Property<int>("KundeId") // Definerer `KundeId` som en fremmednøgle, der forbinder ordren med en kunde.
                         .HasColumnType("int");
 
-                    b.Property<int?>("LejeId")
-                        .HasColumnType("int");
+                    b.Property<int?>("LejeId") // Definerer `LejeId` som en fremmednøgle, der kan forbinde ordren med en lejeaftale, hvis relevant.
+                        .HasColumnType("int"); // Tillader null, da en ordre ikke nødvendigvis er knyttet til en lejeaftale.
 
-                    b.Property<int?>("Status")
-                        .HasColumnType("int");
+                    b.Property<int?>("Status") // Definerer egenskaben `Status`, som repræsenterer status for ordren, typisk som en enum eller kode.
+                        .HasColumnType("int"); // Tillader null, hvis status ikke er påkrævet.
 
-                    b.Property<double?>("TotalPris")
-                        .HasColumnType("float");
+                    b.Property<double?>("TotalPris") // Definerer `TotalPris`, som repræsenterer den samlede pris for ordren.
+                        .HasColumnType("float"); // Tillader null, hvis totalprisen endnu ikke er beregnet.
 
-                    b.HasKey("OrdreId");
+                    b.HasKey("OrdreId"); // Angiver `OrdreId` som primærnøglen for entiteten.
 
-                    b.HasIndex("KundeId");
+                    b.HasIndex("KundeId"); // Opretter et indeks på `KundeId` for at optimere søgninger baseret på kunde-relationen.
 
-                    b.HasIndex("LejeId");
+                    b.HasIndex("LejeId"); // Opretter et indeks på `LejeId` for at optimere søgninger baseret på lejeaftale-relationen.
 
-                    b.ToTable("Ordrer");
+                    b.ToTable("Ordrer"); // Angiver tabelnavnet for `Ordre` som "Ordrer" i databasen.
                 });
 
+            // Definerer entiteten `OrdreProdukt`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.OrdreProdukt", b =>
                 {
-                    b.Property<int>("OrdreProduktId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("OrdreProduktId") // Definerer `OrdreProduktId` som primærnøglen for `OrdreProdukt` og gør det til en automatisk genereret værdi.
+                        .ValueGeneratedOnAdd() // Automatisk genereret ved tilføjelse.
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrdreProduktId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrdreProduktId")); // Konfigurerer `OrdreProduktId` som en identity column for SQL Server.
 
-                    b.Property<int>("Antal")
+                    b.Property<int>("Antal") // Definerer egenskaben `Antal`, som repræsenterer antallet af et specifikt produkt i ordren.
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrdreId")
-                        .HasColumnType("int");
+                    b.Property<int?>("OrdreId") // Definerer `OrdreId` som en fremmednøgle, der forbinder dette `OrdreProdukt` med en specifik ordre.
+                        .HasColumnType("int"); // Tillader null, hvis relationen ikke er etableret endnu.
 
-                    b.Property<double>("Pris")
+                    b.Property<double>("Pris") // Definerer egenskaben `Pris`, som repræsenterer prisen for produktet i ordren.
                         .HasColumnType("float");
 
-                    b.Property<int?>("ProduktId")
-                        .HasColumnType("int");
+                    b.Property<int?>("ProduktId") // Definerer `ProduktId` som en fremmednøgle, der forbinder dette `OrdreProdukt` med et specifikt produkt.
+                        .HasColumnType("int"); // Tillader null, hvis relationen ikke er etableret endnu.
 
-                    b.HasKey("OrdreProduktId");
+                    b.HasKey("OrdreProduktId"); // Angiver `OrdreProduktId` som primærnøglen for entiteten.
 
-                    b.HasIndex("OrdreId");
+                    b.HasIndex("OrdreId"); // Opretter et indeks på `OrdreId` for at optimere søgninger baseret på relationen til en ordre.
 
-                    b.HasIndex("ProduktId");
+                    b.HasIndex("ProduktId"); // Opretter et indeks på `ProduktId` for at optimere søgninger baseret på relationen til et produkt.
 
-                    b.ToTable("OrdreProdukter");
+                    b.ToTable("OrdreProdukter"); // Angiver tabelnavnet for `OrdreProdukt` som "OrdreProdukter" i databasen.
                 });
 
+            // Definerer entiteten `OrdreYdelse`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.OrdreYdelse", b =>
                 {
-                    b.Property<int>("OrdreYdelseId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("OrdreYdelseId") // Definerer `OrdreYdelseId` som primærnøglen for `OrdreYdelse` og gør det til en automatisk genereret værdi.
+                        .ValueGeneratedOnAdd() // Automatisk genereret ved tilføjelse.
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrdreYdelseId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrdreYdelseId")); // Konfigurerer `OrdreYdelseId` som en identity column for SQL Server.
 
-                    b.Property<double?>("AftaltPris")
-                        .HasColumnType("float");
+                    b.Property<double?>("AftaltPris") // Definerer egenskaben `AftaltPris`, som repræsenterer den pris, der er aftalt for ydelsen.
+                        .HasColumnType("float"); // Tillader null, da prisen kan være ukendt.
 
-                    b.Property<DateTime?>("Dato")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("Dato") // Definerer egenskaben `Dato`, som repræsenterer datoen for ydelsen.
+                        .HasColumnType("datetime2"); // Tillader null og bruger datetime2 for præcision.
 
-                    b.Property<int?>("MekanikerId")
-                        .HasColumnType("int");
+                    b.Property<int?>("MekanikerId") // Definerer `MekanikerId` som en fremmednøgle, der forbinder ydelsen med en mekaniker.
+                        .HasColumnType("int"); // Tillader null, hvis der ikke er en mekaniker tilknyttet.
 
-                    b.Property<int>("OrdreId")
-                        .HasColumnType("int");
+                    b.Property<int>("OrdreId") // Definerer `OrdreId` som en fremmednøgle, der forbinder ydelsen med en ordre.
+                        .HasColumnType("int"); // Obligatorisk felt, da hver ydelse skal være knyttet til en ordre.
 
-                    b.Property<int?>("ScooterId")
-                        .HasColumnType("int");
+                    b.Property<int?>("ScooterId") // Definerer `ScooterId` som en fremmednøgle, der forbinder ydelsen med en scooter, hvis relevant.
+                        .HasColumnType("int"); // Tillader null, hvis der ikke er en scooter tilknyttet.
 
-                    b.Property<DateTime?>("SlutDato")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("SlutDato") // Definerer egenskaben `SlutDato`, som repræsenterer slutdatoen for ydelsen.
+                        .HasColumnType("datetime2"); // Tillader null.
 
-                    b.Property<DateTime?>("StartDato")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTime?>("StartDato") // Definerer egenskaben `StartDato`, som repræsenterer startdatoen for ydelsen.
+                        .HasColumnType("datetime2"); // Tillader null.
 
-                    b.Property<double?>("Timer")
-                        .HasColumnType("float");
+                    b.Property<double?>("Timer") // Definerer egenskaben `Timer`, som repræsenterer det antal timer, der er brugt på ydelsen.
+                        .HasColumnType("float"); // Tillader null, da det kan være ukendt.
 
-                    b.Property<int>("YdelseId")
-                        .HasColumnType("int");
+                    b.Property<int>("YdelseId") // Definerer `YdelseId` som en fremmednøgle, der forbinder ydelsen med en specifik type ydelse.
+                        .HasColumnType("int"); // Obligatorisk felt.
 
-                    b.HasKey("OrdreYdelseId");
+                    b.HasKey("OrdreYdelseId"); // Angiver `OrdreYdelseId` som primærnøglen for entiteten.
 
-                    b.HasIndex("MekanikerId");
+                    b.HasIndex("MekanikerId"); // Opretter et indeks på `MekanikerId` for at optimere søgninger baseret på relationen til en mekaniker.
 
-                    b.HasIndex("OrdreId");
+                    b.HasIndex("OrdreId"); // Opretter et indeks på `OrdreId` for at optimere søgninger baseret på relationen til en ordre.
 
-                    b.HasIndex("ScooterId");
+                    b.HasIndex("ScooterId"); // Opretter et indeks på `ScooterId` for at optimere søgninger baseret på relationen til en scooter.
 
-                    b.HasIndex("YdelseId");
+                    b.HasIndex("YdelseId"); // Opretter et indeks på `YdelseId` for at optimere søgninger baseret på relationen til en specifik ydelse.
 
-                    b.ToTable("OrdreYdelser");
+                    b.ToTable("OrdreYdelser"); // Angiver tabelnavnet for `OrdreYdelse` som "OrdreYdelser" i databasen.
                 });
 
+            // Definerer entiteten `Produkt`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Produkt", b =>
                 {
-                    b.Property<int>("ProduktId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("ProduktId") // Definerer `ProduktId` som primærnøglen for `Produkt` og gør det til en automatisk genereret værdi.
+                        .ValueGeneratedOnAdd() // Automatisk genereret ved tilføjelse.
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProduktId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProduktId")); // Konfigurerer `ProduktId` som en identity column for SQL Server.
 
-                    b.Property<int>("KøbsAntal")
+                    b.Property<int>("KøbsAntal") // Definerer egenskaben `KøbsAntal`, som repræsenterer standardantallet af produktet, der købes.
                         .HasColumnType("int");
 
-                    b.Property<int?>("LagerAntal")
-                        .HasColumnType("int");
+                    b.Property<int?>("LagerAntal") // Definerer egenskaben `LagerAntal`, som repræsenterer antallet af produkter på lager.
+                        .HasColumnType("int"); // Tillader null, hvis lagerantal ikke er kendt.
 
-                    b.Property<double?>("Pris")
-                        .HasColumnType("float");
+                    b.Property<double?>("Pris") // Definerer egenskaben `Pris`, som repræsenterer produktets pris. 
+                        .HasColumnType("float"); // Tillader null, da prisen kan være ukendt.
 
-                    b.Property<string>("ProduktNavn")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ProduktNavn") // Definerer egenskaben `ProduktNavn`, som repræsenterer navnet på produktet.
+                        .HasColumnType("nvarchar(max)"); // Sætter datatypen til nvarchar med maksimal længde.
 
-                    b.HasKey("ProduktId");
+                    b.HasKey("ProduktId"); // Angiver `ProduktId` som primærnøglen for entiteten.
 
-                    b.ToTable("Produkter");
+                    b.ToTable("Produkter"); // Angiver tabelnavnet for `Produkt` som "Produkter" i databasen.
                 });
 
+            // Definerer entiteten `Ydelse`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Ydelse", b =>
                 {
-                    b.Property<int>("YdelseId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("YdelseId") // Definerer `YdelseId` som primærnøglen for `Ydelse` og gør det til en automatisk genereret værdi.
+                        .ValueGeneratedOnAdd() // Automatisk genereret ved tilføjelse.
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("YdelseId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("YdelseId")); // Konfigurerer `YdelseId` som en identity column for SQL Server.
 
-                    b.Property<string>("Navn")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Navn") // Definerer egenskaben `Navn`, som repræsenterer navnet på ydelsen.
+                        .HasColumnType("nvarchar(max)"); // Sætter datatypen til nvarchar med maksimal længde.
 
-                    b.Property<double?>("StandardPris")
-                        .HasColumnType("float");
+                    b.Property<double?>("StandardPris") // Definerer egenskaben `StandardPris`, som repræsenterer den standardiserede pris for ydelsen.
+                        .HasColumnType("float"); // Tillader null, hvis standardprisen ikke er fastsat.
 
-                    b.HasKey("YdelseId");
+                    b.HasKey("YdelseId"); // Angiver `YdelseId` som primærnøglen for entiteten.
 
-                    b.ToTable("Ydelser");
+                    b.ToTable("Ydelser"); // Angiver tabelnavnet for `Ydelse` som "Ydelser" i databasen.
                 });
 
+            // Definerer entiteten `Betaling`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Betaling", b =>
                 {
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ordre", "Ordre")
-                        .WithMany("Betalinger")
-                        .HasForeignKey("OrdreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ordre", "Ordre") // Angiver, at `Betaling` har en relation til `Ordre` gennem fremmednøglen `OrdreId`.
+                        .WithMany("Betalinger") // En ordre kan have mange betalinger.
+                        .HasForeignKey("OrdreId")  // Fremmednøglen `OrdreId` bruges til relationen.
+                        .OnDelete(DeleteBehavior.Cascade) // Hvis ordren slettes, slettes relaterede betalinger også.
+                        .IsRequired(); // Relationen er påkrævet, dvs. en betaling skal altid tilknyttes en ordre.
 
-                    b.Navigation("Ordre");
+                    b.Navigation("Ordre"); // Navigationsegenskab, der giver adgang til den tilknyttede `Ordre`.
                 });
 
+            // Definerer entiteten `KundeScooter`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.KundeScooter", b =>
                 {
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Kunde", "Kunde")
-                        .WithMany("KundeScooter")
-                        .HasForeignKey("KundeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Kunde", "Kunde") // Angiver, at `KundeScooter` har en relation til `Kunde` gennem fremmednøglen `KundeId`.
+                        .WithMany("KundeScooter") // En kunde kan have mange scootere.
+                        .HasForeignKey("KundeId") // Fremmednøglen `KundeId` bruges til relationen.
+                        .OnDelete(DeleteBehavior.Cascade) // Hvis kunden slettes, slettes relaterede scootere også.
+                        .IsRequired(); // Relationen er påkrævet, dvs. en scooter skal altid være tilknyttet en kunde.
 
-                    b.Navigation("Kunde");
+                    b.Navigation("Kunde"); // Navigationsegenskab, der giver adgang til den tilknyttede `Kunde`.
                 });
 
+            // Definerer entiteten `LejeAftale`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.LejeAftale", b =>
                 {
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Kunde", "Kunde")
-                        .WithMany("LejeAftale")
-                        .HasForeignKey("KundeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Kunde", "Kunde") // Angiver, at `LejeAftale` har en relation til `Kunde` gennem fremmednøglen `KundeId`.
+                        .WithMany("LejeAftale") // En kunde kan have mange lejeaftaler.
+                        .HasForeignKey("KundeId") // Fremmednøglen `KundeId` bruges til relationen.
+                        .OnDelete(DeleteBehavior.Cascade) // Hvis kunden slettes, slettes relaterede lejeaftaler også.
+                        .IsRequired(); // Relationen er påkrævet, dvs. en lejeaftale skal altid være tilknyttet en kunde.
 
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ordre", "Ordre")
-                        .WithMany()
-                        .HasForeignKey("OrdreId");
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ordre", "Ordre") // Angiver, at `LejeAftale` kan have en relation til `Ordre` gennem fremmednøglen `OrdreId`.
+                        .WithMany() // En ordre kan muligvis have relaterede lejeaftaler.
+                        .HasForeignKey("OrdreId"); // Fremmednøglen `OrdreId` bruges til relationen.
 
-                    b.Navigation("Kunde");
+                    b.Navigation("Kunde"); // Navigationsegenskab, der giver adgang til den tilknyttede `Kunde`.
 
-                    b.Navigation("Ordre");
+                    b.Navigation("Ordre"); // Navigationsegenskab, der giver adgang til den tilknyttede `Ordre`.
                 });
 
+            // Definerer entiteten `LejeScooter`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.LejeScooter", b =>
                 {
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.LejeAftale", "LejeAftale")
-                        .WithMany("LejeScooter")
-                        .HasForeignKey("LejeId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.LejeAftale", "LejeAftale") // Angiver, at `LejeScooter` har en relation til `LejeAftale` gennem fremmednøglen `LejeId`.
+                        .WithMany("LejeScooter") // En lejeaftale kan have mange scootere.
+                        .HasForeignKey("LejeId") // Fremmednøglen `LejeId` bruges til relationen.
+                        .OnDelete(DeleteBehavior.Cascade); // Hvis lejeaftalen slettes, slettes relaterede scootere også.
 
-                    b.Navigation("LejeAftale");
+                    b.Navigation("LejeAftale"); // Navigationsegenskab, der giver adgang til den tilknyttede `LejeAftale`.
                 });
 
-            modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Ordre", b =>
+            // Definerer entiteten `Ordre`.
+            modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Ordre", b => 
                 {
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Kunde", "Kunde")
-                        .WithMany("Ordre")
-                        .HasForeignKey("KundeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Kunde", "Kunde") // Angiver, at `Ordre` har en relation til `Kunde` gennem fremmednøglen `KundeId`.
+                        .WithMany("Ordre") // En kunde kan have mange ordrer.
+                        .HasForeignKey("KundeId") // Fremmednøglen `KundeId` bruges til relationen.
+                        .OnDelete(DeleteBehavior.Cascade) // Hvis kunden slettes, slettes relaterede ordrer også.
+                        .IsRequired(); // Relationen er påkrævet, dvs. en ordre skal altid være tilknyttet en kunde.
 
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.LejeAftale", "LejeAftale")
-                        .WithMany()
-                        .HasForeignKey("LejeId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.LejeAftale", "LejeAftale") // Angiver, at `Ordre` kan have en relation til `LejeAftale` gennem fremmednøglen `LejeId`.
+                        .WithMany() // En lejeaftale kan muligvis relateres til ordrer.
+                        .HasForeignKey("LejeId") // Fremmednøglen `LejeId` bruges til relationen.
+                        .OnDelete(DeleteBehavior.Restrict); // Forhindrer sletning af lejeaftalen, hvis der er en relateret ordre.
 
-                    b.Navigation("Kunde");
+                    b.Navigation("Kunde"); // Navigationsegenskab, der giver adgang til den tilknyttede `Kunde`.
 
-                    b.Navigation("LejeAftale");
+                    b.Navigation("LejeAftale"); // Navigationsegenskab, der giver adgang til den tilknyttede `LejeAftale`.
                 });
 
+            // Definerer entiteten `OrdreProdukt`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.OrdreProdukt", b =>
                 {
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ordre", "Ordre")
-                        .WithMany("OrdreProdukter")
-                        .HasForeignKey("OrdreId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ordre", "Ordre") // Angiver, at `OrdreProdukt` har en relation til `Ordre` gennem fremmednøglen `OrdreId`.
+                        .WithMany("OrdreProdukter") // En ordre kan have mange produkter.
+                        .HasForeignKey("OrdreId") // Fremmednøglen `OrdreId` bruges til relationen.
+                        .OnDelete(DeleteBehavior.Cascade); // Hvis ordren slettes, slettes relaterede produkter også.
 
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Produkt", "Produkt")
-                        .WithMany()
-                        .HasForeignKey("ProduktId");
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Produkt", "Produkt") // Angiver, at `OrdreProdukt` kan have en relation til `Produkt` gennem fremmednøglen `ProduktId`.
+                        .WithMany() // Et produkt kan relateres til mange ordrer.
+                        .HasForeignKey("ProduktId"); // Fremmednøglen `ProduktId` bruges til relationen.
 
-                    b.Navigation("Ordre");
+                    b.Navigation("Ordre"); // Navigationsegenskab, der giver adgang til den tilknyttede `Ordre`.
 
-                    b.Navigation("Produkt");
+                    b.Navigation("Produkt"); // Navigationsegenskab, der giver adgang til det tilknyttede `Produkt`.
                 });
 
+            // Definerer entiteten `OrdreYdelse`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.OrdreYdelse", b =>
                 {
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Mekaniker", "Mekaniker")
-                        .WithMany()
-                        .HasForeignKey("MekanikerId");
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Mekaniker", "Mekaniker") // Angiver, at `OrdreYdelse` kan have en relation til `Mekaniker` gennem fremmednøglen `MekanikerId`.
+                        .WithMany() // En mekaniker kan have relaterede ydelser, men dette er ikke specificeret yderligere.
+                        .HasForeignKey("MekanikerId"); // Fremmednøglen `MekanikerId` bruges til relationen.
 
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ordre", "Ordre")
-                        .WithMany("OrdreYdelse")
-                        .HasForeignKey("OrdreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ordre", "Ordre") // Angiver, at `OrdreYdelse` har en relation til `Ordre` gennem fremmednøglen `OrdreId`.
+                        .WithMany("OrdreYdelse") // En ordre kan have mange ydelser tilknyttet.
+                        .HasForeignKey("OrdreId") // Fremmednøglen `OrdreId` bruges til relationen.
+                        .OnDelete(DeleteBehavior.Cascade) // Hvis ordren slettes, slettes relaterede ydelser også.
+                        .IsRequired(); // Relationen er påkrævet, dvs. en ydelse skal altid være tilknyttet en ordre.
 
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.KundeScooter", "Scooter")
-                        .WithMany()
-                        .HasForeignKey("ScooterId");
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.KundeScooter", "Scooter") // Angiver, at `OrdreYdelse` kan have en relation til `KundeScooter` gennem fremmednøglen `ScooterId`.
+                        .WithMany() // En scooter kan være relateret til mange ydelser, men dette er ikke specificeret yderligere.
+                        .HasForeignKey("ScooterId"); // Fremmednøglen `ScooterId` bruges til relationen.
 
-                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ydelse", "Ydelse")
-                        .WithMany("OrdreYdelse")
-                        .HasForeignKey("YdelseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("ScooterLandProjectOpg.Shared.Models.Ydelse", "Ydelse") // Angiver, at `OrdreYdelse` har en relation til `Ydelse` gennem fremmednøglen `YdelseId`.
+                        .WithMany("OrdreYdelse") // En type ydelse kan være relateret til mange ordrer.
+                        .HasForeignKey("YdelseId") // Fremmednøglen `YdelseId` bruges til relationen.
+                        .OnDelete(DeleteBehavior.Cascade) // Hvis ydelsen slettes, slettes relaterede ordreydelser også.
+                        .IsRequired(); // Relationen er påkrævet, dvs. en ordreydelse skal altid være tilknyttet en ydelse.
 
-                    b.Navigation("Mekaniker");
+                    b.Navigation("Mekaniker"); // Navigationsegenskab, der giver adgang til den tilknyttede `Mekaniker`.
 
-                    b.Navigation("Ordre");
+                    b.Navigation("Ordre"); // Navigationsegenskab, der giver adgang til den tilknyttede `Ordre`.
 
-                    b.Navigation("Scooter");
+                    b.Navigation("Scooter"); // Navigationsegenskab, der giver adgang til den tilknyttede `Scooter`.
 
-                    b.Navigation("Ydelse");
+                    b.Navigation("Ydelse"); // Navigationsegenskab, der giver adgang til den tilknyttede `Ydelse`.
                 });
 
+            // Definerer entiteten `Kunde`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Kunde", b =>
                 {
-                    b.Navigation("KundeScooter");
+                    b.Navigation("KundeScooter");  // Navigationsegenskab, der giver adgang til alle scootere, der tilhører en kunde.
+                     
+                    b.Navigation("LejeAftale"); // Navigationsegenskab, der giver adgang til alle lejeaftaler, der tilhører en kunde.
 
-                    b.Navigation("LejeAftale");
-
-                    b.Navigation("Ordre");
+                    b.Navigation("Ordre"); // Navigationsegenskab, der giver adgang til alle ordrer, der tilhører en kunde.
                 });
 
+            // Definerer entiteten `LejeAftale`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.LejeAftale", b =>
                 {
-                    b.Navigation("LejeScooter");
+                    b.Navigation("LejeScooter"); // Navigationsegenskab, der giver adgang til alle scootere, der er tilknyttet en lejeaftale.
                 });
 
+            // Definerer entiteten `Ordre`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Ordre", b =>
                 {
-                    b.Navigation("Betalinger");
+                    b.Navigation("Betalinger"); // Navigationsegenskab, der giver adgang til alle betalinger, der er relateret til en ordre.
 
-                    b.Navigation("OrdreProdukter");
+                    b.Navigation("OrdreProdukter"); // Navigationsegenskab, der giver adgang til alle produkter, der er relateret til en ordre.
 
-                    b.Navigation("OrdreYdelse");
+                    b.Navigation("OrdreYdelse"); // Navigationsegenskab, der giver adgang til alle ydelser, der er relateret til en ordre.
                 });
 
+            // Definerer entiteten `Ydelse`.
             modelBuilder.Entity("ScooterLandProjectOpg.Shared.Models.Ydelse", b =>
                 {
-                    b.Navigation("OrdreYdelse");
+                    b.Navigation("OrdreYdelse"); // Navigationsegenskab, der giver adgang til alle ordreydelser, der er relateret til en specifik type ydelse.
                 });
-#pragma warning restore 612, 618
+#pragma warning restore 612, 618 // Gendanner advarsler for forældede API'er.
         }
     }
 }

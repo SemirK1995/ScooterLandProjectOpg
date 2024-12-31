@@ -2,36 +2,43 @@
 @using ScooterLandProjectOpg.Shared.Models
 @inject HttpClient Http
 @using System.Text.Json
-@using ScooterLandProjectOpg.Shared.Enum;
+@using ScooterLandProjectOpg.Shared.Enum
 
-
-
+@* Opretter en container med top og bundmargen (my-4). *@
 <div class="container my-4">
+	@* Opretter et korts header med blå baggrund, hvid tekst, og centreret indhold. *@
 	<div class="card-header bg-primary text-white text-center">
+		@* Viser en titel i kortets header. *@
 		<h3 class="card-title">Kunde Katalog</h3>
 	</div>
 
-	<!-- Søgefelt og knapper -->
+	@* Opretter et form-group-område til søgefelt og knapper, med margin-top og fleksibelt layout. *@
 	<div class="form-group mt-3 d-flex">
+		@* Tekstboks til søgning, bundet til variablen søgeTekst. *@
 		<input id="search" type="text" class="form-control me-2"
 			   @bind="søgeTekst"
 			   placeholder="Søg på Kunde ID, Navn eller Telefonnummer" />
+		@* Knap, der kalder metoden SøgKunder ved klik. *@
 		<button class="btn btn-primary me-2" @onclick="SøgKunder">Søg</button>
+		@* Knap, der kalder metoden RydSøgning ved klik (nulstiller). *@
 		<button class="btn btn-secondary" @onclick="RydSøgning">Ryd</button>
 	</div>
 
-	<!-- Indlæsningstilstand -->
+	@* Viser en loading-tekst, hvis kunder-listen ikke er hentet endnu. *@
 	@if (kunder == null)
 	{
+		@* Et centreret afsnit med "Loading..."-tekst. *@
 		<div class="text-center">
 			<p class="text-muted">Loading...</p>
 		</div>
 	}
 	else
 	{
-		<!-- Opret Kunde-knap -->
+		@* Knap til at oprette en ny kunde. *@
 		<div class="text-center my-3">
+			@* Ved klik på knappen kaldes VisOpretModal, der åbner en modal til oprettelse. *@
 			<button class="btn custom-btn" @onclick="VisOpretModal">Opret Kunde</button>
+			@* Indlejret CSS, som definerer en specialknap med gradient og hover-effekt. *@
 			<style>
 				.custom-btn {
 					background: linear-gradient(to bottom, #4f81bd, #1f4e79); /* Samme gradient som boksen */
@@ -52,10 +59,12 @@
 			</style>
 		</div>
 
-		<!-- Kundetabel -->
+		@* Tabel til visning af kunder, med striber og hover-effekt. *@
 		<table class="table table-striped table-hover">
+			@* Header-række med primær baggrund. *@
 			<thead class="table-primary">
 				<tr>
+					@* Kolonneoverskrifter for kundedata. *@
 					<th>ID</th>
 					<th>Navn</th>
 					<th>Email</th>
@@ -65,38 +74,54 @@
 					<th>Handlinger</th>
 				</tr>
 			</thead>
+			@* Tabel-krop, hvor hver kunde vises i sin egen række. *@
 			<tbody>
 				@if (filtreredeKunder.Any())
 				{
+					@* Går igennem alle filtrerede kunder. *@
 					@foreach (var kunde in filtreredeKunder)
 					{
 						<tr>
+							@* Viser kundens ID. *@
 							<td>@kunde.KundeId</td>
+							@* Viser kundens navn. *@
 							<td>@kunde.Navn</td>
+							@* Viser kundens email. *@
 							<td>@kunde.Email</td>
+							@* Viser kundens telefonnummer. *@
 							<td>@kunde.Telefonnummer</td>
+							@* Viser kundens adresse. *@
 							<td>@kunde.Adresse</td>
+							@* Knap til at toggle visning af scootere, kalder ToggleScooterVisning. *@
 							<td>
 								<button class="btn btn-light shadow-sm text-primary hover-highlight px-3 py-2" @onclick="() => ToggleScooterVisning(kunde.KundeId)">
 									<i class="bi bi-eye-fill"></i> Vis Scootere
 								</button>
 							</td>
+							@* Kolonne til diverse handlinger for kunden. *@
 							<td>
 								<div class="d-flex justify-content-evenly">
+									@* Knap til at åbne sidepanelet med kundeoplysninger og ordrer. *@
 									<button class="btn btn-primary btn-sm me-2" @onclick="() => ÅbnSidePanel(kunde.KundeId)">Se Ordrer</button>
+									@* Knap til at vise modal, der redigerer kunden. *@
 									<button class="btn btn-secondary btn-sm me-2" @onclick="() => VisRedigerModal(kunde)">Rediger</button>
+									@* Knap til at vise modal for at tilføje en ny scooter til kunden. *@
 									<button class="btn btn-info btn-sm" @onclick="() => VisTilføjScooterModal(kunde)">Tilføj Scooter</button>
 								</div>
 							</td>
 						</tr>
 
+						@* Hvis vi har scootere for kunden og dennes ID matcher visScooterKundeId, viser vi en ekstra række med scootere. *@
 						@if (kundeScootere.TryGetValue(kunde.KundeId, out var scootere) && visScooterKundeId == kunde.KundeId)
 						{
 							<tr>
+								@* Kolspan sætter, at rækkerne går over alle 7 kolonner. *@
 								<td colspan="7" class="bg-light">
 									@if (scootere != null && scootere.Any())
 									{
+										@* Viser en tabel med scootere, hvis der er nogen. *@
 										<table class="table table-bordered mt-3">
+											@* Tabel-header for scooterinfo. *@
 											<thead class="table-secondary">
 												<tr>
 													<th>Mærke</th>
@@ -104,6 +129,7 @@
 													<th>Registreringsnummer</th>
 												</tr>
 											</thead>
+											@* Scooter-information i tabellen. *@
 											<tbody>
 												@foreach (var scooter in scootere)
 												{
@@ -118,6 +144,7 @@
 									}
 									else
 									{
+										@* Hvis kunden ingen scootere har, vises denne tekst. *@
 										<div class="text-center text-muted py-2">
 											Kunde har ingen scooter.
 										</div>
@@ -125,11 +152,11 @@
 								</td>
 							</tr>
 						}
-
 					}
 				}
 				else
 				{
+					@* Hvis ingen kunder matcher søgningen, vis en enkelt tabelrække med besked. *@
 					<tr>
 						<td colspan="7" class="text-center">Ingen kunder matcher søgningen.</td>
 					</tr>
@@ -139,38 +166,51 @@
 	}
 </div>
 
+@* Modal for tilføjelse af en ny scooter til en kunde. Visning styres af visTilføjScooterModal. *@
 @if (visTilføjScooterModal)
 {
+	@* Baggrundslag med en let mørk overlay. *@
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+		@* Centeret dialog. *@
 		<div class="modal-dialog modal-dialog-centered">
+			@* Modalens indhold. *@
 			<div class="modal-content">
+				@* Modal-header med blå baggrund og hvid tekst. *@
 				<div class="modal-header bg-primary text-white">
+					@* Titel, der viser hvilken kunde der tilføjes scooter til. *@
 					<h5 class="modal-title">Tilføj Scooter til @valgtKunde.Navn</h5>
+					@* Lukke-knap (hvid 'x'). *@
 					<button type="button" class="btn-close btn-close-white" @onclick="LukTilføjScooterModal"></button>
 				</div>
+				@* Modal-body med en EditForm til valideret indtastning af ny scooter. *@
 				<div class="modal-body">
 					<EditForm Model="nyScooter" OnValidSubmit="TilføjScooter">
 						<DataAnnotationsValidator />
+						@* Tekstfelt til mærke. *@
 						<div class="mb-3">
 							<label for="maerke" class="form-label">Mærke</label>
 							<InputText @bind-Value="nyScooter.Maerke" id="maerke" class="form-control" placeholder="Indtast mærke" />
 							<ValidationMessage For="@(() => nyScooter.Maerke)" />
 						</div>
+						@* Tekstfelt til model. *@
 						<div class="mb-3">
 							<label for="model" class="form-label">Model</label>
 							<InputText @bind-Value="nyScooter.Model" id="model" class="form-control" placeholder="Indtast model" />
 							<ValidationMessage For="@(() => nyScooter.Model)" />
 						</div>
+						@* Tekstfelt til registreringsnummer. *@
 						<div class="mb-3">
 							<label for="registreringsNummer" class="form-label">Registreringsnummer</label>
 							<InputText @bind-Value="nyScooter.RegistreringsNummer" id="registreringsNummer" class="form-control" placeholder="Indtast registreringsnummer" />
 							<ValidationMessage For="@(() => nyScooter.RegistreringsNummer)" />
 						</div>
+						@* Numerisk felt til produktionsår. *@
 						<div class="mb-3">
 							<label for="produktionsAar" class="form-label">Produktionsår</label>
 							<InputNumber @bind-Value="nyScooter.ProduktionsAar" id="produktionsAar" class="form-control" placeholder="Indtast produktionsår" />
 							<ValidationMessage For="@(() => nyScooter.ProduktionsAar)" />
 						</div>
+						@* Knap for at indsende formularen (TilføjScooter). *@
 						<div class="d-flex justify-content-end">
 							<button type="submit" class="btn btn-primary">Tilføj Scooter</button>
 						</div>
@@ -181,16 +221,23 @@
 	</div>
 }
 
+@* Et sidepanel, der kan glide ind fra højre for at vise kundeoplysninger og ordrer. *@
 @if (visSidePanel)
 {
+	@* Panel med fast position til højre, med lys baggrund, skygge, og auto-scroll. *@
 	<div class="sidepanel bg-light shadow-sm position-fixed" style="width: 400px; top: 0; right: 0; height: 100%; overflow-y: auto; z-index: 1050;">
+		@* Header på panelet med blå baggrund, hvid tekst, polstring, og en luk-knap. *@
 		<div class="sidepanel-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">
+			@* Titel, her 'Kundeoplysninger'. *@
 			<h5 class="m-0">Kundeoplysninger</h5>
+			@* Lukke-knap til at fjerne panelet fra skærmen. *@
 			<button class="btn-close btn-close-white" @onclick="LukSidePanel"></button>
 		</div>
+		@* Panelets indhold, med polstring på 4. *@
 		<div class="sidepanel-body p-4">
 			@if (søgeResultatKunde != null)
 			{
+				@* Viser generelle kundeoplysninger. *@
 				<div class="mb-4">
 					<p><strong>Kunde ID:</strong> @søgeResultatKunde.KundeId</p>
 					<p><strong>Navn:</strong> @søgeResultatKunde.Navn</p>
@@ -199,9 +246,11 @@
 					<p><strong>Adresse:</strong> @søgeResultatKunde.Adresse</p>
 				</div>
 
+				@* Afsnit for visning af kundens ordrer. *@
 				<h5 class="text-primary mb-3">Ordrer</h5>
 				@if (søgeResultatKunde.Ordre != null && søgeResultatKunde.Ordre.Any())
 				{
+					@* Viser en tabel for hver enkelt ordre, hvis der findes nogle. *@
 					<table class="table table-bordered">
 						<thead class="table-light">
 							<tr>
@@ -217,8 +266,10 @@
 							{
 								<tr>
 									<td>@ordre.OrdreId</td>
+									@* Viser dato i formatet dd-MM-yyyy, eller "N/A" hvis dato ikke findes. *@
 									<td>@(ordre.Dato.HasValue ? ordre.Dato.Value.ToString("dd-MM-yyyy") : "N/A")</td>
 									<td>@ordre.TotalPris kr.</td>
+									@* Mulighed for at opdatere ordrestatus via dropdown. *@
 									<td>
 										<div class="d-flex align-items-center">
 											<select class="form-select form-select-sm me-2" @bind="ordre.Status">
@@ -230,6 +281,7 @@
 											<button class="btn btn-sm btn-primary" @onclick="() => OpdaterOrdreStatus(ordre)">Opdater</button>
 										</div>
 									</td>
+									@* Knap til at se yderligere ordredetaljer. *@
 									<td>
 										<button class="btn btn-sm btn-info" @onclick="() => VisOrdreDetaljer(ordre.OrdreId)">Se Detaljer</button>
 									</td>
@@ -240,30 +292,39 @@
 				}
 				else
 				{
+					@* Hvis kunden ikke har nogen ordrer, vises en tekst. *@
 					<p class="text-muted">Kunden har ingen ordrer.</p>
 				}
 			}
 			else
 			{
+				@* Hvis søgeResultatKunde ikke er hentet endnu. *@
 				<p>Indlæser kundeoplysninger...</p>
 			}
 		</div>
 	</div>
 }
+
+@* Modal til at vise detaljer om en specifik ordre. *@
 @if (visOrdreDetaljerModal)
 {
+	@* Baggrunds-overlay for modalen. *@
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
+				@* Header med blå baggrund, hvid tekst, og luk-knap. *@
 				<div class="modal-header bg-primary text-white">
+					@* Viser Ordre ID i titel. *@
 					<h5 class="modal-title">Ordre Detaljer (Ordre ID: @valgtOrdre.OrdreId)</h5>
 					<button type="button" class="btn-close btn-close-white" @onclick="LukOrdreDetaljerModal"></button>
 				</div>
+				@* Modal-body, hvor ydelser, produkter og eventuel lejeaftale vises. *@
 				<div class="modal-body">
-					<!-- Ordre Ydelser -->
+					@* Sektion for OrdreYdelse. *@
 					<h5 class="text-primary mb-3">Ydelser</h5>
 					@if (valgtOrdre.OrdreYdelse != null && valgtOrdre.OrdreYdelse.Any())
 					{
+						@* En tabel med alle ydelser knyttet til ordren. *@
 						<table class="table table-bordered">
 							<thead class="table-light">
 								<tr>
@@ -276,8 +337,11 @@
 								@foreach (var ydelse in valgtOrdre.OrdreYdelse)
 								{
 									<tr>
+										@* Navnet på ydelsen. *@
 										<td>@ydelse.Ydelse?.Navn</td>
+										@* Pris for ydelsen. *@
 										<td>@ydelse.BeregnetPris kr.</td>
+										@* Viser mærke og model for scooteren tilknyttet ydelsen. *@
 										<td>@ydelse.Scooter?.Maerke @ydelse.Scooter?.Model</td>
 									</tr>
 								}
@@ -286,13 +350,15 @@
 					}
 					else
 					{
+						@* Hvis der ikke er nogen ydelser, vises en besked. *@
 						<p class="text-muted">Ingen ydelser tilføjet.</p>
 					}
 
-					<!-- Ordre Produkter -->
+					@* Sektion for OrdreProdukter. *@
 					<h5 class="text-primary mb-3">Produkter</h5>
 					@if (valgtOrdre.OrdreProdukter != null && valgtOrdre.OrdreProdukter.Any())
 					{
+						@* Viser produkter i en tabel med antal og pris. *@
 						<table class="table table-bordered">
 							<thead class="table-light">
 								<tr>
@@ -317,10 +383,11 @@
 					}
 					else
 					{
+						@* Vises hvis ingen produkter er tilknyttet ordren. *@
 						<p class="text-muted">Ingen produkter tilknyttet denne ordre.</p>
 					}
 
-					<!-- Lejeaftale -->
+					@* Sektion for Lejeaftale (hvis en eksisterer). *@
 					<h5 class="text-primary mb-3">Lejeaftale</h5>
 					@if (valgtOrdre.LejeAftale != null)
 					{
@@ -333,9 +400,11 @@
 							<p><strong>Antal kørte Km:</strong> @valgtOrdre.LejeAftale.KortKilometer Km.</p>
 							<p><strong>Selvrisiko:</strong> @valgtOrdre.LejeAftale.Selvrisiko Kr.</p>
 						</div>
+						@* Overskrift for scootere i lejeaftalen. *@
 						<h6 class="text-primary">Scootere</h6>
 						@if (valgtOrdre.LejeAftale.LejeScooter != null && valgtOrdre.LejeAftale.LejeScooter.Any())
 						{
+							@* Viser en liste over scootere tilknyttet lejeaftalen. *@
 							<ul class="list-unstyled">
 								@foreach (var scooter in valgtOrdre.LejeAftale.LejeScooter)
 								{
@@ -345,18 +414,21 @@
 						}
 						else
 						{
+							@* Ingen scootere på denne lejeaftale. *@
 							<p class="text-muted">Ingen scootere knyttet til lejeaftalen.</p>
 						}
 					}
 					else
 					{
+						@* Ingen lejeaftale for denne ordre. *@
 						<p class="text-muted">Ingen lejeaftale knyttet til denne ordre.</p>
 					}
 
-					<!-- Total Pris -->
+					@* Viser en sektion for total pris på ordren. *@
 					<h5 class="text-primary mt-4">Total Pris</h5>
 					<p class="fs-5"><strong>@valgtOrdre.TotalOrdrePris kr.</strong></p>
 				</div>
+				@* Modal-footer med en luk-knap. *@
 				<div class="modal-footer">
 					<button class="btn btn-secondary" @onclick="LukOrdreDetaljerModal">Luk</button>
 				</div>
@@ -364,46 +436,50 @@
 		</div>
 	</div>
 }
+
+@* En modal, der enten bruges til at oprette eller redigere en kunde, afhængigt af modalTitel. *@
 @if (visModal)
 {
+	@* Mørkt overlay, der aktiverer modalen som 'show'. *@
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
+				@* Modal-header, hvor modalTitel vises og en luk-knap. *@
 				<div class="modal-header bg-primary text-white">
 					<h5 class="modal-title">@modalTitel</h5>
 					<button type="button" class="btn-close btn-close-white" @onclick="LukModal"></button>
 				</div>
+				@* Modal-body, der indeholder en EditForm til at oprette/redigere en kunde. *@
 				<div class="modal-body">
 					<EditForm Model="valgtKunde" OnValidSubmit="GemKunde">
 						<DataAnnotationsValidator />
+						@* Første række med navn og email. *@
 						<div class="row">
-							<!-- Navn -->
 							<div class="col-md-6 mb-3">
 								<label for="navn" class="form-label"><strong>Navn:</strong></label>
 								<InputText id="navn" @bind-Value="valgtKunde.Navn" class="form-control" />
 								<ValidationMessage For="@(() => valgtKunde.Navn)" />
 							</div>
-							<!-- Email -->
 							<div class="col-md-6 mb-3">
 								<label for="email" class="form-label"><strong>Email:</strong></label>
 								<InputText id="email" @bind-Value="valgtKunde.Email" class="form-control" />
 								<ValidationMessage For="@(() => valgtKunde.Email)" />
 							</div>
 						</div>
+						@* Anden række med telefon og adresse. *@
 						<div class="row">
-							<!-- Telefon -->
 							<div class="col-md-6 mb-3">
 								<label for="telefon" class="form-label"><strong>Telefon:</strong></label>
 								<InputNumber id="telefon" @bind-Value="valgtKunde.Telefonnummer" class="form-control" />
 								<ValidationMessage For="@(() => valgtKunde.Telefonnummer)" />
 							</div>
-							<!-- Adresse -->
 							<div class="col-md-6 mb-3">
 								<label for="adresse" class="form-label"><strong>Adresse:</strong></label>
 								<InputText id="adresse" @bind-Value="valgtKunde.Adresse" class="form-control" />
 								<ValidationMessage For="@(() => valgtKunde.Adresse)" />
 							</div>
 						</div>
+						@* Modal-footer med to knapper: 'Gem' og 'Slet'. *@
 						<div class="modal-footer mt-3">
 							<button class="btn btn-primary" type="submit">Gem</button>
 							<button class="btn btn-danger" @onclick="VisBekræftSletModal">Slet</button>
@@ -414,8 +490,11 @@
 		</div>
 	</div>
 }
+
+@* Modal til at bekræfte, om man vil slette en kunde. *@
 @if (visBekræftSletModal)
 {
+	@* Ligner de andre modaler: overlay, lille dialog, header i rød baggrund. *@
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
 		<div class="modal-dialog modal-sm">
 			<div class="modal-content">
@@ -423,10 +502,12 @@
 					<h5 class="modal-title">Bekræft Sletning</h5>
 					<button type="button" class="btn-close btn-close-white" @onclick="LukBekræftSletModal"></button>
 				</div>
+				@* Body med advarsel. *@
 				<div class="modal-body text-center">
 					<p class="fw-bold">Er du sikker på, at du vil slette kunden?</p>
 					<p class="text-danger"><strong>@valgtKunde.Navn</strong></p>
 				</div>
+				@* Modal-footer med 'Annuller' og 'Ja, Slet'. *@
 				<div class="modal-footer d-flex justify-content-between">
 					<button class="btn btn-secondary w-45" @onclick="LukBekræftSletModal">Annuller</button>
 					<button class="btn btn-danger w-45" @onclick="SletBekræftetKunde">Ja, Slet</button>
@@ -436,6 +517,7 @@
 	</div>
 }
 
+@* CSS til sidepanelet. *@
 <style>
 	.sidepanel {
 		position: fixed;
@@ -451,12 +533,16 @@
 	}
 </style>
 
+@* En sektion i bunden med en alert-boks, der viser Scooterland-info. *@
 <div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 200px;">
+	@* En alert, der har en gradient-baggrund, afrundede hjørner og hvid tekst. *@
 	<div class="alert border rounded-3 text-center"
 		 style="max-width: 700px; width: 90%; padding: 20px; background: linear-gradient(to bottom, #1D3557, #457B9D); color: white;">
+		@* En lidt større overskrift med ikon. *@
 		<h4 class="fw-bold mb-3">
 			<i class="fas fa-motorcycle"></i> Scooterland
 		</h4>
+		@* Indholdet fordeles i to kolonner ved hjælp af flex. *@
 		<div class="d-flex justify-content-between">
 			<div class="text-start">
 				<p class="mb-2">
@@ -478,6 +564,7 @@
 	</div>
 </div>
 
+@* CSS til alert-boksen. *@
 <style>
 	.alert {
 		background: linear-gradient(to bottom, #1D3557, #457B9D); /* Match farve fra sidebar */
@@ -504,13 +591,14 @@
 		}
 </style>
 
-
+@* Link til en CSS-fil for scooter-animationer. *@
 <link rel="stylesheet" href="css/ScooterAnimation.css">
 
+@* Container til scooter-ikonet. *@
 <div class="scooter-container">
 
+	@* Et SVG-element med en scooter-grafik, spejlvendt med transform: scaleX(-1). *@
 	<svg class="scooter" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 128 128" style="transform: scaleX(-1);">
-
 		<path fill="#ea6c3a" d="M109.4 59.1h8.8c2 0 3.5 1.6 3.5 3.5c0 2-1.6 3.5-3.5 3.5h-8.8z" />
 		<path fill="#fac136" d="M29.6 25.3c-.4 2.8-1.1 8.1-1.5 10.9c-.2 1.1-1.4 1.8-2.4 1.3c-2.9-1.4-4.7-4.5-4.2-7.8s3.1-5.8 6.2-6.4c1.1-.2 2.1.8 1.9 2" />
 		<circle cx="19.4" cy="90.2" r="17.5" fill="#2f2f2f" />
@@ -529,29 +617,58 @@
 
 </div>
 
-
 @code {
+	// Liste over alle kunder.
 	private List<Kunde> kunder = new();
+
+	// Kunde-objekt der bruges, når en kunde oprettes eller redigeres.
 	private Kunde valgtKunde = new();
+
+	// Kunde-objekt til sletning (håndteres ved bekræftelsesmodal).
 	private Kunde kundeTilSletning = new();
+
+	// Kunde-objekt der vises i sidepanelet (inklusive ordrer).
 	private Kunde søgeResultatKunde = new();
+
+	// Oprettelse af et nyt KundeScooter-objekt, når en scooter skal tilføjes.
 	private KundeScooter nyScooter = new();
+
+	// Styrer visning af "Tilføj scooter"-modalen.
 	private bool visTilføjScooterModal = false;
+
+	// Styrer visningen af den generelle kunde-modal (opret/rediger).
 	private bool visModal = false;
+
+	// Styrer, om sidepanelet med kundeoplysninger er åbent.
 	private bool visSidePanel = false;
+
+	// Titel på modalvinduet, skifter mellem "Opret" eller "Rediger".
 	private string modalTitel = "";
+
+	// Gemmer det kundeId, der skal vises i sidepanelet.
 	private int søgeKundeId;
+
+	// Styrer visningen af slet-bekræftelsesmodal.
 	private bool visBekræftSletModal = false;
 
+	// Variabler til ordrer og ordre-detaljer.
+	private int valgtOrdreId; // Aktuelt valgte ordre-ID.
+	private Ordre? valgtOrdre; // Indeholder detaljer om den valgte ordre.
+	private bool visOrdreDetaljerModal; // Styrer, om ordredetalje-modal skal vises.
 
-	private int valgtOrdreId; // Gemmer det valgte ordre-ID
-	private Ordre? valgtOrdre; // Indeholder detaljer om den valgte ordre
-	private bool visOrdreDetaljerModal; // Styrer modalens synlighed
-	private Dictionary<int, List<KundeScooter>> kundeScootere = new(); // Holder scootere for hver kunde
+	// Lagrer en liste over scootere pr. kundeId, så de kan toggles i tabellen.
+	private Dictionary<int, List<KundeScooter>> kundeScootere = new();
+
+	// Huskes for at styre, hvilken kundeId's scootere der p.t. er synlige.
 	private int? visScooterKundeId = null;
 
-	private string søgeTekst = ""; // Søgeteksten fra brugeren
-	private List<Kunde> filtreredeKunder = new(); // Den filtrerede liste af kunder
+	// Tekst, der bruges til at søge i kunder.
+	private string søgeTekst = "";
+
+	// Filtreret liste af kunder, som opdateres ved søgning.
+	private List<Kunde> filtreredeKunder = new();
+
+	// Egenskab, der opdaterer søgeTekst og udfører søgning automatisk.
 	private string SøgeTekst
 	{
 		get => søgeTekst;
@@ -560,34 +677,37 @@
 			if (søgeTekst != value)
 			{
 				søgeTekst = value;
-				_ = PerformSearchAsync(); // Kald søgning når søgeTekst ændres
-
+				_ = PerformSearchAsync(); // Start asynkron søgning.
 			}
 		}
 	}
+
+	// Asynkron metode, der kalder SøgKunder og tvinger en UI-opdatering.
 	private async Task PerformSearchAsync()
 	{
 		await SøgKunder();
-		StateHasChanged(); // Tving UI-opdatering
+		StateHasChanged(); // Tvinger en genrendring af UI.
 	}
 
+	// Simpel placeholder-metode til fremvisning af scootere (her blot en log).
 	private void VisScootere(int kundeId)
 	{
 		Console.WriteLine($"Henter scootere for kunde med ID: {kundeId}");
-		// Du kan implementere en modal eller navigere til en anden side
+		// Kunne implementere ekstra funktionalitet eller navigation.
 	}
 
+	// Slår visningen af scootere for en given kunde til/fra og henter data, hvis nødvendigt.
 	private async Task ToggleScooterVisning(int kundeId)
 	{
 		if (visScooterKundeId == kundeId)
 		{
-			visScooterKundeId = null; // Skjul
+			visScooterKundeId = null; // Skjul scootere, hvis de allerede vises.
 		}
 		else
 		{
 			try
 			{
-				// Hent scootere for kunden fra serveren
+				// Henter scootere for kunden via API'et.
 				var response = await Http.GetAsync($"api/KundeScooter/{kundeId}/scootere");
 
 				if (response.IsSuccessStatusCode)
@@ -597,7 +717,7 @@
 				}
 				else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
 				{
-					// Håndter situationen hvor kunden ikke har nogen scootere
+					// Hvis API returnerer 404, har kunden ingen scootere.
 					kundeScootere[kundeId] = new List<KundeScooter>();
 				}
 				else
@@ -605,7 +725,7 @@
 					Console.WriteLine($"Fejl ved hentning af scootere for kunde {kundeId}: {response.StatusCode}");
 				}
 
-				visScooterKundeId = kundeId; // Vis for valgt kunde
+				visScooterKundeId = kundeId; // Sæt, at vi nu viser scootere for denne kunde.
 			}
 			catch (Exception ex)
 			{
@@ -614,22 +734,22 @@
 			}
 		}
 
-		StateHasChanged(); // Sørg for, at UI opdateres
+		StateHasChanged(); // Opdaterer UI, så vi kan se ændringen.
 	}
 
-
+	// Lifecycle-metode, der kører, når komponenten initialiseres.
 	protected override async Task OnInitializedAsync()
 	{
-		await HentAlleKunder(); // Hent kun kunder
-
+		await HentAlleKunder(); // Hent alle kunder fra API ved opstart.
 	}
 
+	// Henter alle kunder fra API og gemmer dem lokalt i listerne kunder og filtreredeKunder.
 	private async Task HentAlleKunder()
 	{
 		try
 		{
 			kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
-			filtreredeKunder = new List<Kunde>(kunder); // Start med at vise alle kunder
+			filtreredeKunder = new List<Kunde>(kunder); // Start med at vise alle kunder i tabellen.
 		}
 		catch (Exception ex)
 		{
@@ -639,23 +759,28 @@
 		}
 	}
 
+	// Åbner sidepanelet til at vise ordreinformationer for en specifik kunde.
 	private async Task ÅbnSidePanel(int kundeId)
 	{
 		søgeKundeId = kundeId;
 		visSidePanel = true;
 		await HentKundeDetaljer(kundeId);
 	}
+
+	// Viser bekræftelsesmodal for at slette en kunde.
 	private void VisBekræftSletModal()
 	{
 		kundeTilSletning = valgtKunde;
 		visBekræftSletModal = true;
 	}
 
+	// Lukker bekræftelsesmodalen uden at slette.
 	private void LukBekræftSletModal()
 	{
 		visBekræftSletModal = false;
 	}
 
+	// Henter detaljer om en kunde (inklusive ordrer) og gemmer i søgeResultatKunde, så sidepanelet kan vise dem.
 	private async Task HentKundeDetaljer(int kundeId)
 	{
 		try
@@ -667,60 +792,62 @@
 			Console.WriteLine($"Fejl ved hentning af kundeoplysninger: {ex.Message}");
 		}
 	}
+
+	// Søgning blandt kunder baseret på søgeTekst; sammenligner ID, Navn og telefonnummer.
 	private async Task SøgKunder()
 	{
 		if (string.IsNullOrWhiteSpace(søgeTekst))
 		{
-			filtreredeKunder = new List<Kunde>(); // Tøm listen, hvis søgefeltet er tomt
+			// Hvis søgetekst er tom, ryddes den filtrerede liste.
+			filtreredeKunder = new List<Kunde>();
 		}
 		else
 		{
 			var søgetekstLower = søgeTekst.ToLower();
 			filtreredeKunder = kunder.Where(k =>
-			k.KundeId.ToString().Contains(søgeTekst) ||
-			(!string.IsNullOrEmpty(k.Navn) && k.Navn.ToLower().Contains(søgeTekst.ToLower())) ||
-			k.Telefonnummer?.ToString().Contains(søgeTekst) == true
-
+				k.KundeId.ToString().Contains(søgeTekst) ||
+				(!string.IsNullOrEmpty(k.Navn) && k.Navn.ToLower().Contains(søgetekstLower)) ||
+				k.Telefonnummer?.ToString().Contains(søgeTekst) == true
 			).ToList();
-
 		}
 	}
-	// Nulstiller søgefeltet og viser hele listen
+
+	// Nulstiller søgefeltet og viser hele listen af kunder igen.
 	private void RydSøgning()
 	{
-		søgeTekst = ""; // Nulstil søgeteksten
-		filtreredeKunder = new List<Kunde>(kunder); // Vis alle kunder
+		søgeTekst = "";
+		filtreredeKunder = new List<Kunde>(kunder);
 	}
 
+	// Viser modal til at tilføje en scooter til en eksisterende kunde.
 	private void VisTilføjScooterModal(Kunde kunde)
 	{
-		valgtKunde = kunde; // Indstil den valgte kunde
-		nyScooter = new KundeScooter(); // Nulstil scooterdetaljer
-		visTilføjScooterModal = true; // Vis modalvindue
+		valgtKunde = kunde;
+		nyScooter = new KundeScooter();
+		visTilføjScooterModal = true;
 	}
+
+	// Lukker modalvinduet til at tilføje scooter.
 	private void LukTilføjScooterModal()
 	{
-		visTilføjScooterModal = false; // Skjul modalvindue
+		visTilføjScooterModal = false;
 	}
+
+	// Tilføjer en scooter til den valgte kunde via API-kald.
 	private async Task TilføjScooter()
 	{
 		try
 		{
-			// Indstil kundeId til scooteren
-			nyScooter.KundeId = valgtKunde.KundeId;
+			nyScooter.KundeId = valgtKunde.KundeId; // Sæt, hvilken kunde scooteren hører til.
 
-			// Send scooter til API'et
 			var response = await Http.PostAsJsonAsync($"api/KundeScooter/{valgtKunde.KundeId}/add-scooter", nyScooter);
-
 			if (response.IsSuccessStatusCode)
 			{
-				// Vis succesbesked eller opdater data
-				await HentAlleKunder();
-				LukTilføjScooterModal();
+				await HentAlleKunder(); // Opdater kundeoversigten.
+				LukTilføjScooterModal(); // Luk modal.
 			}
 			else
 			{
-				// Håndter fejl
 				Console.WriteLine("Fejl ved oprettelse af scooter.");
 			}
 		}
@@ -730,11 +857,13 @@
 		}
 	}
 
+	// Lukker sidepanelet.
 	private void LukSidePanel()
 	{
 		visSidePanel = false;
 	}
 
+	// Viser modal til at oprette en ny kunde (kundeId = 0).
 	private void VisOpretModal()
 	{
 		valgtKunde = new Kunde();
@@ -742,6 +871,7 @@
 		visModal = true;
 	}
 
+	// Viser modal til at redigere en eksisterende kunde.
 	private void VisRedigerModal(Kunde kunde)
 	{
 		valgtKunde = kunde;
@@ -749,6 +879,7 @@
 		visModal = true;
 	}
 
+	// Gemmer en kunde (nyt opret eller redigeret), kalder Post eller Put på API'et.
 	private async Task GemKunde()
 	{
 		if (valgtKunde.KundeId == 0)
@@ -763,32 +894,26 @@
 		LukModal();
 	}
 
+	// Lukker opret/rediger-modal uden at gemme.
 	private void LukModal()
 	{
 		visModal = false;
 	}
 
+	// Bekræfter sletning af kunde og kalder DELETE på API.
 	private async Task SletBekræftetKunde()
 	{
 		try
 		{
-			// Send DELETE-anmodning til API
 			var response = await Http.DeleteAsync($"api/Kunde/{kundeTilSletning.KundeId}");
-
 			if (response.IsSuccessStatusCode)
 			{
-				// Fjern kunden midlertidigt fra listen
 				kunder.Remove(kundeTilSletning);
-
-				// Opdater listen fra serveren i baggrunden
 				await HentAlleKunder();
-
-				// Luk modal
 				LukBekræftSletModal();
 			}
 			else
 			{
-				// Håndter fejl
 				var fejl = await response.Content.ReadAsStringAsync();
 				Console.WriteLine($"Fejl ved sletning: {fejl}");
 			}
@@ -799,23 +924,20 @@
 		}
 	}
 
+	// Opdaterer status for en specifik ordre via API, og udfører evt. handling ved Annulleret/Betalt.
 	private async Task OpdaterOrdreStatus(Ordre ordre)
 	{
 		try
 		{
 			var response = await Http.PutAsJsonAsync($"api/Ordre/{ordre.OrdreId}/status", ordre.Status);
-
 			if (response.IsSuccessStatusCode)
 			{
 				Console.WriteLine($"Ordrestatus for ID {ordre.OrdreId} opdateret til {ordre.Status}.");
 
-				// Tjek, om status er Annulleret eller Betalt
 				if (ordre.Status == OrdreStatus.Annulleret || ordre.Status == OrdreStatus.Betalt)
 				{
 					Console.WriteLine("Udfører yderligere handlinger for status: " + ordre.Status);
 				}
-
-				// Opdater listen over kunder eller ordrer, hvis det er nødvendigt
 				await HentKundeDetaljer(ordre.KundeId);
 			}
 			else
@@ -829,12 +951,12 @@
 		}
 	}
 
+	// Henter detaljeret ordreinfo og viser en modal med disse oplysninger.
 	private async Task VisOrdreDetaljer(int ordreId)
 	{
 		try
 		{
 			valgtOrdre = søgeResultatKunde.Ordre.FirstOrDefault(o => o.OrdreId == ordreId);
-
 			if (valgtOrdre == null)
 			{
 				Console.WriteLine($"Ingen ordre fundet med ID {ordreId}.");
@@ -844,7 +966,7 @@
 			var response = await Http.GetFromJsonAsync<Ordre>($"api/Ordre/{ordreId}");
 			if (response != null)
 			{
-				valgtOrdre = response; // Opdater valgtOrdre
+				valgtOrdre = response;
 			}
 
 			visOrdreDetaljerModal = true;
@@ -854,10 +976,10 @@
 			Console.WriteLine($"Fejl ved hentning af ordredetaljer: {ex.Message}");
 		}
 	}
+
+	// Lukker modal med ordredetaljer.
 	private void LukOrdreDetaljerModal()
 	{
 		visOrdreDetaljerModal = false;
-
 	}
-
 }

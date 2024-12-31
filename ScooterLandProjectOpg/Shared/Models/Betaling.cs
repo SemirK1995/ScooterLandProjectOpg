@@ -1,35 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ScooterLandProjectOpg.Shared.Enum;
+﻿using System; // Inkluderer grundlæggende funktionalitet som datatyper og systemværktøjer.
+using System.Collections.Generic; // Giver funktionalitet til generiske samlinger.
+using System.ComponentModel.DataAnnotations.Schema; // Muliggør mapping af klasser til database-tabeller.
+using System.ComponentModel.DataAnnotations; // Giver funktionalitet til validering og metadata.
+using System.Linq; // Tilbyder LINQ-funktionalitet for forespørgsler over samlinger.
+using System.Text; // Giver klasser til tekstmanipulation.
+using System.Threading.Tasks; // Understøtter asynkron programmering og opgaver.
+using ScooterLandProjectOpg.Shared.Enum; // Inkluderer enums defineret i projektet.
 
-namespace ScooterLandProjectOpg.Shared.Models
+namespace ScooterLandProjectOpg.Shared.Models // Definerer et namespace til organisering af modellerne i projektet.
 {
-	public class Betaling
-	{
-		// Primary Key
-		[Key]
-		public int BetalingsId { get; set; }
+    // Definerer klassen Betaling, der repræsenterer en betaling i systemet.
+    public class Betaling 
+    {
+        [Key] // Angiver, at BetalingsId er primærnøglen i databasen.
+        public int BetalingsId { get; set; } // Unik identifikator for betalingen.
 
-		// Foreign Key
-		public int OrdreId { get; set; }
+        public int OrdreId { get; set; } // Refererer til den tilknyttede ordre via dens ID.
 
-		// Navigation property
-		[ForeignKey("OrdreId")]
-		public Ordre Ordre { get; set; }
+        [ForeignKey("OrdreId")] // Angiver en fremmed nøgle til Ordre-tabellen.
+        public Ordre Ordre { get; set; } // Navigationsegenskab til den relaterede ordre.
 
-		//Attributter
-		public DateTime? BetalingsDato { get; set; }
-		public double? Beløb { get; set; }
-		public BetalingsMetodeStatus? BetalingsMetode { get; set; }
-		public bool Betalt { get; set; } = false;
+        public DateTime? BetalingsDato { get; set; } // Dato for betalingen. Kan være null, hvis betalingen ikke er gennemført.
+        
+        public double? Beløb { get; set; } // Det beløb, der skal betales. Kan være null, hvis ikke specificeret.
+        
+        public BetalingsMetodeStatus? BetalingsMetode { get; set; } // Betalingsmetode som Mobilepay, Kontant osv. Bruger en enum.
+        
+        public bool Betalt { get; set; } = false; // Angiver, om betalingen er gennemført. Standard er false.
 
-		public Betaling()
-		{
-		}
-	}
+        public Betaling() // Standardkonstruktør for Betaling-klassen.
+        {
+        }
+    }
 }

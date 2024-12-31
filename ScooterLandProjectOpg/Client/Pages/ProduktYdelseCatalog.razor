@@ -2,477 +2,537 @@
 @using ScooterLandProjectOpg.Shared.Models
 @inject HttpClient Http
 
+@* // En tom div-indpakning med et card, giver en skygge og margin i bunden. *@
 <div class="card shadow mb-4">
 </div>
-	<div class="card-header bg-primary text-white">
-		<h3 class="card-title text-center mb-0">Produkt og Ydelse Katalog</h3>
-	</div>
-<style>
-	.nav-tabs .nav-link {
-		color: #495057; /* Neutral mørk farve for inaktive tabs */
-		background-color: #f8f9fa; /* Lys baggrund */
-		border: 1px solid #dee2e6; /* Standard grå kant */
-		font-weight: bold; /* Fremhæv teksten */
-		border-radius: 0.5rem; /* Afrundede hjørner */
-		padding: 10px 20px; /* God størrelse for klikbarhed */
-		transition: all 0.3s ease; /* Glidende effekt */
-		text-align: center;
-		box-shadow: none; /* Fjern skygge for inaktive tabs */
-	}
 
-		.nav-tabs .nav-link:hover {
-			background-color: #007bff; /* Blå hover-baggrund */
-			color: #fff; /* Hvid tekst ved hover */
-			border-color: #0056b3; /* Mørkere blå kant */
-			transform: scale(1.05); /* Let forstørrelse ved hover */
-			box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Skygge */
-		}
-
-		.nav-tabs .nav-link.active {
-			color: #fff; /* Hvid tekst for aktiv tab */
-			background-color: #007bff; /* Blå baggrund for aktiv tab */
-			border-color: #0056b3; /* Mørkere blå kant */
-			font-size: 18px; /* Gør aktiv tab lidt større */
-			box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* Mere fremhævet skygge */
-		}
-
-		.nav-tabs .nav-link:not(.active) {
-			background-color: #e2e6ea; /* Lys grå baggrund for inaktive tabs */
-			color: #343a40; /* Mørk tekstfarve */
-			border-color: #ced4da; /* Lys kant for inaktive tabs */
-			opacity: 1; /* Fuld synlighed */
-			font-size: 16px; /* Ensartet tekststørrelse */
-			box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Svag skygge */
-		}
-
-	.nav-tabs {
-		justify-content: center; /* Centrer tabs */
-		margin-bottom: 20px; /* Mellemrum under tabs */
-	}
-</style>
-
-<!-- Tabs navigation -->
-<ul class="nav nav-tabs d-flex">
-	<li class="nav-item">
-		<a class="nav-link @(aktivTab == "ydelser" ? "active" : "")" @onclick="@(() => AktivTabSkift("ydelser"))">
-			Ydelser
-		</a>
-	</li>
-	<li class="nav-item">
-		<a class="nav-link @(aktivTab == "produkter" ? "active" : "")" @onclick="@(() => AktivTabSkift("produkter"))">
-			Produkter
-		</a>
-	</li>
-</ul>
-
-
-	
-
-
-<div class="tab-content mt-4">
-	@if (aktivTab == "ydelser")
-	{
-		<div>
-			<div class="d-flex justify-content-center mb-4">
-				<button class="btn custom-btn" @onclick="VisOpretYdelseModal">Opret Ydelse</button>
-			</div>
-			@if (ydelser == null)
-			{
-				<div class="text-center">
-					<p>Loading ydelser...</p>
-				</div>
-			}
-			else
-			{
-				<table class="table table-hover table-striped shadow-sm">
-					<thead class="table-light">
-						<tr>
-							<th>ID</th>
-							<th>Navn</th>
-							<th>Standard Pris</th>
-							<th>Handlinger</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var ydelse in ydelser)
-						{
-							<tr>
-								<td>@ydelse.YdelseId</td>
-								<td>@ydelse.Navn</td>
-								<td>@ydelse.StandardPris?.ToString("F2") kr.</td>
-								<td>
-									<div class="d-flex justify-content-evenly">
-										<button class="btn btn-primary btn-sm" @onclick="() => VisRedigerYdelseModal(ydelse)">Rediger</button>
-										<button class="btn btn-danger btn-sm" @onclick="() => BekræftSletYdelse(ydelse)">Slet</button>
-									</div>
-
-
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			}
-		</div>
-	}
-	else if (aktivTab == "produkter")
-	{
-		<div>
-			<div class="d-flex justify-content-center mb-4">
-				<button class="btn custom-btn" @onclick="VisOpretProduktModal">Opret Produkt</button>
-			</div>
-			@if (produkter == null)
-			{
-				<div class="text-center">
-					<p>Loading produkter...</p>
-				</div>
-			}
-			else
-			{
-				<table class="table table-hover table-striped shadow-sm">
-					<thead class="table-light">
-						<tr>
-							<th>ID</th>
-							<th>Navn</th>
-							<th>Pris</th>
-							<th>Lager Antal</th>
-							<th>Handlinger</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var produkt in produkter)
-						{
-							<tr>
-								<td>@produkt.ProduktId</td>
-								<td>@produkt.ProduktNavn</td>
-								<td>@produkt.Pris?.ToString("F2") kr.</td>
-								<td>@produkt.LagerAntal</td>
-								<td>
-									<button class="btn btn-primary btn-sm" @onclick="() => VisRedigerProduktModal(produkt)">Rediger</button>
-									<button class="btn btn-danger btn-sm" @onclick="() => BekræftSletProdukt(produkt)">Slet</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			}
-		</div>
-	}
+@* Opretter en overskrift-sektion med blå baggrund og hvid tekst. *@
+<div class="card-header bg-primary text-white">
+    @* Viser titlen "Produkt og Ydelse Katalog" centreret og uden margin i bunden. *@
+    <h3 class="card-title text-center mb-0">Produkt og Ydelse Katalog</h3>
 </div>
 
 <style>
-	.custom-btn {
-		background: linear-gradient(to bottom, #4f81bd, #1f4e79); /* Samme gradient som boksen */
-		color: white; /* Tekstfarve */
-		border: none; /* Fjern kant */
-		border-radius: 25px; /* Afrundede hjørner */
-		padding: 10px 20px; /* Størrelse på knappen */
-		font-size: 16px; /* Tekststørrelse */
-		box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Skygge */
-		transition: all 0.3s ease-in-out; /* Glidende hover-effekt */
-	}
+    @* CSS-styling for navigationsfaner (tabs). *@
+    .nav-tabs .nav-link {
+        color: #495057;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        font-weight: bold;
+        border-radius: 0.5rem;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+        text-align: center;
+        box-shadow: none;
+    }
 
-		.custom-btn:hover {
-			background: linear-gradient(to bottom, #1f4e79, #4f81bd); /* Omvendt gradient på hover */
-			transform: scale(1.1); /* Gør knappen lidt større */
-			box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3); /* Mere markant skygge */
-		}
+    .nav-tabs .nav-link:hover {
+        background-color: #007bff;
+        color: #fff;
+        border-color: #0056b3;
+        transform: scale(1.05);
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #fff;
+        background-color: #007bff;
+        border-color: #0056b3;
+        font-size: 18px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-tabs .nav-link:not(.active) {
+        background-color: #e2e6ea;
+        color: #343a40;
+        border-color: #ced4da;
+        opacity: 1;
+        font-size: 16px;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-tabs {
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+</style>
+
+@* Navigationsfanerne til at skifte mellem "Ydelser" og "Produkter". *@
+<ul class="nav nav-tabs d-flex">
+    <li class="nav-item">
+        <a class="nav-link @(aktivTab == "ydelser" ? "active" : "")" @onclick="@(() => AktivTabSkift("ydelser"))">
+            Ydelser
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(aktivTab == "produkter" ? "active" : "")" @onclick="@(() => AktivTabSkift("produkter"))">
+            Produkter
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content mt-4">
+    @if (aktivTab == "ydelser")
+    {
+        @* Indholdet vises hvis den aktive tab er "ydelser". *@
+        <div>
+            <div class="d-flex justify-content-center mb-4">
+                @* En knap i midten til at oprette en ny ydelse. *@
+                <button class="btn custom-btn" @onclick="VisOpretYdelseModal">Opret Ydelse</button>
+            </div>
+            @if (ydelser == null)
+            {
+                @* Vis en tekst, hvis ydelser stadig indlæses (null). *@
+                <div class="text-center">
+                    <p>Loading ydelser...</p>
+                </div>
+            }
+            else
+            {
+                @* Viser en tabel med alle ydelser, hvis listen er hentet. *@
+                <table class="table table-hover table-striped shadow-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Navn</th>
+                            <th>Standard Pris</th>
+                            <th>Handlinger</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ydelse in ydelser)
+                        {
+                            <tr>
+                                <td>@ydelse.YdelseId</td>
+                                <td>@ydelse.Navn</td>
+                                <td>@ydelse.StandardPris?.ToString("F2") kr.</td>
+                                <td>
+                                    <div class="d-flex justify-content-evenly">
+                                        <button class="btn btn-primary btn-sm" @onclick="() => VisRedigerYdelseModal(ydelse)">Rediger</button>
+                                        <button class="btn btn-danger btn-sm" @onclick="() => BekræftSletYdelse(ydelse)">Slet</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    }
+    else if (aktivTab == "produkter")
+    {
+        @* Indholdet vises hvis den aktive tab er "produkter". *@
+        <div>
+            <div class="d-flex justify-content-center mb-4">
+                @* En knap i midten til at oprette et nyt produkt. *@
+                <button class="btn custom-btn" @onclick="VisOpretProduktModal">Opret Produkt</button>
+            </div>
+            @if (produkter == null)
+            {
+                <div class="text-center">
+                    <p>Loading produkter...</p>
+                </div>
+            }
+            else
+            {
+                @* Viser en tabel med alle produkter, hvis listen er hentet. *@
+                <table class="table table-hover table-striped shadow-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Navn</th>
+                            <th>Pris</th>
+                            <th>Lager Antal</th>
+                            <th>Handlinger</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var produkt in produkter)
+                        {
+                            <tr>
+                                <td>@produkt.ProduktId</td>
+                                <td>@produkt.ProduktNavn</td>
+                                <td>@produkt.Pris?.ToString("F2") kr.</td>
+                                <td>@produkt.LagerAntal</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" @onclick="() => VisRedigerProduktModal(produkt)">Rediger</button>
+                                    <button class="btn btn-danger btn-sm" @onclick="() => BekræftSletProdukt(produkt)">Slet</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    @* En specialknap med gradient, afrundede hjørner og hover-effekt. *@
+    .custom-btn {
+        background: linear-gradient(to bottom, #4f81bd, #1f4e79);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-size: 16px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease-in-out;
+    }
+
+    .custom-btn:hover {
+        background: linear-gradient(to bottom, #1f4e79, #4f81bd);
+        transform: scale(1.1);
+        box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3);
+    }
 </style>
 
 @if (visYdelseModal)
 {
-	<EditForm Model="valgtYdelse" OnValidSubmit="GemYdelse">
-		<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-			<div class="modal-dialog modal-dialog-centered">
-				<div class="modal-content shadow">
-					<div class="modal-header bg-primary text-white">
-						<h5 class="modal-title">@ydelseModalTitel</h5>
-						<button type="button" class="btn-close btn-close-white" @onclick="LukYdelseModal"></button>
-					</div>
-					<div class="modal-body">
-						<DataAnnotationsValidator />
-						<div class="mb-3">
-							<label for="navn" class="form-label">Navn</label>
-							<InputText id="navn" @bind-Value="valgtYdelse.Navn" class="form-control" placeholder="Indtast ydelsesnavn" />
-							<ValidationMessage For="@(() => valgtYdelse.Navn)" />
-						</div>
-						<div class="mb-3">
-							<label for="pris" class="form-label">Standard Pris</label>
-							<InputNumber id="pris" @bind-Value="valgtYdelse.StandardPris" class="form-control" placeholder="Indtast standard pris" />
-							<ValidationMessage For="@(() => valgtYdelse.StandardPris)" />
-						</div>
-					</div>
-					<div class="modal-footer d-flex justify-content-end">
-						<button type="button" class="btn btn-secondary rounded-pill px-4 me-2" @onclick="LukYdelseModal">Annuller</button>
-						<button type="submit" class="btn btn-success rounded-pill px-4">Gem</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</EditForm>
+    @* Modal (pop-up) til at oprette eller redigere en ydelse. *@
+    <EditForm Model="valgtYdelse" OnValidSubmit="GemYdelse">
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">@ydelseModalTitel</h5>
+                        <button type="button" class="btn-close btn-close-white" @onclick="LukYdelseModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label for="navn" class="form-label">Navn</label>
+                            <InputText id="navn" @bind-Value="valgtYdelse.Navn" class="form-control" placeholder="Indtast ydelsesnavn" />
+                            <ValidationMessage For="@(() => valgtYdelse.Navn)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="pris" class="form-label">Standard Pris</label>
+                            <InputNumber id="pris" @bind-Value="valgtYdelse.StandardPris" class="form-control" placeholder="Indtast standard pris" />
+                            <ValidationMessage For="@(() => valgtYdelse.StandardPris)" />
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4 me-2" @onclick="LukYdelseModal">Annuller</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4">Gem</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
 }
 
 @if (visProduktModal)
 {
-	<EditForm Model="valgtProdukt" OnValidSubmit="GemProdukt">
-		<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-			<div class="modal-dialog modal-dialog-centered">
-				<div class="modal-content shadow">
-					<div class="modal-header bg-primary text-white">
-						<h5 class="modal-title">@produktModalTitel</h5>
-						<button type="button" class="btn-close btn-close-white" @onclick="LukProduktModal"></button>
-					</div>
-					<div class="modal-body">
-						<DataAnnotationsValidator />
-						<div class="mb-3">
-							<label for="navn" class="form-label">Navn</label>
-							<InputText id="navn" @bind-Value="valgtProdukt.ProduktNavn" class="form-control" placeholder="Indtast produktnavn" />
-							<ValidationMessage For="@(() => valgtProdukt.ProduktNavn)" />
-						</div>
-						<div class="mb-3">
-							<label for="pris" class="form-label">Pris</label>
-							<InputNumber id="pris" @bind-Value="valgtProdukt.Pris" class="form-control" placeholder="Indtast pris" />
-							<ValidationMessage For="@(() => valgtProdukt.Pris)" />
-						</div>
-						<div class="mb-3">
-							<label for="antal" class="form-label">Antal</label>
-							<InputNumber id="antal" @bind-Value="valgtProdukt.LagerAntal" class="form-control" placeholder="Indtast antal" />
-							<ValidationMessage For="@(() => valgtProdukt.LagerAntal)" />
-						</div>
-					</div>
-					<div class="modal-footer d-flex justify-content-end">
-						<button type="button" class="btn btn-secondary rounded-pill px-4 me-2" @onclick="LukProduktModal">Annuller</button>
-						<button type="submit" class="btn btn-success rounded-pill px-4">Gem</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</EditForm>
+    @* Modal til at oprette eller redigere et produkt. *@
+    <EditForm Model="valgtProdukt" OnValidSubmit="GemProdukt">
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">@produktModalTitel</h5>
+                        <button type="button" class="btn-close btn-close-white" @onclick="LukProduktModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label for="navn" class="form-label">Navn</label>
+                            <InputText id="navn" @bind-Value="valgtProdukt.ProduktNavn" class="form-control" placeholder="Indtast produktnavn" />
+                            <ValidationMessage For="@(() => valgtProdukt.ProduktNavn)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="pris" class="form-label">Pris</label>
+                            <InputNumber id="pris" @bind-Value="valgtProdukt.Pris" class="form-control" placeholder="Indtast pris" />
+                            <ValidationMessage For="@(() => valgtProdukt.Pris)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="antal" class="form-label">Antal</label>
+                            <InputNumber id="antal" @bind-Value="valgtProdukt.LagerAntal" class="form-control" placeholder="Indtast antal" />
+                            <ValidationMessage For="@(() => valgtProdukt.LagerAntal)" />
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4 me-2" @onclick="LukProduktModal">Annuller</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4">Gem</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </EditForm>
 }
-
 
 @if (visBekræftSletModal)
 {
-	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content shadow">
-				<div class="modal-header bg-danger text-white">
-					<h5 class="modal-title">Bekræft Sletning</h5>
-					<button type="button" class="btn-close btn-close-white" @onclick="LukBekræftSletModal"></button>
-				</div>
-				<div class="modal-body text-center">
-					<p class="fs-5">Er du sikker på, at du vil slette <strong>@bekræftModalTitel</strong>?</p>
-				</div>
-				<div class="modal-footer d-flex justify-content-center">
-					<button class="btn btn-secondary rounded-pill px-4 me-2" @onclick="LukBekræftSletModal">Annuller</button>
-					<button class="btn btn-danger rounded-pill px-4" @onclick="BekræftSlet">Ja, Slet</button>
-				</div>
-			</div>
-		</div>
-	</div>
+    @* Modal, der bekræfter sletning af enten ydelse eller produkt. *@
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Bekræft Sletning</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="LukBekræftSletModal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="fs-5">Er du sikker på, at du vil slette <strong>@bekræftModalTitel</strong>?</p>
+                    @* Viser navnet på ydelsen eller produktet, der skal slettes. *@
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button class="btn btn-secondary rounded-pill px-4 me-2" @onclick="LukBekræftSletModal">Annuller</button>
+                    <button class="btn btn-danger rounded-pill px-4" @onclick="BekræftSlet">Ja, Slet</button>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
+@* En container, hvor vi viser en info-boks i bunden, ligesom en "footer". *@
 <div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 200px;">
-	<div class="alert border rounded-3 text-center"
-		 style="max-width: 700px; width: 90%; padding: 20px; background: linear-gradient(to bottom, #1D3557, #457B9D); color: white;">
-		<h4 class="fw-bold mb-3">
-			<i class="fas fa-motorcycle"></i> Scooterland
-		</h4>
-		<div class="d-flex justify-content-between">
-			<div class="text-start">
-				<p class="mb-2">
-					<strong><i class="fas fa-map-marker-alt"></i> Adresse:</strong> Hovedgade 123, 4000 Roskilde
-				</p>
-				<p class="mb-2">
-					<strong><i class="fas fa-phone-alt"></i> Telefon:</strong> 12 34 56 78
-				</p>
-			</div>
-			<div class="text-start">
-				<p class="mb-2">
-					<strong><i class="fas fa-envelope"></i> Email:</strong> kontakt@scooterland.dk
-				</p>
-				<p class="mb-0">
-					<strong><i class="fas fa-calendar-alt"></i> Dags dato:</strong> @DateTime.Now.ToString("dd-MM-yyyy")
-				</p>
-			</div>
-		</div>
-	</div>
+    @* En boks med en blå gradient, afrundede kanter og hvid tekst. *@
+    <div class="alert border rounded-3 text-center"
+         style="max-width: 700px; width: 90%; padding: 20px; background: linear-gradient(to bottom, #1D3557, #457B9D); color: white;">
+        @* Overskrift "Scooterland" med motorcykelikon. *@
+        <h4 class="fw-bold mb-3">
+            <i class="fas fa-motorcycle"></i> Scooterland
+        </h4>
+        @* Flex-layout, der fordeler teksten i to kolonner. *@
+        <div class="d-flex justify-content-between">
+            <div class="text-start">
+                <p class="mb-2">
+                    <strong><i class="fas fa-map-marker-alt"></i> Adresse:</strong> Hovedgade 123, 4000 Roskilde
+                </p>
+                <p class="mb-2">
+                    <strong><i class="fas fa-phone-alt"></i> Telefon:</strong> 12 34 56 78
+                </p>
+            </div>
+            <div class="text-start">
+                <p class="mb-2">
+                    <strong><i class="fas fa-envelope"></i> Email:</strong> kontakt@scooterland.dk
+                </p>
+                <p class="mb-0">
+                    <strong><i class="fas fa-calendar-alt"></i> Dags dato:</strong> @DateTime.Now.ToString("dd-MM-yyyy")
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
-	.alert {
-		background: linear-gradient(to bottom, #1D3557, #457B9D); /* Match farve fra sidebar */
-		border: none; /* Fjern kant */
-	}
+    @* Justerer stilen for .alert, der anvendes som footer. *@
+    .alert {
+        background: linear-gradient(to bottom, #1D3557, #457B9D);
+        border: none;
+    }
 
-		.alert h4 {
-			font-size: 1.75rem; /* Fremhæv overskriften */
-			color: white; /* Hvid tekst */
-		}
+    .alert h4 {
+        font-size: 1.75rem;
+        color: white;
+    }
 
-		.alert p {
-			font-size: 1rem; /* Læsbar tekst */
-			color: white; /* Hvid tekst */
-		}
+    .alert p {
+        font-size: 1rem;
+        color: white;
+    }
 
-		.alert i {
-			margin-right: 8px; /* Plads mellem ikon og tekst */
-			color: white; /* Hvid farve til ikoner */
-		}
+    .alert i {
+        margin-right: 8px;
+        color: white;
+    }
 
-		.alert .text-start {
-			flex: 1; /* Fordel pladsen ligeligt */
-		}
+    .alert .text-start {
+        flex: 1;
+    }
 </style>
-<link rel="stylesheet" href="css/ScooterAnimation.css">
+@* Link til en CSS-fil, der evt. indeholder animation for scooter-elementet. *@
+<link rel="stylesheet" href="css/ScooterAnimation.css" />
 
+@* En container til den animerede scooter-SVG. *@
 <div class="scooter-container">
-
-	<svg class="scooter" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 128 128" style="transform: scaleX(-1);">
-
-		<path fill="#ea6c3a" d="M109.4 59.1h8.8c2 0 3.5 1.6 3.5 3.5c0 2-1.6 3.5-3.5 3.5h-8.8z" />
-		<path fill="#fac136" d="M29.6 25.3c-.4 2.8-1.1 8.1-1.5 10.9c-.2 1.1-1.4 1.8-2.4 1.3c-2.9-1.4-4.7-4.5-4.2-7.8s3.1-5.8 6.2-6.4c1.1-.2 2.1.8 1.9 2" />
-		<circle cx="19.4" cy="90.2" r="17.5" fill="#2f2f2f" />
-		<circle cx="19.4" cy="90.2" r="9.7" fill="#65878d" />
-		<circle cx="97.7" cy="90.2" r="17.5" fill="#2f2f2f" />
-		<circle cx="97.7" cy="90.2" r="9.7" fill="#65878d" />
-		<path fill="#47c0e5" d="M95.7 54.7h.2c2.1.1 31.3 2.8 31.3 34.6c0 1.9-1.6 3.5-3.5 3.5H51.6c-7.6 0-14.7-3.3-19.7-9l-9.6-11.1c-1.3-1.5-1.8-3.5-1.4-5.5c2-9.1 5.9-17.7 11.6-25.2l1.8-2.4h7.5l-7 28.9c.5 8.7 7.8 15.5 16.5 15.6h12.3c5.6 0 10.1-4.5 10.1-10.1c0-3.5-1.8-6.7-4.8-8.6L63 61.7c-1.2-.8-2-2.2-2-3.6v-3.5h34.7z" />
-		<path fill="#bae9f3" d="M94.6 62.1q-.15 0 0 0c-.8 0-1.4.7-1.4 1.4c0 .8.6 1.4 1.4 1.4c12.3 0 22.2 9.9 22.2 22.2c0 .8.6 1.4 1.4 1.4s1.4-.6 1.4-1.4c0-13.8-11.2-25-25-25" />
-		<path fill="#2f2f2f" d="M66.2 58.5L61 56.1c-.8-.4-1.3-1.2-1.3-2c0-4.7 3.8-8.6 8.6-8.6h14.5c4.9 0 9.9-.3 14.8-1c4.8-.4 8.8 3.4 8.8 8.2v3.4c0 1.1-.9 2.1-2.1 2.1l-30.8 1.3c-2.5.5-5 .1-7.3-1m43.5-31.1l-.1.2c-1.8 2.7-2.8 5.8-2.8 9v2c0 .9.6 1.8 1.5 2.1l1.2.4c1.1.3 2.3-.3 2.7-1.4l3-9.9c.4-1.2-.3-2.4-1.5-2.7l-1.7-.5c-.9-.3-1.8 0-2.3.8" />
-		<path fill="#2f2f2f" d="M115.5 30c.6.2.9.8.7 1.4l-5.7 20.2c-.5 1.9-2 3.5-3.8 4.2l-2.5 1v-2.5l.6-.2c2-.7 3.5-2.3 4.1-4.4l5.2-19c.2-.5.8-.9 1.4-.7" />
-		<path fill="#47c0e5" d="M42.7 37.4L44 33c.4-1.2 0-2.6-1-3.4L38.8 26c-1.7-1.4-3.8-2.3-6-2.5l-6.5-.5c-.5 0-.9.2-1.1.6l-.8 1.8c-1.3 2.9-1.9 6-1.7 9.1l.1 1.7c0 .5.4.9.9 1l4.3.6c3.4.5 5.5 4 4.2 7.3l8.6-1.7z" />
-		<path fill="#2f2f2f" d="M38.4 26s-1.8-.8-2.8 1.7c-1 2.4 1.1 4.6 1.1 4.6l7.5 2.5c1.5.5 3.1-.5 3.4-2.1c.2-1.1-.4-2.2-1.4-2.7z" />
-		<path fill="#47c0e5" d="M3 83.7h4.5c10.3.1 20.3 3.4 28.8 9.4c1.4 1 3.3-.1 3.2-1.9c-.1-2.2-.5-5.2-1.6-8.3c-2-6-6.2-11.3-12.8-13.1c-13.7-3.7-21 5.5-23.9 10.6c-.7 1.6.3 3.3 1.8 3.3" />
-		<path fill="none" stroke="#bae9f3" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.5" d="M15 74.4s7.2-2.4 13.1 2.1c4 3 5.3 7.3 5.3 7.3" />
-	</svg>
-
+    @* SVG'en er spejlvendt via scaleX(-1). *@
+    <svg class="scooter" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 128 128" style="transform: scaleX(-1);">
+        <path fill="#ea6c3a" d="M109.4 59.1h8.8c2 0 3.5 1.6 3.5 3.5c0 2-1.6 3.5-3.5 3.5h-8.8z" />
+        <path fill="#fac136" d="M29.6 25.3c-.4 2.8-1.1 8.1-1.5 10.9c-.2 1.1-1.4 1.8-2.4 1.3c-2.9-1.4-4.7-4.5-4.2-7.8s3.1-5.8 6.2-6.4c1.1-.2 2.1.8 1.9 2" />
+        <circle cx="19.4" cy="90.2" r="17.5" fill="#2f2f2f" />
+        <circle cx="19.4" cy="90.2" r="9.7" fill="#65878d" />
+        <circle cx="97.7" cy="90.2" r="17.5" fill="#2f2f2f" />
+        <circle cx="97.7" cy="90.2" r="9.7" fill="#65878d" />
+        <path fill="#47c0e5" d="M95.7 54.7h.2c2.1.1 31.3 2.8 31.3 34.6c0 1.9-1.6 3.5-3.5 3.5H51.6c-7.6 0-14.7-3.3-19.7-9l-9.6-11.1c-1.3-1.5-1.8-3.5-1.4-5.5c2-9.1 5.9-17.7 11.6-25.2l1.8-2.4h7.5l-7 28.9c.5 8.7 7.8 15.5 16.5 15.6h12.3c5.6 0 10.1-4.5 10.1-10.1c0-3.5-1.8-6.7-4.8-8.6L63 61.7c-1.2-.8-2-2.2-2-3.6v-3.5h34.7z" />
+        <path fill="#bae9f3" d="M94.6 62.1q-.15 0 0 0c-.8 0-1.4.7-1.4 1.4c0 .8.6 1.4 1.4 1.4c12.3 0 22.2 9.9 22.2 22.2c0 .8.6 1.4 1.4 1.4s1.4-.6 1.4-1.4c0-13.8-11.2-25-25-25" />
+        <path fill="#2f2f2f" d="M66.2 58.5L61 56.1c-.8-.4-1.3-1.2-1.3-2c0-4.7 3.8-8.6 8.6-8.6h14.5c4.9 0 9.9-.3 14.8-1c4.8-.4 8.8 3.4 8.8 8.2v3.4c0 1.1-.9 2.1-2.1 2.1l-30.8 1.3c-2.5.5-5 .1-7.3-1m43.5-31.1l-.1.2c-1.8 2.7-2.8 5.8-2.8 9v2c0 .9.6 1.8 1.5 2.1l1.2.4c1.1.3 2.3-.3 2.7-1.4l3-9.9c.4-1.2-.3-2.4-1.5-2.7l-1.7-.5c-.9-.3-1.8 0-2.3.8" />
+        <path fill="#2f2f2f" d="M115.5 30c.6.2.9.8.7 1.4l-5.7 20.2c-.5 1.9-2 3.5-3.8 4.2l-2.5 1v-2.5l.6-.2c2-.7 3.5-2.3 4.1-4.4l5.2-19c.2-.5.8-.9 1.4-.7" />
+        <path fill="#47c0e5" d="M42.7 37.4L44 33c.4-1.2 0-2.6-1-3.4L38.8 26c-1.7-1.4-3.8-2.3-6-2.5l-6.5-.5c-.5 0-.9.2-1.1.6l-.8 1.8c-1.3 2.9-1.9 6-1.7 9.1l.1 1.7c0 .5.4.9.9 1l4.3.6c3.4.5 5.5 4 4.2 7.3l8.6-1.7z" />
+        <path fill="#2f2f2f" d="M38.4 26s-1.8-.8-2.8 1.7c-1 2.4 1.1 4.6 1.1 4.6l7.5 2.5c1.5.5 3.1-.5 3.4-2.1c.2-1.1-.4-2.2-1.4-2.7z" />
+        <path fill="#47c0e5" d="M3 83.7h4.5c10.3.1 20.3 3.4 28.8 9.4c1.4 1 3.3-.1 3.2-1.9c-.1-2.2-.5-5.2-1.6-8.3c-2-6-6.2-11.3-12.8-13.1c-13.7-3.7-21 5.5-23.9 10.6c-.7 1.6.3 3.3 1.8 3.3" />
+        <path fill="none" stroke="#bae9f3" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.5" d="M15 74.4s7.2-2.4 13.1 2.1c4 3 5.3 7.3 5.3 7.3" />
+    </svg>
 </div>
 
-
 @code {
-	private string aktivTab = "ydelser";
-	private List<Ydelse>? ydelser;
-	private List<Produkt>? produkter;
-	private Ydelse valgtYdelse = new();
-	private Produkt valgtProdukt = new();
-	private bool visYdelseModal = false;
-	private bool visProduktModal = false;
-	private string ydelseModalTitel = "";
-	private string produktModalTitel = "";
-	private bool visBekræftSletModal = false;
-	private string bekræftModalTitel = "";
-	private int? idTilSletning = null;
-	private string aktivTypeTilSletning = ""; // "ydelse" eller "produkt"
+    // Styrer hvilken tab (fane) der er aktiv: "ydelser" eller "produkter".
+    private string aktivTab = "ydelser";
 
-	protected override async Task OnInitializedAsync()
-	{
-		await HentYdelser();
-		await HentProdukter();
-	}
+    // Lister til ydelser og produkter, som hentes fra API.
+    private List<Ydelse>? ydelser;
+    private List<Produkt>? produkter;
 
-	private async Task HentYdelser() => ydelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
-	private async Task HentProdukter() => produkter = await Http.GetFromJsonAsync<List<Produkt>>("api/Produkt");
+    // Et midlertidigt objekt til den ydelse, der oprettes/redigeres.
+    private Ydelse valgtYdelse = new();
 
-	private void AktivTabSkift(string tab) => aktivTab = tab;
+    // Et midlertidigt objekt til det produkt, der oprettes/redigeres.
+    private Produkt valgtProdukt = new();
 
-	private void VisOpretYdelseModal()
-	{
-		valgtYdelse = new();
-		ydelseModalTitel = "Opret Ydelse";
-		visYdelseModal = true;
-	}
+    // Styrer, om ydelses-modal (opret/rediger) er synlig.
+    private bool visYdelseModal = false;
 
-	private void VisRedigerYdelseModal(Ydelse ydelse)
-	{
-		valgtYdelse = ydelse;
-		ydelseModalTitel = "Rediger Ydelse";
-		visYdelseModal = true;
-	}
+    // Styrer, om produkt-modal (opret/rediger) er synlig.
+    private bool visProduktModal = false;
 
-	private void LukYdelseModal() => visYdelseModal = false;
+    // Indeholder overskriften i ydelses-modal (om det er "Opret" eller "Rediger").
+    private string ydelseModalTitel = "";
 
-	private async Task GemYdelse()
-	{
-		if (valgtYdelse.YdelseId == 0)
-		{
-			await Http.PostAsJsonAsync("api/Ydelse", valgtYdelse);
-		}
-		else
-		{
-			await Http.PutAsJsonAsync($"api/Ydelse/{valgtYdelse.YdelseId}", valgtYdelse);
-		}
-		await HentYdelser();
-		LukYdelseModal();
-	}
+    // Indeholder overskriften i produkt-modal (om det er "Opret" eller "Rediger").
+    private string produktModalTitel = "";
 
-	private void BekræftSletYdelse(Ydelse ydelse)
-	{
-		bekræftModalTitel = ydelse.Navn ?? "ukendt ydelse";
-		idTilSletning = ydelse.YdelseId;
-		aktivTypeTilSletning = "ydelse";
-		visBekræftSletModal = true;
-	}
+    // Styrer, om slet-bekræftelsesmodal er synlig.
+    private bool visBekræftSletModal = false;
 
-	private void VisOpretProduktModal()
-	{
-		valgtProdukt = new();
-		produktModalTitel = "Opret Produkt";
-		visProduktModal = true;
-	}
+    // Viser navn/titel på det objekt, der er ved at blive slettet (ydelse eller produkt).
+    private string bekræftModalTitel = "";
 
-	private void VisRedigerProduktModal(Produkt produkt)
-	{
-		valgtProdukt = produkt;
-		produktModalTitel = "Rediger Produkt";
-		visProduktModal = true;
-	}
+    // Gemmer ID'et på det objekt, der er ved at blive slettet.
+    private int? idTilSletning = null;
 
-	private void LukProduktModal() => visProduktModal = false;
+    // Angiver, om vi sletter en "ydelse" eller et "produkt".
+    private string aktivTypeTilSletning = "";
 
-	private async Task GemProdukt()
-	{
-		if (valgtProdukt.ProduktId == 0)
-		{
-			await Http.PostAsJsonAsync("api/Produkt", valgtProdukt);
-		}
-		else
-		{
-			await Http.PutAsJsonAsync($"api/Produkt/{valgtProdukt.ProduktId}", valgtProdukt);
-		}
-		await HentProdukter();
-		LukProduktModal();
-	}
+    // Lifecycle-metode, der hentes ved komponentinitialisering.
+    protected override async Task OnInitializedAsync()
+    {
+        await HentYdelser();   // Henter liste af ydelser via API.
+        await HentProdukter(); // Henter liste af produkter via API.
+    }
 
-	private void BekræftSletProdukt(Produkt produkt)
-	{
-		bekræftModalTitel = produkt.ProduktNavn ?? "ukendt produkt";
-		idTilSletning = produkt.ProduktId;
-		aktivTypeTilSletning = "produkt";
-		visBekræftSletModal = true;
-	}
+    // Metoder til at hente ydelser og produkter fra API (GET).
+    private async Task HentYdelser() => ydelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
+    private async Task HentProdukter() => produkter = await Http.GetFromJsonAsync<List<Produkt>>("api/Produkt");
 
-	private void LukBekræftSletModal()
-	{
-		visBekræftSletModal = false;
-		idTilSletning = null;
-		aktivTypeTilSletning = "";
-	}
+    // Skifter aktiv fane, når brugeren klikker på enten "Ydelser" eller "Produkter".
+    private void AktivTabSkift(string tab) => aktivTab = tab;
 
-	private async Task BekræftSlet()
-	{
-		if (idTilSletning != null)
-		{
-			if (aktivTypeTilSletning == "ydelse")
-			{
-				await Http.DeleteAsync($"api/Ydelse/{idTilSletning}");
-				await HentYdelser();
-			}
-			else if (aktivTypeTilSletning == "produkt")
-			{
-				await Http.DeleteAsync($"api/Produkt/{idTilSletning}");
-				await HentProdukter();
-			}
-		}
-		LukBekræftSletModal();
-	}
+    // Åbner modal for at oprette en ny ydelse.
+    private void VisOpretYdelseModal()
+    {
+        valgtYdelse = new(); // Initialiserer en ny instans af `Ydelse` og tildeler den til `valgtYdelse`, så formularen kan udfyldes med standardværdier.
+        ydelseModalTitel = "Opret Ydelse"; // Sætter modalens titel til "Opret Ydelse" for at informere brugeren om modalens formål.
+        visYdelseModal = true; // Sætter `visYdelseModal` til true for at vise modalvinduet til oprettelse af en ny ydelse.
+    }
+
+    // Åbner modal for at redigere en eksisterende ydelse.
+    private void VisRedigerYdelseModal(Ydelse ydelse)
+    {
+        valgtYdelse = ydelse; // Tildeler den eksisterende ydelse, der skal redigeres, til `valgtYdelse` for at forudfylde modalens formular med de aktuelle data.
+        ydelseModalTitel = "Rediger Ydelse"; // Sætter modalens titel til "Rediger Ydelse" for at indikere, at brugeren er ved at redigere en eksisterende ydelse.
+        visYdelseModal = true; // Sætter `visYdelseModal` til true for at vise modalvinduet til redigering af ydelsen.
+    }
+
+    // Lukker ydelsesmodal.
+    private void LukYdelseModal() => visYdelseModal = false;
+
+    // Gemmer en ny eller redigeret ydelse ved at kalde enten POST eller PUT på API.
+    private async Task GemYdelse()
+    {
+        if (valgtYdelse.YdelseId == 0)
+        {
+            // Opretter ny ydelse
+            await Http.PostAsJsonAsync("api/Ydelse", valgtYdelse);
+        }
+        else
+        {
+            // Opdaterer eksisterende ydelse
+            await Http.PutAsJsonAsync($"api/Ydelse/{valgtYdelse.YdelseId}", valgtYdelse);
+        }
+        await HentYdelser();   // Opdater ydelseslisten efter ændringer.
+        LukYdelseModal();      // Luk ydelsesmodal.
+    }
+
+    // Starter slet-proces for en ydelse: viser bekræftelsesmodal med ydelsens navn.
+    private void BekræftSletYdelse(Ydelse ydelse)
+    {
+        bekræftModalTitel = ydelse.Navn ?? "ukendt ydelse"; // Sætter titlen for bekræftelsesmodalen til navnet på den ydelse, der skal slettes. Hvis navnet er null, bruges "ukendt ydelse" som standard.
+        idTilSletning = ydelse.YdelseId; // Gemmer ID'et på den ydelse, der skal slettes, i variablen `idTilSletning` for at kunne identificere det senere.
+        aktivTypeTilSletning = "ydelse"; // Angiver typen af det element, der skal slettes, som "ydelse". Dette bruges til at differentiere sletningslogik for forskellige typer elementer.
+        visBekræftSletModal = true; // Sætter `visBekræftSletModal` til true for at vise bekræftelsesmodalen i brugergrænsefladen.
+    }
+
+    // Åbner modal for at oprette et nyt produkt.
+    private void VisOpretProduktModal()
+    {
+        valgtProdukt = new(); // Initialiserer en ny instans af `Produkt` og tildeler den til `valgtProdukt`, så formularen kan udfyldes med standardværdier.
+        produktModalTitel = "Opret Produkt"; // Sætter modalens titel til "Opret Produkt" for at informere brugeren om, at modalvinduet bruges til at oprette et nyt produkt.
+        visProduktModal = true; // Sætter `visProduktModal` til true for at vise modalvinduet, hvor brugeren kan oprette det nye produkt.
+    }
+
+    // Åbner modal for at redigere et eksisterende produkt.
+    private void VisRedigerProduktModal(Produkt produkt)
+    {
+        valgtProdukt = produkt; // Tildeler det valgte produkt, der skal redigeres, til `valgtProdukt` for at forudfylde modalens formular med de aktuelle data.
+        produktModalTitel = "Rediger Produkt"; // Sætter modalens titel til "Rediger Produkt" for at informere brugeren om, at modalvinduet bruges til at redigere et eksisterende produkt.
+        visProduktModal = true; // Sætter `visProduktModal` til true for at vise modalvinduet, hvor brugeren kan redigere det valgte produkt.
+    }
+
+    // Lukker produktmodal.
+    private void LukProduktModal() => visProduktModal = false;
+
+    // Gemmer et nyt eller redigeret produkt ved at kalde POST eller PUT på API.
+    private async Task GemProdukt()
+    {
+        if (valgtProdukt.ProduktId == 0)
+        {
+            // Opretter nyt produkt
+            await Http.PostAsJsonAsync("api/Produkt", valgtProdukt);
+        }
+        else
+        {
+            // Opdaterer eksisterende produkt
+            await Http.PutAsJsonAsync($"api/Produkt/{valgtProdukt.ProduktId}", valgtProdukt);
+        }
+        await HentProdukter(); // Opdater produktlisten
+        LukProduktModal();     // Luk produktmodal.
+    }
+
+    // Starter slet-proces for et produkt: viser bekræftelsesmodal med produktets navn.
+    private void BekræftSletProdukt(Produkt produkt)
+    {
+        bekræftModalTitel = produkt.ProduktNavn ?? "ukendt produkt"; // Sætter titlen for bekræftelsesmodalen til navnet på produktet, der skal slettes. Hvis navnet er null, bruges "ukendt produkt" som standard.
+        idTilSletning = produkt.ProduktId; // Gemmer ID'et på produktet, der skal slettes, i variablen `idTilSletning` for senere brug i sletningsprocessen.
+        aktivTypeTilSletning = "produkt"; // Indikerer, at typen af elementet, der skal slettes, er et "produkt".
+        visBekræftSletModal = true; // Sætter `visBekræftSletModal` til true for at vise bekræftelsesmodalen i brugergrænsefladen.
+    }
+
+    // Lukker bekræftelsesmodal og nulstiller slettedata.
+    private void LukBekræftSletModal()
+    {
+        visBekræftSletModal = false; // Skjuler bekræftelsesmodalen ved at sætte `visBekræftSletModal` til false.
+        idTilSletning = null; // Nulstiller ID'et for det element, der skal slettes, til null, da processen afsluttes eller annulleres.
+        aktivTypeTilSletning = ""; // Nulstiller typen af elementet, der skulle slettes, til en tom streng for at rydde eventuelle resterende data.
+    }
+
+    // Udfører selve sletningen, hvis brugeren bekræfter.
+    private async Task BekræftSlet()
+    {
+        // Kontrollerer, om der er et ID til sletning. Hvis der ikke er, udføres sletningen ikke.
+        if (idTilSletning != null)
+        {
+            // Hvis typen af det element, der skal slettes, er "ydelse", udføres en HTTP DELETE-forespørgsel til API'et for at slette ydelsen.
+            if (aktivTypeTilSletning == "ydelse")
+            {
+                await Http.DeleteAsync($"api/Ydelse/{idTilSletning}"); // Sletter ydelsen med det angivne ID.
+                await HentYdelser(); // Henter den opdaterede liste over ydelser fra API'et.
+            }
+            // Hvis typen af det element, der skal slettes, er "produkt", udføres en HTTP DELETE-forespørgsel til API'et for at slette produktet.
+            else if (aktivTypeTilSletning == "produkt")
+            {
+                await Http.DeleteAsync($"api/Produkt/{idTilSletning}"); // Sletter produktet med det angivne ID.
+                await HentProdukter(); // Henter den opdaterede liste over produkter fra API'et.
+            }
+        }
+        LukBekræftSletModal(); // Lukker bekræftelsesmodalen og rydder slettedata uanset om sletningen blev udført eller ej.
+    }
 }

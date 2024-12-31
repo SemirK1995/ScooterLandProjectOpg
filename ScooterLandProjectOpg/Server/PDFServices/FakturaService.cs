@@ -1,189 +1,147 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using PdfSharpCore.Drawing;
-using PdfSharpCore.Pdf;
-using ScooterLandProjectOpg.Server.Context;
-using ScooterLandProjectOpg.Shared.Models;
-using SixLabors.Fonts;
-using System.Reflection.Metadata;
+﻿using Microsoft.EntityFrameworkCore; // Importerer Entity Framework Core til databaseinteraktioner.
+using Microsoft.EntityFrameworkCore.Metadata.Internal; // Importerer interne metadata for EF Core.
+using PdfSharpCore.Drawing; // Importerer tegneværktøjer til at generere PDF'er.
+using PdfSharpCore.Pdf; // Importerer PDF-funktionalitet fra PdfSharpCore.
+using ScooterLandProjectOpg.Server.Context; // Importerer ScooterLand datakontext til databasen.
+using ScooterLandProjectOpg.Shared.Models; // Importerer delte modeller fra projektet.
+using SixLabors.Fonts; // Importerer SixLabors til fontstyring.
+using System.Reflection.Metadata; // Importerer metadatahåndtering.
 
-namespace ScooterLandProjectOpg.Server.PDFServices
+namespace ScooterLandProjectOpg.Server.PDFServices // Definerer namespace for PDF-relaterede tjenester, der bruges i projektet.
 {
-	public class FakturaService
-	{
-		private readonly ScooterLandContext _context;
+    // En serviceklasse til generering af fakturaer i PDF-format.
+    public class FakturaService 
+    {
+        private readonly ScooterLandContext _context; // Kontekst, der giver adgang til databasen via EF Core.
 
-		public FakturaService(ScooterLandContext context)
-		{
-			_context = context;
-		}
+        public FakturaService(ScooterLandContext context) // Constructor, der initialiserer databaskonteksten for denne service.
+        {
+            _context = context;
+        }
 
-		public async Task<byte[]> GenererFakturaPdfAsync(int betalingsId)
-		{
-			var betaling = await _context.Betalinger
-				 .Include(b => b.Ordre)
-			.ThenInclude(o => o.LejeAftale)
-				.ThenInclude(la => la.LejeScooter)
-		.Include(b => b.Ordre)
-			.ThenInclude(o => o.OrdreYdelse)
-				.ThenInclude(oy => oy.Scooter)
-		.Include(b => b.Ordre)
-			.ThenInclude(o => o.OrdreYdelse)
-				.ThenInclude(oy => oy.Ydelse)
-		.Include(b => b.Ordre)
-			.ThenInclude(o => o.OrdreYdelse)
-				.ThenInclude(oy => oy.Mekaniker) // Tilføj denne linje for mekanikeroplysninger
-		.Include(b => b.Ordre)
-			.ThenInclude(o => o.Kunde)
-		.Include(b => b.Ordre) // Tilføj produkterne
-			.ThenInclude(o => o.OrdreProdukter)
-				.ThenInclude(op => op.Produkt)
-		.FirstOrDefaultAsync(b => b.BetalingsId == betalingsId);
+        public async Task<byte[]> GenererFakturaPdfAsync(int betalingsId) // Metode til at generere faktura som PDF baseret på betalingsID.
+        {
+            // Henter betaling med relaterede data som ordre, kunde, produkter og ydelser.
+            var betaling = await _context.Betalinger
+                .Include(b => b.Ordre) // Inkluderer ordren relateret til betalingen.
+                    .ThenInclude(o => o.LejeAftale) // Inkluderer lejeaftalen relateret til ordren.
+                        .ThenInclude(la => la.LejeScooter) // Inkluderer scootere relateret til lejeaftalen.
+                .Include(b => b.Ordre)
+                    .ThenInclude(o => o.OrdreYdelse) // Inkluderer ydelser relateret til ordren.
+                        .ThenInclude(oy => oy.Scooter) // Inkluderer scooteren relateret til ydelsen.
+                .Include(b => b.Ordre)
+                    .ThenInclude(o => o.OrdreYdelse)
+                        .ThenInclude(oy => oy.Ydelse) // Inkluderer ydelsesdetaljer.
+                .Include(b => b.Ordre)
+                    .ThenInclude(o => o.OrdreYdelse)
+                        .ThenInclude(oy => oy.Mekaniker) // Inkluderer mekanikeren relateret til ydelsen.
+                .Include(b => b.Ordre)
+                    .ThenInclude(o => o.Kunde) // Inkluderer kunden relateret til ordren.
+                .Include(b => b.Ordre)
+                    .ThenInclude(o => o.OrdreProdukter) // Inkluderer produkter relateret til ordren.
+                        .ThenInclude(op => op.Produkt) // Inkluderer produktdetaljer.
+                .FirstOrDefaultAsync(b => b.BetalingsId == betalingsId); // Finder den første betaling med det angivne betalingsID.
 
-			if (betaling == null)
-				throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
+            // Kontrollerer, om betalingen eksisterer.
+            if (betaling == null) 
+                // Kaster undtagelse, hvis betalingen ikke findes.
+                throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet."); 
 
-			var ordre = betaling.Ordre;
-			var kunde = ordre.Kunde;
+            // Henter ordren fra betalingen.
+            var ordre = betaling.Ordre; 
+            // Henter kunden relateret til ordren.
+            var kunde = ordre.Kunde; 
 
-			using (var ms = new MemoryStream())
-			{
-				PdfDocument pdf = new PdfDocument();
-				PdfPage page = pdf.AddPage();
-				XGraphics gfx = XGraphics.FromPdfPage(page);
+            // Opretter en MemoryStream til PDF-data.
+            using (var ms = new MemoryStream()) 
+            {
+                PdfDocument pdf = new PdfDocument(); // Opretter en ny PDF-dokument.
+                PdfPage page = pdf.AddPage(); // Tilføjer en side til dokumentet.
+                XGraphics gfx = XGraphics.FromPdfPage(page); // Opretter en tegnekontekst til siden.
 
-				// Define fonts and colors
-				var titleFont = new XFont("Arial", 16, XFontStyle.Bold);
-				var headerFont = new XFont("Arial", 12, XFontStyle.Bold);
-				var normalFont = new XFont("Arial", 10);
-				var smallFont = new XFont("Arial", 8);
-				var grayBrush = new XSolidBrush(XColor.FromArgb(150, 150, 150));
-				var darkBrush = XBrushes.Black;
-				var lightGrayBrush = new XSolidBrush(XColor.FromArgb(240, 240, 240));
+                // Definerer skrifttyper og farver, der skal bruges i PDF'en.
+                var titleFont = new XFont("Arial", 16, XFontStyle.Bold);
+                var headerFont = new XFont("Arial", 12, XFontStyle.Bold);
+                var normalFont = new XFont("Arial", 10);
+                var smallFont = new XFont("Arial", 8);
+                var grayBrush = new XSolidBrush(XColor.FromArgb(150, 150, 150));
+                var darkBrush = XBrushes.Black;
+                var lightGrayBrush = new XSolidBrush(XColor.FromArgb(240, 240, 240));
 
-				int yPoint = 40;
+                int yPoint = 40; // Startpunkt for y-koordinaten, hvor tekst begynder på siden.
 
-				// Draw Header Section
-				gfx.DrawString("Scooterland Faktura", titleFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-				gfx.DrawString($"Dato: {DateTime.Now:dd-MM-yyyy}", normalFont, darkBrush, new XRect(0, yPoint, page.Width - 40, 0), XStringFormats.TopRight);
-				yPoint += 30;
-
-				gfx.DrawLine(XPens.LightGray, 40, yPoint, page.Width - 40, yPoint);
-				yPoint += 10;
-
-				// Betaling detaljer
-				gfx.DrawString("Betaling Detaljer", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-				yPoint += 30;
-				gfx.DrawString($"Betalings ID: {betaling.BetalingsId}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 15;
-				gfx.DrawString($"Betalingsmetode: {betaling.BetalingsMetode}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 15;
-				gfx.DrawString($"Betalingsdato: {betaling.BetalingsDato:dd-MM-yyyy}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 30;
-
-				// Kundeoplysninger
-				gfx.DrawString("Kundeoplysninger", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-				yPoint += 30;
-				gfx.DrawString($"KundeId: {kunde.KundeId}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 15;
-				gfx.DrawString($"Kunde Navn: {kunde.Navn}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 15;
-				gfx.DrawString($"Adresse: {kunde.Adresse}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 15;
-				gfx.DrawString($"Telefon: {kunde.Telefonnummer}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 30;
-
-				gfx.DrawLine(XPens.LightGray, 40, yPoint, page.Width - 40, yPoint);
-				yPoint += 20;
-
-				// Ordre detaljer
-				gfx.DrawString("Ordre Detaljer", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-				yPoint += 30;
-				gfx.DrawString($"Ordre ID: {ordre.OrdreId}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 15;
-				gfx.DrawString($"Ordre Dato: {ordre.Dato?.ToString("dd-MM-yyyy")}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 30;
-
-				// Lejeaftale
-				if (ordre.LejeAftale != null)
-				{
-					gfx.DrawString("Lejeaftale Detaljer", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-					yPoint += 30;
-					gfx.DrawString($"LejeId: {ordre.LejeAftale.LejeId}", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Startdato: {ordre.LejeAftale.StartDato:dd-MM-yyyy}", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Slutdato: {ordre.LejeAftale.SlutDato:dd-MM-yyyy}", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Daglig leje for scooter: {ordre.LejeAftale.DagligLeje} kr.", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Kilometer Pris: {ordre.LejeAftale.KilometerPris} kr.", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Antal kørte kilometer: {ordre.LejeAftale.KortKilometer}", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Selvrisiko: {ordre.LejeAftale.Selvrisiko} kr.", normalFont, darkBrush, 40, yPoint);
-					yPoint += 30;
-				}
-
-				// Ydelser
-				if (ordre.OrdreYdelse?.Any() == true)
-				{
-					gfx.DrawString("Ydelser", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-					yPoint += 30;
-					foreach (var ydelse in ordre.OrdreYdelse)
-					{
-						gfx.DrawString($"- {ydelse.Ydelse?.Navn}: {ydelse.BeregnetPris.ToString("F2")} kr.", normalFont, darkBrush, 40, yPoint);
-						yPoint += 15;
-					}
-					yPoint += 10;
-				}
+                // Tegner fakturaens header.
+                // Skriver overskriften "Scooterland Faktura" med stor skrift.
+                gfx.DrawString("Scooterland Faktura", titleFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                // Tilføjer datoen for fakturagenerering i øverste højre hjørne.
+                gfx.DrawString($"Dato: {DateTime.Now:dd-MM-yyyy}", normalFont, darkBrush, new XRect(0, yPoint, page.Width - 40, 0), XStringFormats.TopRight);
+                // Flytter y-koordinaten ned for næste sektion.
+                yPoint += 30; 
 
 
-				// Produkter
-				if (ordre.OrdreProdukter?.Any() == true)
-				{
-                    gfx.DrawString("Ydelser", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-                    yPoint += 30;
-
-                    foreach (var ydelse in ordre.OrdreYdelse)
-                    {
-                        gfx.DrawString($"- {ydelse.Ydelse?.Navn}: {ydelse.BeregnetPris.ToString("F2")} kr.", normalFont, darkBrush, 40, yPoint);
-                        yPoint += 15;
-
-                        // Mekanikeroplysninger
-                        if (ydelse.Mekaniker != null)
-                        {
-                            gfx.DrawString($"  Mekaniker: {ydelse.Mekaniker.Navn}", normalFont, XBrushes.Gray, 60, yPoint);
-                            yPoint += 15;
-                        }
-
-                        // Timer arbejdet
-                        if (ydelse.Timer.HasValue)
-                        {
-                            gfx.DrawString($"  Timer: {ydelse.Timer.Value:F2}", normalFont, XBrushes.Gray, 60, yPoint);
-                            yPoint += 15;
-                        }
-                    }
-                    yPoint += 10;
-                }
-
-				// Beregn totalpris
-				double totalPris = ordre.TotalPris ?? 0;
-				if (ordre.LejeAftale?.Selvrisiko > 0)
-					totalPris += ordre.LejeAftale.Selvrisiko;
-
-				yPoint += 30;
-				gfx.DrawLine(XPens.LightGray, 40, yPoint, page.Width - 40, yPoint);
-				yPoint += 20;
-
-				gfx.DrawString($"Total Pris: {totalPris:F2} kr.", new XFont("Arial", 14, XFontStyle.Bold), darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-
-				// Save the PDF
-				pdf.Save(ms);
-				return ms.ToArray();
-			}
-		}
+                // Tegner en linje som separator.
+                gfx.DrawLine(XPens.LightGray, 40, yPoint, page.Width - 40, yPoint);
+                // Flytter y-koordinaten ned for næste sektion.
+                yPoint += 10;
 
 
-	}
+                // Tegner betalingsdetaljer.
+                // Skriver overskriften "Betaling Detaljer" på PDF'en. Teksten er formateret med en header-skrifttype og sort farve.
+                // Den placeres øverst til venstre på siden, med en XRect, der definerer placeringen og bredden af tekstområdet.
+                gfx.DrawString("Betaling Detaljer", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                // Flytter y-koordinaten 30 enheder ned for at gøre plads til yderligere indhold nedenfor.
+                yPoint += 30;
+                // Skriver betalings-ID'et, som kommer fra betalingens data, med en normal skrifttype og sort farve.
+                // Den placeres på x-position 40 og den aktuelle y-position.
+                gfx.DrawString($"Betalings ID: {betaling.BetalingsId}", normalFont, darkBrush, 40, yPoint);
+                // Flytter y-koordinaten 15 enheder ned for at tilføje næste tekstlinje.
+                yPoint += 15;
+                // Skriver betalingsmetoden fra betalingen. Teksten er også placeret i venstre kolonne, 40 enheder fra venstre kant.
+                gfx.DrawString($"Betalingsmetode: {betaling.BetalingsMetode}", normalFont, darkBrush, 40, yPoint);
+                // Flytter y-koordinaten yderligere 15 enheder ned.
+                yPoint += 15;
+                // Skriver betalingsdatoen i formatet dag-måned-år. Datoen hentes fra betalingens data og vises på samme måde som de tidligere linjer.
+                gfx.DrawString($"Betalingsdato: {betaling.BetalingsDato:dd-MM-yyyy}", normalFont, darkBrush, 40, yPoint);
+                // Tilføjer et større mellemrum på 30 enheder til at adskille betalingssektionen fra den næste sektion.
+                yPoint += 30;
+
+
+                // Kundeoplysninger
+                // Skriver overskriften "Kundeoplysninger" med en header-skrifttype og sort farve.
+                // Dette angiver starten på en ny sektion, der indeholder kundens informationer.
+                gfx.DrawString("Kundeoplysninger", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                // Flytter y-koordinaten 30 enheder ned for at forberede plads til at vise kundens detaljer.
+                yPoint += 30;
+                // Skriver kundens unikke ID fra databasefeltet KundeId. Dette identificerer kunden entydigt i systemet.
+                gfx.DrawString($"KundeId: {kunde.KundeId}", normalFont, darkBrush, 40, yPoint);
+                // Flytter y-koordinaten ned for at gøre plads til næste kundeoplysning.
+                yPoint += 15;
+                // Skriver kundens navn, som er gemt i feltet `Navn` i kundens data. Dette præsenterer kundens fulde navn.
+                gfx.DrawString($"Kunde Navn: {kunde.Navn}", normalFont, darkBrush, 40, yPoint);
+                // Flytter y-koordinaten yderligere 15 enheder for at tilføje næste oplysning.
+                yPoint += 15;
+                // Skriver kundens adresse, som gemmes i feltet `Adresse`. Dette giver information om kundens lokation.
+                gfx.DrawString($"Adresse: {kunde.Adresse}", normalFont, darkBrush, 40, yPoint);
+                // Flytter y-koordinaten ned for at tilføje telefonnummeret.
+                yPoint += 15;
+                // Skriver kundens telefonnummer, der gemmes i feltet `Telefonnummer`. Dette bruges til at kontakte kunden.
+                gfx.DrawString($"Telefon: {kunde.Telefonnummer}", normalFont, darkBrush, 40, yPoint);
+                // Tilføjer et større mellemrum for at adskille kundeoplysningerne fra den næste sektion af PDF'en.
+                yPoint += 30;
+
+
+                // Tegner en separatorlinje.
+                gfx.DrawLine(XPens.LightGray, 40, yPoint, page.Width - 40, yPoint);
+                // Flytter y-koordinaten ned for næste sektion.
+                yPoint += 20;
+
+
+                // Gemmer PDF-dokumentet til MemoryStream.
+                pdf.Save(ms); 
+                
+                // Returnerer PDF'en som bytearray.
+                return ms.ToArray(); 
+            }
+        }
+    }
 }

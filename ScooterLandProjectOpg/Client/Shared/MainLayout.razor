@@ -1,12 +1,25 @@
 ﻿@inherits LayoutComponentBase
 
+@* Arver fra `LayoutComponentBase`, som er en grundlæggende klasse for layouts i Blazor. *@
+@* Dette gør det muligt at definere en standardlayoutstruktur, der kan bruges af forskellige sider i applikationen *@
+
+
+@* Starter en div-container med klassen "page", som sandsynligvis bruges til overordnet styling af hele siden. *@
 <div class="page">
+    @* Starter en div-container med klassen "sidebar", som bruges til at placere en navigationsmenu eller lignende indhold. *@
     <div class="sidebar">
+        @* Indsætter en `NavMenu`-komponent, som typisk indeholder navigationselementer til applikationen. *@
+        @* Komponenten defineres separat og genbruges her for at holde layoutet konsistent. *@
         <NavMenu />
     </div>
 
+    @* Starter en hovedsektion (`main` HTML-element), som typisk bruges til at definere hovedindholdet på siden. *@
     <main>
+        @* Starter en artikel-sektion (`article` HTML-element) med klassen "content" og "px-4" (sandsynligvis til padding eller margin-styling). *@
+        @* Dette område bruges til at indeholde dynamisk indhold, som varierer afhængigt af hvilken side, der vises. *@
         <article class="content px-4">
+            @* Placerer `@Body`, som er en reserveret placering i Blazor-layouts, hvor indholdet fra de specifikke sider bliver indsat. *@
+            @* Når en side bruger dette layout, bliver sidens specifikke HTML/C# indhold renderet her. *@
             @Body
         </article>
     </main>

@@ -1,111 +1,166 @@
 ﻿@page "/"
 
-
-
+@* Opretter en container, som skal rumme alt indhold på forsiden, og tilføjer en tilpasset CSS-klasse 'frontpage'. *@
 <div class="container frontpage">
+    @* Et jumbotron-element med centreret tekst, typisk brugt til store overskrifter. *@
     <div class="jumbotron text-center">
+        @* Overskrift, der præsenterer siden som "ScooterLand". *@
         <h1 class="display-title">Velkommen til ScooterLand</h1>
+
+        @* Underoverskrift, der beskriver formålet med siden. *@
         <p class="subtitle">Din platform til administration af scootere, kunder og ordrer.</p>
+
+        @* En horisontal linje (divider) for at opdele sektioner visuelt. *@
         <hr class="divider">
     </div>
 
-        <div class="row mt-5 g-4">
-            <!-- Opret Kunde -->
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="mb-3">
-                            <path fill="currentColor" d="M8 0a8 8 0 1 0 8 8a8 8 0 0 0-8-8zm0 14a6 6 0 1 1 6-6a6 6 0 0 1-6 6zM9 7V4H7v3H4v2h3v3h2V9h3V7H9z" />
-                        </svg>
-                        <h5 class="card-title">Opret Kunde</h5>
-                        <p class="card-text">Opret en ny kunde hurtigt og nemt.</p>
-                        <a href="opretkunde" class="btn btn-primary">Opret Kunde</a>
-                    </div>
+    @* En række, der indeholder flere kolonner. 'mt-5' tilføjer top-margin, 'g-4' tilføjer spacing mellem kolonner. *@
+    <div class="row mt-5 g-4">
+
+        @* Opret Kunde *@
+        @* En kolonne, der tilpasses til medium størrelse skærme (md) og opefter. *@
+        <div class="col-md-4">
+            @* Et card-element med en lille skyggeeffekt. *@
+            <div class="card shadow-sm">
+                @* Cardets indhold med centreret tekst. *@
+                <div class="card-body text-center">
+                    @* Et SVG-ikon, der ligger i top (med margin-bottom for luft). *@
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="mb-3">
+                        @* Ikonets sti, som tegner selve symbolet. '@*' er ikke nødvendigt herinde, da det er SVG. *@
+                        <path fill="currentColor" d="M8 0a8 8 0 1 0 8 8a8 8 0 0 0-8-8zm0 14a6 6 0 1 1 6-6a6 6 0 0 1-6 6zM9 7V4H7v3H4v2h3v3h2V9h3V7H9z" />
+                    </svg>
+                    @* Titel på kortet, der fortæller, at dette handler om at oprette kunder. *@
+                    <h5 class="card-title">Opret Kunde</h5>
+
+                    @* Kort beskrivelse af funktionen. *@
+                    <p class="card-text">Opret en ny kunde hurtigt og nemt.</p>
+
+                    @* Link/knap, der navigerer brugeren til siden 'opretkunde'. *@
+                    <a href="opretkunde" class="btn btn-primary">Opret Kunde</a>
                 </div>
             </div>
+        </div>
 
-            <!-- Opret Ordre -->
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
+        @* Opret Ordre *@
+        @* Endnu en kolonne med et tilsvarende card-element. *@
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    @* Et SVG-ikon med en bredde og højde på 1.5em, og margin-right for afstand mellem ikon og tekst. *@
                     <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" style="margin-right: 12px;">
                         <path fill="currentColor" fill-rule="evenodd" d="M8.126 4H6a1 1 0 0 0 0 2h2.126a4 4 0 0 1 0-2m.32 2.836C5.725 8.314 5 11.355 5 13v5a3 3 0 0 0 3 3h.028A4 4 0 0 1 8 20.556V15a4 4 0 0 1 8 0v5.556q0 .226-.028.444H16a3 3 0 0 0 3-3v-5c0-1.645-.726-4.686-3.445-6.164a4 4 0 0 1-7.11 0zM15.873 6H18a1 1 0 1 0 0-2h-2.126a4 4 0 0 1 0 2zM12 13a2 2 0 0 0-2 2v5.556c0 .797.647 1.444 1.444 1.444h1.112c.797 0 1.444-.647 1.444-1.444V15a2 2 0 0 0-2-2m-2-8a2 2 0 1 1 4 0a2 2 0 0 1-4 0" clip-rule="evenodd" />
                     </svg>
-                        <h5 class="card-title">Opret Ordre</h5>
-                        <p class="card-text">Opret en ordre og administrer dem nemt.</p>
-                        <a href="opretordre" class="btn btn-primary">Opret Ordre</a>
-                    </div>
+                    @* Kortets titel, der fortæller, at dette handler om at oprette ordrer. *@
+                    <h5 class="card-title">Opret Ordre</h5>
+
+                    @* Beskrivelse af funktionen for ordrer. *@
+                    <p class="card-text">Opret en ordre og administrer dem nemt.</p>
+
+                    @* Knap, der leder brugeren til siden 'opretordre'. *@
+                    <a href="opretordre" class="btn btn-primary">Opret Ordre</a>
                 </div>
             </div>
+        </div>
 
-            <!-- Kunde Katalog -->
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="mb-3">
-                            <path fill="currentColor" d="M309.334 117.333c0-41.237-33.43-74.666-74.667-74.666l-4.097.11C191.238 44.904 160 77.471 160 117.333C160 158.571 193.43 192 234.667 192l4.097-.111c39.332-2.126 70.57-34.693 70.57-74.556M256 362.667c0 23.314 6.233 45.173 17.124 64H85.334v-76.8c0-62.033 47.668-112.614 107.383-115.104l4.616-.096H272c19.434 0 37.712 5.091 53.642 14.047C284.293 269.933 256 312.996 256 362.667m65.303 86.295L384 410.667l62.697 38.295l-17.046-71.463l55.795-47.794l-73.232-5.871L384 256l-28.214 67.834l-73.232 5.871l55.795 47.794z" />
-                        </svg>
-                        <h5 class="card-title">Kunde Katalog</h5>
-                        <p class="card-text">Få overblik over dine kunder og deres information.</p>
-                        <a href="kundekatalog" class="btn btn-primary">Se Katalog</a>
-                    </div>
+        @* Kunde Katalog *@
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    @* Endnu et SVG-ikon med margin-bottom, for at skabe luft mellem ikon og tekst. *@
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="mb-3">
+                        <path fill="currentColor" d="M309.334 117.333c0-41.237-33.43-74.666-74.667-74.666l-4.097.11C191.238 44.904 160 77.471 160 117.333C160 158.571 193.43 192 234.667 192l4.097-.111c39.332-2.126 70.57-34.693 70.57-74.556M256 362.667c0 23.314 6.233 45.173 17.124 64H85.334v-76.8c0-62.033 47.668-112.614 107.383-115.104l4.616-.096H272c19.434 0 37.712 5.091 53.642 14.047C284.293 269.933 256 312.996 256 362.667m65.303 86.295L384 410.667l62.697 38.295l-17.046-71.463l55.795-47.794l-73.232-5.871L384 256l-28.214 67.834l-73.232 5.871l55.795 47.794z" />
+                    </svg>
+                    @* Titel, der viser at dette kort handler om at se kunderne. *@
+                    <h5 class="card-title">Kunde Katalog</h5>
+
+                    @* Beskrivende tekst om kundefunktionen. *@
+                    <p class="card-text">Få overblik over dine kunder og deres information.</p>
+
+                    @* Knap, der leder til 'kundekatalog'-siden. *@
+                    <a href="kundekatalog" class="btn btn-primary">Se Katalog</a>
                 </div>
             </div>
+        </div>
 
-            <!-- Mekaniker Katalog -->
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
+        @* Mekaniker Katalog *@
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    @* SVG-ikon til mekaniker-kataloget med en lille margin-right. *@
                     <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24" style="margin-right: 12px;">
                         <path fill="currentColor" d="M20.96 16.45c.01-.15.04-.3.04-.45v.5zM11 16c0 .71.15 1.39.42 2H6v1c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1v-8l2.08-6c.2-.58.76-1 1.42-1h11c.66 0 1.22.42 1.42 1L21 11v5c0-2.76-2.24-5-5-5s-5 2.24-5 5m-3-2.5c0-.83-.67-1.5-1.5-1.5S5 12.67 5 13.5S5.67 15 6.5 15S8 14.33 8 13.5M19 10l-1.5-4.5h-11L5 10zm3.87 11.19l-4.11-4.11c.41-1.04.18-2.26-.68-3.11c-.9-.91-2.25-1.09-3.34-.59l1.94 1.94l-1.35 1.36l-1.99-1.95c-.54 1.09-.29 2.44.59 3.35a2.91 2.91 0 0 0 3.12.68l4.11 4.1c.18.19.45.19.63 0l1.04-1.03c.22-.18.22-.5.04-.64" />
                     </svg>
-                        <h5 class="card-title">Mekaniker Katalog</h5>
-                        <p class="card-text">Administrer dine mekanikere og deres opgaver.</p>
-                        <a href="mekanikercatalog" class="btn btn-primary">Se Katalog</a>
-                    </div>
+                    @* Titel for mekaniker-katalog. *@
+                    <h5 class="card-title">Mekaniker Katalog</h5>
+
+                    @* Beskrivelse af hvad man kan med mekaniker-kataloget. *@
+                    <p class="card-text">Administrer dine mekanikere og deres opgaver.</p>
+
+                    @* Knap, der navigerer til mekanikerkataloget. *@
+                    <a href="mekanikercatalog" class="btn btn-primary">Se Katalog</a>
                 </div>
             </div>
+        </div>
 
-            <!-- Produkt Oversigt -->
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" class="mb-3">
-                            <path fill="currentColor" d="M5.5 0A2.5 2.5 0 0 0 3 2.5c0 .32.08.62.19.91L.28 6.29c-.39.39-.39 1.05 0 1.44c.2.2.46.28.72.28s.52-.09.72-.28L4.6 4.82c.28.11.58.19.91.19a2.5 2.5 0 0 0 2.5-2.5c0-.16 0-.32-.03-.47l-.97.97h-2v-2l.97-.97C5.83.01 5.67.01 5.51.01z" />
-                        </svg>
-                        <h5 class="card-title">Produkt Oversigt</h5>
-                        <p class="card-text">Administrer dine produkter og ydelser.</p>
-                        <a href="produktydelsecatalog" class="btn btn-primary">Se Oversigt</a>
-                    </div>
+        @* Produkt Oversigt *@
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    @* Et lille SVG-ikon til produktoversigten. *@
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" class="mb-3">
+                        <path fill="currentColor" d="M5.5 0A2.5 2.5 0 0 0 3 2.5c0 .32.08.62.19.91L.28 6.29c-.39.39-.39 1.05 0 1.44c.2.2.46.28.72.28s.52-.09.72-.28L4.6 4.82c.28.11.58.19.91.19a2.5 2.5 0 0 0 2.5-2.5c0-.16 0-.32-.03-.47l-.97.97h-2v-2l.97-.97C5.83.01 5.67.01 5.51.01z" />
+                    </svg>
+                    @* Titel, der informerer om at dette kort handler om produkter. *@
+                    <h5 class="card-title">Produkt Oversigt</h5>
+
+                    @* Kort beskrivelse af, hvad brugeren kan se/administrere. *@
+                    <p class="card-text">Administrer dine produkter og ydelser.</p>
+
+                    @* Knap, der leder til en side for visning af produkter og ydelser. *@
+                    <a href="produktydelsecatalog" class="btn btn-primary">Se Oversigt</a>
                 </div>
             </div>
+        </div>
 
-            <!-- Betalings Oversigt -->
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="mb-3">
-                            <g fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M17.414 10.414C18 9.828 18 8.886 18 7s0-2.828-.586-3.414m0 6.828C16.828 11 15.886 11 14 11h-4c-1.886 0-2.828 0-3.414-.586m10.828 0Zm0-6.828C16.828 3 15.886 3 14 3h-4c-1.886 0-2.828 0-3.414.586m10.828 0Zm-10.828 0C6 4.172 6 5.114 6 7s0 2.828.586 3.414m0-6.828Zm0 6.828ZM13 7a1 1 0 1 1-2 0a1 1 0 0 1 2 0Z" />
-                                <path stroke-linecap="round" d="M18 6a3 3 0 0 1-3-3m3 5a3 3 0 0 0-3 3M6 6a3 3 0 0 0 3-3M6 8a3 3 0 0 1 3 3m-4 9.388h2.26c1.01 0 2.033.106 3.016.308a14.9 14.9 0 0 0 5.33.118c.868-.14 1.72-.355 2.492-.727c.696-.337 1.549-.81 2.122-1.341c.572-.53 1.168-1.397 1.59-2.075c.364-.582.188-1.295-.386-1.728a1.89 1.89 0 0 0-2.22 0l-1.807 1.365c-.7.53-1.465 1.017-2.376 1.162q-.165.026-.345.047m0 0l-.11.012m.11-.012a1 1 0 0 0 .427-.24a1.49 1.49 0 0 0 .126-2.134a1.9 1.9 0 0 0-.45-.367c-2.797-1.669-7.15-.398-9.779 1.467m9.676 1.274a.5.5 0 0 1-.11.012m0 0a9.3 9.3 0 0 1-1.814.004" />
-                                <rect width="3" height="8" x="2" y="14" rx="1.5" />
-                            </g>
-                        </svg>
-                        <h5 class="card-title">Betalings Oversigt</h5>
-                        <p class="card-text">Hold styr på betalinger og oversigter.</p>
-                        <a href="betalingsoversigt" class="btn btn-primary">Se Betalinger</a>
-                    </div>
+        @* Betalings Oversigt *@
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    @* Endnu et SVG-ikon, nu til betalinger. *@
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="mb-3">
+                        <g fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M17.414 10.414C18 9.828 18 8.886 18 7s0-2.828-.586-3.414m0 6.828C16.828 11 15.886 11 14 11h-4c-1.886 0-2.828 0-3.414-.586m10.828 0Zm0-6.828C16.828 3 15.886 3 14 3h-4c-1.886 0-2.828 0-3.414.586m10.828 0Zm-10.828 0C6 4.172 6 5.114 6 7s0 2.828.586 3.414m0-6.828Zm0 6.828ZM13 7a1 1 0 1 1-2 0a1 1 0 0 1 2 0Z" />
+                            <path stroke-linecap="round" d="M18 6a3 3 0 0 1-3-3m3 5a3 3 0 0 0-3 3M6 6a3 3 0 0 0 3-3M6 8a3 3 0 0 1 3 3m-4 9.388h2.26c1.01 0 2.033.106 3.016.308a14.9 14.9 0 0 0 5.33.118c.868-.14 1.72-.355 2.492-.727c.696-.337 1.549-.81 2.122-1.341c.572-.53 1.168-1.397 1.59-2.075c.364-.582.188-1.295-.386-1.728a1.89 1.89 0 0 0-2.22 0l-1.807 1.365c-.7.53-1.465 1.017-2.376 1.162q-.165.026-.345.047m0 0l-.11.012m.11-.012a1 1 0 0 0 .427-.24a1.49 1.49 0 0 0 .126-2.134a1.9 1.9 0 0 0-.45-.367c-2.797-1.669-7.15-.398-9.779 1.467m9.676 1.274a.5.5 0 0 1-.11.012m0 0a9.3 9.3 0 0 1-1.814.004" />
+                            <rect width="3" height="8" x="2" y="14" rx="1.5" />
+                        </g>
+                    </svg>
+                    @* Titel, der fortæller, at dette kort handler om betalinger. *@
+                    <h5 class="card-title">Betalings Oversigt</h5>
+
+                    @* Kort beskrivelse af funktionen til betalinger. *@
+                    <p class="card-text">Hold styr på betalinger og oversigter.</p>
+
+                    @* Knap til siden "betalingsoversigt". *@
+                    <a href="betalingsoversigt" class="btn btn-primary">Se Betalinger</a>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+@* En container for en "alert"-boks, med en fast højde og margin-top, samt centrering. *@
 <div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 200px;">
+    @* En boks med afrundede kanter, tekst i midten, baggrundsfarve i en gradient, og tekstfarve hvid. *@
     <div class="alert border rounded-3 text-center"
          style="max-width: 700px; width: 90%; padding: 20px; background: linear-gradient(to bottom, #1D3557, #457B9D); color: white;">
+        @* Overskrift med et ikon og navnet "Scooterland". *@
         <h4 class="fw-bold mb-3">
             <i class="fas fa-motorcycle"></i> Scooterland
         </h4>
+
+        @* En flex-container, der fordeler indholdet i to kolonner (venstre/højre). *@
         <div class="d-flex justify-content-between">
+            @* Venstre kolonne med adresse og telefonnummer. *@
             <div class="text-start">
                 <p class="mb-2">
                     <strong><i class="fas fa-map-marker-alt"></i> Adresse:</strong> Hovedgade 123, 4000 Roskilde
@@ -114,6 +169,7 @@
                     <strong><i class="fas fa-phone-alt"></i> Telefon:</strong> 12 34 56 78
                 </p>
             </div>
+            @* Højre kolonne med email og dato. *@
             <div class="text-start">
                 <p class="mb-2">
                     <strong><i class="fas fa-envelope"></i> Email:</strong> kontakt@scooterland.dk
@@ -127,36 +183,39 @@
 </div>
 
 <style>
+    @* Herunder følger CSS til '.alert' og dens elementer. *@
     .alert {
         background: linear-gradient(to bottom, #1D3557, #457B9D); /* Match farve fra sidebar */
         border: none; /* Fjern kant */
     }
 
-        .alert h4 {
-            font-size: 1.75rem; /* Fremhæv overskriften */
-            color: white; /* Hvid tekst */
-        }
+    .alert h4 {
+        font-size: 1.75rem; /* Fremhæv overskriften */
+        color: white; /* Hvid tekst */
+    }
 
-        .alert p {
-            font-size: 1rem; /* Læsbar tekst */
-            color: white; /* Hvid tekst */
-        }
+    .alert p {
+        font-size: 1rem; /* Læsbar tekst */
+        color: white; /* Hvid tekst */
+    }
 
-        .alert i {
-            margin-right: 8px; /* Plads mellem ikon og tekst */
-            color: white; /* Hvid farve til ikoner */
-        }
+    .alert i {
+        margin-right: 8px; /* Plads mellem ikon og tekst */
+        color: white; /* Hvid farve til ikoner */
+    }
 
-        .alert .text-start {
-            flex: 1; /* Fordel pladsen ligeligt */
-        }
+    .alert .text-start {
+        flex: 1; /* Fordel pladsen ligeligt */
+    }
 </style>
-<link rel="stylesheet" href="css/ScooterAnimation.css">
 
+@* Linker til en ekstern CSS-fil, der indeholder animationseffekter for scooteren. *@
+<link rel="stylesheet" href="css/ScooterAnimation.css" />
+
+@* En container, der omkranser SVG-scooteren og eventuel animation. *@
 <div class="scooter-container">
-
+    @* SVG-grafik for en scooter, vendt spejlvendt (scaleX(-1)). *@
     <svg class="scooter" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 128 128" style="transform: scaleX(-1);">
-
         <path fill="#ea6c3a" d="M109.4 59.1h8.8c2 0 3.5 1.6 3.5 3.5c0 2-1.6 3.5-3.5 3.5h-8.8z" />
         <path fill="#fac136" d="M29.6 25.3c-.4 2.8-1.1 8.1-1.5 10.9c-.2 1.1-1.4 1.8-2.4 1.3c-2.9-1.4-4.7-4.5-4.2-7.8s3.1-5.8 6.2-6.4c1.1-.2 2.1.8 1.9 2" />
         <circle cx="19.4" cy="90.2" r="17.5" fill="#2f2f2f" />
@@ -172,6 +231,4 @@
         <path fill="#47c0e5" d="M3 83.7h4.5c10.3.1 20.3 3.4 28.8 9.4c1.4 1 3.3-.1 3.2-1.9c-.1-2.2-.5-5.2-1.6-8.3c-2-6-6.2-11.3-12.8-13.1c-13.7-3.7-21 5.5-23.9 10.6c-.7 1.6.3 3.3 1.8 3.3" />
         <path fill="none" stroke="#bae9f3" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.5" d="M15 74.4s7.2-2.4 13.1 2.1c4 3 5.3 7.3 5.3 7.3" />
     </svg>
-
 </div>
-

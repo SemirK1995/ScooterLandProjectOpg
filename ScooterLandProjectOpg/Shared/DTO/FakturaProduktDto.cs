@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System; // Importerer funktionalitet til arbejde med datoer og tid (ikke brugt direkte her).
+using System.Collections.Generic; // Gør det muligt at arbejde med generiske kollektioner som List (ikke brugt direkte her).
+using System.Linq; // Tilbyder LINQ-forespørgsler til datahåndtering (ikke brugt her).
+using System.Text; // Indeholder klasser til tekstmanipulation (ikke brugt her).
+using System.Threading.Tasks; // Tilbyder funktioner til asynkron programmering (ikke brugt her).
 
-namespace ScooterLandProjectOpg.Shared.DTO
+namespace ScooterLandProjectOpg.Shared.DTO // Definerer navnerummet for dataoverførselsobjekter (DTO'er) relateret til ScooterLand-projektet.
 {
-	public class FakturaProduktDto
-	{
-		//Denne DTO er lavet for at kunne vise hvilket produkt/produkter der er købt så det kan vises i en faktura. 
-		public int ProduktId { get; set; }
-		public string ProduktNavn { get; set; }
-		public int Antal { get; set; }
-		public double Pris { get; set; }
-	}
+    // En klasse, der repræsenterer produktoplysninger til brug i en faktura.
+    public class FakturaProduktDto 
+    {
+        public int ProduktId { get; set; } // ID for det produkt, der er købt.
+        public string ProduktNavn { get; set; } // Navnet på det produkt, der er købt.
+        public int Antal { get; set; } // Antallet af det pågældende produkt, der er købt.
+        public double Pris { get; set; } // Prisen per enhed af produktet.
+    }
 }

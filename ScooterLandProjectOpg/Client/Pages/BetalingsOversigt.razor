@@ -5,72 +5,109 @@
 @inject IJSRuntime JSRuntime
 @inject HttpClient Http
 
+
+@* Opretter en container med fleksibel layout, centrerer indholdet vandret og tilføjer margin i bunden. *@
 <div class="d-flex justify-content-center mb-3">
-    <button class="btn @GetFaneKlasse("IkkeBetalte") me-2" @onclick="@(() => SkiftFane("IkkeBetalte"))">Ikke Betalte</button>
-    <button class="btn @GetFaneKlasse("Betalte")" @onclick="@(() => SkiftFane("Betalte"))">Betalte</button>
+    @* Knap til at skifte fanen til "IkkeBetalte"; CSS-klasse tildeles dynamisk. *@
+    <button class="btn @GetFaneKlasse("IkkeBetalte") me-2" @onclick="@(() => SkiftFane("IkkeBetalte"))">
+        Ikke Betalte
+    </button>
+    @* Knap til at skifte fanen til "Betalte"; CSS-klasse tildeles dynamisk. *@
+    <button class="btn @GetFaneKlasse("Betalte")" @onclick="@(() => SkiftFane("Betalte"))">
+        Betalte
+    </button>
 </div>
 
-
+@* Opretter et kort med skyggeeffekt og margin i bunden. *@
 <div class="card shadow-lg mb-4">
+    @* Header-sektionen af kortet med en primær (blå) baggrund, hvid tekst og centreret indhold. *@
     <div class="card-header bg-primary text-white text-center">
+        @* Overskrift på kortet. *@
         <h3 class="card-title">Betalingsoversigt</h3>
     </div>
+    @* Kortets hovedindholdsområde. *@
     <div class="card-body">
+        @* En container med margin i bunden til søgefelt og knapper. *@
         <div class="mb-3">
+            @* Tekstfelt bundet til søgeFelt-variablen, kalder HandleSearchKeyPress ved taster. *@
             <input type="text" class="form-control mb-3 rounded-pill" placeholder="Søg efter Betalings ID, Ordre ID eller Kundens Navn"
                    @bind="søgeFelt" @onkeypress="HandleSearchKeyPress" />
+
+            @* Container der centrerer indholdet vandret. *@
             <div class="d-flex justify-content-center">
-                <button class="btn btn-primary rounded-pill me-2 px-4" @onclick="SøgBetalinger">Søg</button>
-                <button class="btn btn-secondary rounded-pill px-4" @onclick="ResetSøgning">Nulstil</button>
+                @* Knap til at udføre søgning. *@
+                <button class="btn btn-primary rounded-pill me-2 px-4" @onclick="SøgBetalinger">
+                    Søg
+                </button>
+                @* Knap til at nulstille søgning og hente alle betalinger igen. *@
+                <button class="btn btn-secondary rounded-pill px-4" @onclick="ResetSøgning">
+                    Nulstil
+                </button>
             </div>
         </div>
     </div>
-
-
 </div>
-
 
 @if (betalinger == null)
 {
+    @* Viser en indlæsningsbesked, hvis betalinger stadig er null. *@
     <div class="text-center my-4">
         <p class="text-muted">Indlæser betalinger...</p>
     </div>
 }
 else
 {
+    @* Filtrerer betalingerne baseret på aktiv fane (enten IkkeBetalte eller Betalte). *@
     var filtreredeBetalinger = aktivFane == "IkkeBetalte"
         ? betalinger.Where(b => !b.Betalt).ToList()
         : betalinger.Where(b => b.Betalt).ToList();
 
     if (!filtreredeBetalinger.Any())
     {
+        @* Hvis der ikke er nogen betalinger i denne kategori, vises en besked. *@
         <div class="text-center my-4">
             <p class="text-muted">Ingen betalinger fundet for denne kategori.</p>
         </div>
     }
     else
     {
+        @* Gør tabellen responsiv, så den kan rulles, hvis den bliver for bred. *@
         <div class="table-responsive">
+            @* Opretter en HTML-tabel med hover-effekt, skygge og afrundede hjørner. *@
             <table class="table table-hover shadow-sm rounded">
+                @* Header-række med primær (blå) baggrund. *@
                 <thead class="table-primary">
                     <tr>
+                        @* Kolonneoverskrift for Ordre ID. *@
                         <th>Ordre ID</th>
+                        @* Kolonneoverskrift for Kundenavn. *@
                         <th>Kunde Navn</th>
+                        @* Kolonneoverskrift for beløb. *@
                         <th>Beløb</th>
+                        @* Kolonneoverskrift for metode. *@
                         <th>Betalingsmetode</th>
+                        @* Kolonneoverskrift for om betalingen er betalt eller ej. *@
                         <th>Betalt</th>
+                        @* Kolonneoverskrift for dato. *@
                         <th>Betalingsdato</th>
+                        @* Kolonneoverskrift for de forskellige handlinger (Vis, Download). *@
                         <th>Handlinger</th>
                     </tr>
                 </thead>
                 <tbody>
+                    @* Tabelkroppen, hvor hver betaling bliver listet. *@
                     @foreach (var betaling in filtreredeBetalinger)
                     {
                         <tr>
+                            @* Viser Ordre ID. *@
                             <td>@betaling.OrdreId</td>
+                            @* Viser kundens navn (via Ordre-objektet). *@
                             <td>@betaling.Ordre.Kunde.Navn</td>
+                            @* Viser beløbet med to decimaler efterfulgt af "kr.". *@
                             <td>@betaling.Beløb?.ToString("F2") kr.</td>
+
                             <td>
+                                @* Dropdown til at vælge betalingsmetode. Kalder OpdaterBetalingsMetode ved ændring. *@
                                 <select class="form-control form-select"
                                         @onchange="async e => await OpdaterBetalingsMetode(betaling.BetalingsId, e.Value.ToString())">
                                     @foreach (var metode in Enum.GetValues<BetalingsMetodeStatus>())
@@ -81,22 +118,36 @@ else
                                     }
                                 </select>
                             </td>
+
                             <td>
+                                @* Dropdown til at vælge betalt (Ja eller Nej). Kalder OpdaterBetaltStatus ved ændring. *@
                                 <select class="form-control form-select"
                                         @onchange="async e => await OpdaterBetaltStatus(betaling.BetalingsId, e.Value.ToString())">
+                                    @* Mulighed for Ja, forudvalgt hvis Betalt er true. *@
                                     <option value="true" selected="@(betaling.Betalt ? "true" : null)">Ja</option>
+                                    @* Mulighed for Nej, forudvalgt hvis Betalt er false. *@
                                     <option value="false" selected="@(betaling.Betalt ? null : "false")">Nej</option>
                                 </select>
                             </td>
+
                             <td>
+                                @* Viser betalingsdatoen i date-format. Feltet er deaktiveret og kan ikke redigeres direkte. *@
                                 <input type="date" class="form-control"
                                        value="@betaling.BetalingsDato?.ToString("yyyy-MM-dd")"
                                        disabled />
                             </td>
+
                             <td>
+                                @* En container der placerer knapperne jævnt fordelt. *@
                                 <div class="d-flex justify-content-evenly">
-                                    <button class="btn btn-info btn-sm" @onclick="() => VisFakturaDetaljer(betaling.BetalingsId)">Vis Faktura</button>
-                                    <button class="btn btn-primary btn-sm" @onclick="async () => await DownloadFaktura(betaling.BetalingsId)">Download Faktura</button>
+                                    @* Knap til at vise fakturaens detaljer i en modal. *@
+                                    <button class="btn btn-info btn-sm" @onclick="() => VisFakturaDetaljer(betaling.BetalingsId)">
+                                        Vis Faktura
+                                    </button>
+                                    @* Knap til at downloade fakturaen som PDF. *@
+                                    <button class="btn btn-primary btn-sm" @onclick="async () => await DownloadFaktura(betaling.BetalingsId)">
+                                        Download Faktura
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -107,20 +158,27 @@ else
     }
 }
 
-
 @if (visFakturaModal)
 {
+    @* Modal overlay med en mørk baggrund. *@
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+        @* Modalens størrelse sættes til "large". *@
         <div class="modal-dialog modal-lg">
+            @* Selve modalens indhold med skygge. *@
             <div class="modal-content shadow">
+                @* Modal-overskrift med primær baggrund og hvid tekst. *@
                 <div class="modal-header bg-primary text-white">
+                    @* Titel i modal-head. *@
                     <h5 class="modal-title">Faktura Detaljer</h5>
+                    @* Knap til at lukke modal. btn-close-white giver en hvid 'x'. *@
                     <button type="button" class="btn-close btn-close-white" @onclick="LukFakturaModal"></button>
                 </div>
+                @* Modalens brødtekst, hvor fakturaoplysninger vises. *@
                 <div class="modal-body">
                     @if (fakturaData != null)
                     {
                         <div class="mb-4">
+                            @* Sektion for kundeinfo. *@
                             <h6 class="fw-bold text-primary">Kundeoplysninger:</h6>
                             <p><strong>Kunde ID:</strong> @fakturaData.KundeId</p>
                             <p><strong>Navn:</strong> @fakturaData.KundeNavn</p>
@@ -131,6 +189,7 @@ else
                         <hr />
 
                         <div class="mb-4">
+                            @* Sektion for betalingsinfo. *@
                             <h6 class="fw-bold text-primary">Betalingsoplysninger:</h6>
                             <p><strong>Betalings ID:</strong> @fakturaData.BetalingsId</p>
                             <p><strong>Ordre ID:</strong> @fakturaData.OrdreId</p>
@@ -155,6 +214,7 @@ else
                                 <ul>
                                     @foreach (var scooter in fakturaData.Lejeaftale.Scootere)
                                     {
+                                        @* Viser hver scooter i lejeaftalen. *@
                                         <li>@scooter</li>
                                     }
                                 </ul>
@@ -165,6 +225,7 @@ else
                         @if (fakturaData.Ydelser != null && fakturaData.Ydelser.Any())
                         {
                             <h6 class="fw-bold text-primary">Ydelser:</h6>
+                            @* Viser ydelser i en tabel. *@
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
@@ -175,19 +236,25 @@ else
                                         <th>Mekaniker</th>
                                         <th>Timer</th>
                                         <th>Pris</th>
-                                      
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var ydelse in fakturaData.Ydelser)
                                     {
                                         <tr>
+                                            @* Viser ydelsens ID. *@
                                             <td>@ydelse.YdelseId</td>
+                                            @* Viser navnet på ydelsen. *@
                                             <td>@ydelse.YdelseNavn</td>
+                                            @* Viser scooterens mærke. *@
                                             <td>@ydelse.ScooterMaerke</td>
+                                            @* Viser scooterens model. *@
                                             <td>@ydelse.ScooterModel</td>
-                                            <td>@ydelse.MekanikerNavn</td> <!-- Mekanikerens navn -->
-                                            <td>@ydelse.MekanikerTimer?.ToString("F2")</td> <!-- Timer arbejdet -->
+                                            @* Viser navnet på mekanikeren. *@
+                                            <td>@ydelse.MekanikerNavn</td>
+                                            @* Timer brugt på ydelsen, med to decimaler. *@
+                                            <td>@ydelse.MekanikerTimer?.ToString("F2")</td>
+                                            @* Pris for ydelsen, med "kr." i slutningen. *@
                                             <td>@ydelse.BeregnetPris?.ToString("F2") kr.</td>
                                         </tr>
                                     }
@@ -196,12 +263,14 @@ else
                         }
                         else
                         {
+                            @* Vises, hvis der ikke er nogle ydelser. *@
                             <p>Ingen ydelser tilføjet.</p>
                         }
 
                         @if (fakturaData.Produkter != null && fakturaData.Produkter.Any())
                         {
                             <h6 class="fw-bold text-primary">Produkter:</h6>
+                            @* Tabel over produkter. *@
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
@@ -215,9 +284,13 @@ else
                                     @foreach (var produkt in fakturaData.Produkter)
                                     {
                                         <tr>
+                                            @* Produktets ID. *@
                                             <td>@produkt.ProduktId</td>
+                                            @* Navn på produktet. *@
                                             <td>@produkt.ProduktNavn</td>
+                                            @* Antal af produktet. *@
                                             <td>@produkt.Antal</td>
+                                            @* Pris for produktet, med to decimaler. *@
                                             <td>@produkt.Pris.ToString("F2") kr.</td>
                                         </tr>
                                     }
@@ -226,32 +299,43 @@ else
                         }
                         else
                         {
+                            @* Vises, hvis der ikke er nogle produkter. *@
                             <p>Ingen produkter tilføjet.</p>
                         }
 
+                        @* Viser totalpris i bunden af modal-vinduet. *@
                         <div class="mt-4 text-end">
                             <h5 class="fw-bold">Total Sum: @fakturaData.TotalPris kr.</h5>
                         </div>
                     }
                     else
                     {
+                        @* Hvis fakturaData er null, vises en indlæsningsbesked. *@
                         <p>Indlæser faktura...</p>
                     }
                 </div>
+                @* Modalfod, der centrerer knappen til at lukke. *@
                 <div class="modal-footer d-flex justify-content-center">
-                    <button class="btn btn-secondary rounded-pill px-4" @onclick="LukFakturaModal">Luk</button>
+                    @* Knap til at lukke modal. *@
+                    <button class="btn btn-secondary rounded-pill px-4" @onclick="LukFakturaModal">
+                        Luk
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 }
 
+@* En container med en bestemt højde, centreret indhold vandret og lodret, samt topmargin. *@
 <div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 200px;">
+    @* En "alert"-boks med gradient-baggrund, hvid tekst og afrundede kanter. *@
     <div class="alert border rounded-3 text-center"
          style="max-width: 700px; width: 90%; padding: 20px; background: linear-gradient(to bottom, #1D3557, #457B9D); color: white;">
+        @* Overskrift i boksen, med en lille scooter-ikon og "Scooterland". *@
         <h4 class="fw-bold mb-3">
             <i class="fas fa-motorcycle"></i> Scooterland
         </h4>
+        @* Fordeler indholdet i to kolonner (text-start klasser). *@
         <div class="d-flex justify-content-between">
             <div class="text-start">
                 <p class="mb-2">
@@ -272,12 +356,12 @@ else
         </div>
     </div>
 </div>
-<link rel="stylesheet" href="css/ScooterAnimation.css">
+@* Linker til en CSS-fil med animationer for scooter-elementet. *@
+<link rel="stylesheet" href="css/ScooterAnimation.css" />
 
+@* En container til SVG-scooteren. *@
 <div class="scooter-container">
-
     <svg class="scooter" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 128 128" style="transform: scaleX(-1);">
-
         <path fill="#ea6c3a" d="M109.4 59.1h8.8c2 0 3.5 1.6 3.5 3.5c0 2-1.6 3.5-3.5 3.5h-8.8z" />
         <path fill="#fac136" d="M29.6 25.3c-.4 2.8-1.1 8.1-1.5 10.9c-.2 1.1-1.4 1.8-2.4 1.3c-2.9-1.4-4.7-4.5-4.2-7.8s3.1-5.8 6.2-6.4c1.1-.2 2.1.8 1.9 2" />
         <circle cx="19.4" cy="90.2" r="17.5" fill="#2f2f2f" />
@@ -293,120 +377,114 @@ else
         <path fill="#47c0e5" d="M3 83.7h4.5c10.3.1 20.3 3.4 28.8 9.4c1.4 1 3.3-.1 3.2-1.9c-.1-2.2-.5-5.2-1.6-8.3c-2-6-6.2-11.3-12.8-13.1c-13.7-3.7-21 5.5-23.9 10.6c-.7 1.6.3 3.3 1.8 3.3" />
         <path fill="none" stroke="#bae9f3" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.5" d="M15 74.4s7.2-2.4 13.1 2.1c4 3 5.3 7.3 5.3 7.3" />
     </svg>
-
 </div>
 
 <style>
     .alert {
-        background: linear-gradient(to bottom, #1D3557, #457B9D); /* Match farve fra sidebar */
-        border: none; /* Fjern kant */
+        background: linear-gradient(to bottom, #1D3557, #457B9D); /* Matching af farve fra sidebar. */
+        border: none; /* Fjerner kantlinje. */
     }
 
         .alert h4 {
-            font-size: 1.75rem; /* Fremhæv overskriften */
-            color: white; /* Hvid tekst */
+            font-size: 1.75rem; /* Gør overskriften større. */
+            color: white; /* Hvid tekst. */
         }
 
         .alert p {
-            font-size: 1rem; /* Læsbar tekst */
-            color: white; /* Hvid tekst */
+            font-size: 1rem; /* Læsbar brødtekst. */
+            color: white; /* Hvid tekst. */
         }
 
         .alert i {
-            margin-right: 8px; /* Plads mellem ikon og tekst */
-            color: white; /* Hvid farve til ikoner */
+            margin-right: 8px; /* Lidt luft mellem ikon og tekst. */
+            color: white; /* Gør ikonet hvidt. */
         }
 
         .alert .text-start {
-            flex: 1; /* Fordel pladsen ligeligt */
+            flex: 1; /* Fordeler pladsen ligeligt mellem kolonner. */
         }
 </style>
 
-
-
 @code {
-    private List<Betaling> betalinger;
-    private FakturaDto? fakturaData; // Dynamisk objekt til faktura
-    private bool visFakturaModal = false;
-    private string søgeFelt = string.Empty; // Søgefelt
-    private string aktivFane = "IkkeBetalte"; //Default til ikke betalte
+    private List<Betaling> betalinger; // Liste over Betaling-objekter, som hentes fra API.
+    private FakturaDto? fakturaData; // Holder fakturadata, når man klikker "Vis Faktura".
+    private bool visFakturaModal = false; // Styrer, om faktura-modal skal vises.
+    private string søgeFelt = string.Empty; // Variabel til søgefeltets indhold.
+    private string aktivFane = "IkkeBetalte"; // Standardværdi for den aktive fane er "IkkeBetalte".
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync() // Lifecycle-metode, der kører når komponenten initialiseres.
     {
-        await HentBetalinger();
+        await HentBetalinger(); // Kalder en metode, der henter betalinger fra API.
     }
 
-    private async Task HentBetalinger()
+    private async Task HentBetalinger() // Henter en liste af betalinger via HttpClient.
     {
-        betalinger = await Http.GetFromJsonAsync<List<Betaling>>("api/Betalings");
+        betalinger = await Http.GetFromJsonAsync<List<Betaling>>("api/Betalings"); // Gør et GET-kald til "api/Betalings" og parser JSON til en liste.
     }
-    private async Task SøgBetalinger()
+
+    private async Task SøgBetalinger() // Metode til at søge betalinger.
     {
-        if (string.IsNullOrWhiteSpace(søgeFelt))
+        if (string.IsNullOrWhiteSpace(søgeFelt)) // Hvis søgefeltet er tomt eller kun whitespace.
         {
-            await HentBetalinger();
+            await HentBetalinger(); // Henter alle betalinger igen.
             return;
         }
 
         try
         {
-            betalinger = await Http.GetFromJsonAsync<List<Betaling>>($"api/Betalings/search?query={søgeFelt}");
+            betalinger = await Http.GetFromJsonAsync<List<Betaling>>($"api/Betalings/search?query={søgeFelt}"); // Søger betalinger på API'et med query-parameter.
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Søgefejl: {ex.Message}");
+            Console.WriteLine($"Søgefejl: {ex.Message}"); // Skriver eventuelle fejl i konsollen.
         }
     }
 
-    private void SkiftFane(string faneNavn)
+    private void SkiftFane(string faneNavn) // Metode til at skifte mellem "IkkeBetalte" og "Betalte".
     {
-        aktivFane = faneNavn; // Opdater den aktive fane
+        aktivFane = faneNavn; // Opdaterer den aktive fane.
     }
 
-    private string GetFaneKlasse(string faneNavn)
+    private string GetFaneKlasse(string faneNavn) // Returnerer CSS-klassen for en fane-knap, alt efter om den er aktiv.
     {
         return aktivFane == faneNavn ? "btn-primary" : "btn-outline-primary";
     }
 
-
-
-    private void ResetSøgning()
+    private void ResetSøgning() // Nulstiller søgefelt og henter alle betalinger igen.
     {
-        søgeFelt = string.Empty;
-        _ = HentBetalinger(); // Hent alle betalinger igen
+        søgeFelt = string.Empty; // Sætter søgefeltet til tom streng.
+        _ = HentBetalinger(); // Kalder hent-metoden (uden at vente på den).
     }
 
-    private async Task HandleSearchKeyPress(KeyboardEventArgs e)
+    private async Task HandleSearchKeyPress(KeyboardEventArgs e) // Håndterer tastetryk i søgefeltet.
     {
-        if (e.Key == "Enter")
+        if (e.Key == "Enter") // Hvis brugeren trykker på Enter-tasten.
         {
-            await SøgBetalinger();
+            await SøgBetalinger(); // Udfører søgningen.
         }
     }
 
-    private async Task OpdaterBetaltStatus(int betalingsId, string nyStatus)
+    private async Task OpdaterBetaltStatus(int betalingsId, string nyStatus) // Opdaterer, om betalingen er betalt eller ej.
     {
-        var status = nyStatus == "true";
+        var status = nyStatus == "true"; // Konverterer input til en bool (true/false).
 
-        // DTO til at sende status og dato
         var betalingUpdate = new BetalingUpdateDto
             {
                 Betalt = status
-            };
+            }; // Opretter en DTO, der skal sendes til API'et med opdateret status.
 
-        var response = await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/status", betalingUpdate);
+        var response = await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/status", betalingUpdate); // Kalder PUT-endpointet med den nye status.
 
         if (response.IsSuccessStatusCode)
         {
             Console.WriteLine("Betalingsstatus og dato opdateret.");
 
-            // Genindlæs fakturaen, hvis den er åben og denne betaling opdateres
             if (visFakturaModal && fakturaData?.BetalingsId == betalingsId)
             {
-                await VisFakturaDetaljer(betalingsId);
+                await VisFakturaDetaljer(betalingsId); // Hvis modal er åben med samme betalingsId, genindlæs da fakturadetaljer.
             }
 
-            await HentBetalinger(); // Opdater listen
+            await HentBetalinger(); // Opdaterer listen ved at hente data igen.
         }
         else
         {
@@ -415,32 +493,24 @@ else
         }
     }
 
-
-
-
-    private async Task OpdaterBetalingsMetode(int betalingsId, string nyMetode)
+    private async Task OpdaterBetalingsMetode(int betalingsId, string nyMetode) // Opdaterer betalingsmetode (fx Kontant, Kort, MobilePay).
     {
         try
         {
-            // Konverter string til enum
-            var metode = Enum.Parse<BetalingsMetodeStatus>(nyMetode, ignoreCase: true);
+            var metode = Enum.Parse<BetalingsMetodeStatus>(nyMetode, ignoreCase: true); // Konverterer strengværdien til enum.
 
-            // Kald API for at opdatere betalingsmetoden
-            var response = await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/metode", metode);
+            var response = await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/metode", metode); // Kalder PUT-endpointet for at opdatere betalingsmetoden.
 
             if (response.IsSuccessStatusCode)
             {
-                // Genindlæs fakturaen, hvis den er åben og denne betaling opdateres
                 if (visFakturaModal && fakturaData?.BetalingsId == betalingsId)
                 {
-                    await VisFakturaDetaljer(betalingsId);
+                    await VisFakturaDetaljer(betalingsId); // Genindlæs faktura, hvis modal er åben for denne betaling.
                 }
-                // Opdater listen, hvis API-kaldet lykkedes
-                await HentBetalinger();
+                await HentBetalinger(); // Hent betalinger igen for at vise opdateringen.
             }
             else
             {
-                // Håndter fejl
                 var errorMessage = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"Fejl ved opdatering: {errorMessage}");
             }
@@ -451,13 +521,12 @@ else
         }
     }
 
-
-    private async Task VisFakturaDetaljer(int betalingsId)
+    private async Task VisFakturaDetaljer(int betalingsId) // Henter og viser detaljer om fakturaen i modal-vinduet.
     {
         try
         {
-            fakturaData = await Http.GetFromJsonAsync<FakturaDto>($"api/Betalings/{betalingsId}/faktura");
-            visFakturaModal = true;
+            fakturaData = await Http.GetFromJsonAsync<FakturaDto>($"api/Betalings/{betalingsId}/faktura"); // Kalder API for at hente faktura-DTO.
+            visFakturaModal = true; // Åbner modal.
         }
         catch (Exception ex)
         {
@@ -465,34 +534,30 @@ else
         }
     }
 
-
-    private void LukFakturaModal()
+    private void LukFakturaModal() // Lukker faktura-modal.
     {
         visFakturaModal = false;
     }
 
-    private async Task DownloadFaktura(int betalingsId)
+    private async Task DownloadFaktura(int betalingsId) // Downloader en PDF-version af fakturaen.
     {
-        // Hent PDF-data fra backend
-        var pdfBytes = await Http.GetByteArrayAsync($"api/Betalings/{betalingsId}/download");
+        var pdfBytes = await Http.GetByteArrayAsync($"api/Betalings/{betalingsId}/download"); // Henter PDF-data som bytearray.
 
-        // Kald JavaScript-funktionen
-        await JSRuntime.InvokeVoidAsync("downloadFileFromBytes", $"Faktura_{betalingsId}.pdf", pdfBytes);
+        await JSRuntime.InvokeVoidAsync("downloadFileFromBytes", $"Faktura_{betalingsId}.pdf", pdfBytes); // Kalder en JavaScript-funktion til at downloade filen i browseren.
     }
-   
-    private async Task OpdaterBetalingsDato(int betalingsId, string nyDato)
+
+    private async Task OpdaterBetalingsDato(int betalingsId, string nyDato) // Opdaterer betalingsdatoen for en given betaling.
     {
         try
         {
-            DateTime? dato = string.IsNullOrWhiteSpace(nyDato) ? null : DateTime.Parse(nyDato);
+            DateTime? dato = string.IsNullOrWhiteSpace(nyDato) ? null : DateTime.Parse(nyDato); // Konverterer streng til DateTime, hvis den ikke er tom.
 
-            var response = await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/dato", dato);
+            var response = await Http.PutAsJsonAsync($"api/Betalings/{betalingsId}/dato", dato); // Kalder PUT-endpointet for at opdatere dato.
 
             if (response.IsSuccessStatusCode)
             {
                 Console.WriteLine("Betalingsdato opdateret.");
-                // Opdater listen for at vise den ændrede dato
-                await HentBetalinger();
+                await HentBetalinger(); // Opdaterer listen med opdateret dato.
             }
             else
             {
@@ -505,6 +570,5 @@ else
             Console.WriteLine($"Fejl: {ex.Message}");
         }
     }
-
 }
 

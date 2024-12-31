@@ -1,54 +1,58 @@
-﻿using ScooterLandProjectOpg.Server.Interfaces;
-using ScooterLandProjectOpg.Shared.Models;
-using Microsoft.EntityFrameworkCore;
-using ScooterLandProjectOpg.Server.Context;
-namespace ScooterLandProjectOpg.Server.Services
+﻿using ScooterLandProjectOpg.Server.Interfaces; // Importerer interface-definitioner for Ydelse-relaterede operationer.
+using ScooterLandProjectOpg.Shared.Models; // Importerer modeldefinitionen for Ydelse.
+using Microsoft.EntityFrameworkCore; // Importerer Entity Framework Core til databaseinteraktion.
+using ScooterLandProjectOpg.Server.Context; // Importerer databasekonteksten for ScooterLand.
+
+namespace ScooterLandProjectOpg.Server.Services // Definerer namespace for Ydelse-tjenester.
 {
-	public class YdelseService : Repository<Ydelse>, IYdelseRepository
-	{
-		private readonly ScooterLandContext _context;
+    // Arver generisk Repository og implementerer IYdelseRepository.
+    public class YdelseService : Repository<Ydelse>, IYdelseRepository 
+    {
+        // Felt til at holde en reference til databasekonteksten.
+        private readonly ScooterLandContext _context; 
 
-		public YdelseService(ScooterLandContext context) : base(context)
-		{
-			_context = context;
-		}
+        // Constructor, der initialiserer databasekonteksten.
+        public YdelseService(ScooterLandContext context) : base(context) 
+        {
+            _context = context; // Initialiserer _context med den leverede databasekontekst.
+        }
 
-		public async Task<IEnumerable<Ydelse>> GetAllWithDetailsAsync()
-		{
-			// Henter alle Ydelser fra databasen
-			return await _context.Ydelser.ToListAsync();
-		}
+        // Metode til at hente alle Ydelser fra databasen.
+        public async Task<IEnumerable<Ydelse>> GetAllWithDetailsAsync() 
+        {
+            return await _context.Ydelser.ToListAsync(); // Henter alle poster i Ydelser-tabellen og returnerer som en liste.
+        }
 
-		public async Task<Ydelse> GetWithDetailsByIdAsync(int id)
-		{
-			// Henter en Ydelse ved hjælp af dens ID
-			return await _context.Ydelser.FindAsync(id);
-		}
+        // Metode til at hente en Ydelse ved hjælp af dens ID.
+        public async Task<Ydelse> GetWithDetailsByIdAsync(int id) 
+        {
+            return await _context.Ydelser.FindAsync(id); // Finder og returnerer Ydelsen med det angivne ID.
+        }
 
-		public async Task<Ydelse> AddAsync(Ydelse entity)
-		{
-			// Tilføjer en ny Ydelse til databasen
-			await _context.Ydelser.AddAsync(entity);
-			await _context.SaveChangesAsync();
-			return entity;
-		}
+        // Metode til at tilføje en ny Ydelse til databasen.
+        public async Task<Ydelse> AddAsync(Ydelse entity) 
+        {
+            await _context.Ydelser.AddAsync(entity); // Tilføjer Ydelsen til DbSet.
+            await _context.SaveChangesAsync(); // Gemmer ændringer i databasen.
+            return entity; // Returnerer den tilføjede Ydelse.
+        }
 
-		public async Task UpdateAsync(Ydelse entity)
-		{
-			// Opdaterer en eksisterende Ydelse i databasen
-			_context.Ydelser.Update(entity);
-			await _context.SaveChangesAsync();
-		}
+        // Metode til at opdatere en eksisterende Ydelse i databasen.
+        public async Task UpdateAsync(Ydelse entity) 
+        {
+            _context.Ydelser.Update(entity); // Marker Ydelsen som opdateret i DbSet.
+            await _context.SaveChangesAsync(); // Gemmer ændringer i databasen.
+        }
 
-		public async Task DeleteAsync(int id)
-		{
-			// Henter og sletter en Ydelse baseret på ID
-			var ydelse = await _context.Ydelser.FindAsync(id);
-			if (ydelse != null)
-			{
-				_context.Ydelser.Remove(ydelse);
-				await _context.SaveChangesAsync();
-			}
-		}
-	}
+        // Metode til at slette en Ydelse baseret på dens ID.
+        public async Task DeleteAsync(int id) 
+        {
+            var ydelse = await _context.Ydelser.FindAsync(id); // Finder Ydelsen med det angivne ID.
+            if (ydelse != null) // Tjekker, om Ydelsen blev fundet.
+            {
+                _context.Ydelser.Remove(ydelse); // Fjerner Ydelsen fra DbSet.
+                await _context.SaveChangesAsync(); // Gemmer ændringer i databasen.
+            }
+        }
+    }
 }

@@ -3,14 +3,20 @@
 @using ScooterLandProjectOpg.Shared.Models
 @inject HttpClient Http
 
+@* Opretter en container med top-margin, der rummer card-elementet. *@
 <div class="container mt-4">
+	@* Et card, som holder alt indhold på en samlet, pæn måde. *@
 	<div class="card">
+		@* Kortets header med primær (blå) baggrund og hvid tekst. *@
 		<div class="card-header bg-primary text-white">
+			@* Overskrift, som angiver at vi er i gang med at oprette en ordre. *@
 			<h3 class="card-title">Opret Ordre</h3>
 		</div>
+		@* Kortets brødtekst, hvor hovedfunktionaliteten placeres. *@
 		<div class="card-body">
 			@if (valgtKunde != null)
 			{
+				@* Viser en alert-boks med info om den valgte kunde, hvis der er en valgt kunde. *@
 				<div class="alert alert-info">
 					<h5>Valgt Kunde</h5>
 					<p>
@@ -19,32 +25,34 @@
 						<strong>Telefon:</strong> @valgtKunde.Telefonnummer
 					</p>
 					<button class="btn btn-warning" @onclick="RydValgtKunde">Ryd Valg</button>
+					@* Knap til at fjerne det valgte kundevalg. *@
 				</div>
 			}
 
 			<style>
+				@* Lokal styling til nav-tabs og deres tilstande. *@
 				.nav-tabs .nav-link {
-					color: #555; /* Neutral farve for inaktive tabs */
-					background-color: #f8f9fa; /* Lys baggrund */
+					color: #555;
+					background-color: #f8f9fa;
 					border: 1px solid #dee2e6;
 					font-weight: bold;
-					border-radius: 5px; /* Bløde hjørner */
+					border-radius: 5px;
 				}
 
-					.nav-tabs .nav-link:hover {
-						color: #0056b3; /* Blå hover-effekt */
-						background-color: #e9ecef; /* Lysere baggrund ved hover */
-						transition: all 0.3s ease;
-					}
+				.nav-tabs .nav-link:hover {
+					color: #0056b3;
+					background-color: #e9ecef;
+					transition: all 0.3s ease;
+				}
 
-					.nav-tabs .nav-link.active {
-						color: #fff; /* Hvid tekst for aktiv tab */
-						background-color: #007bff; /* Blå baggrund for aktiv tab */
-						border-color: #0056b3; /* Mørkere blå kant */
-					}
+				.nav-tabs .nav-link.active {
+					color: #fff;
+					background-color: #007bff;
+					border-color: #0056b3;
+				}
 			</style>
 
-			<!-- Tabs navigation -->
+			@* Tabs navigation til at skifte mellem forskellige undersider: Ordre, Lejeaftale, Produkter. *@
 			<ul class="nav nav-tabs">
 				<li class="nav-item">
 					<a class="nav-link @(aktivTab == "ordre" ? "active" : "")" @onclick="@(() => AktivTabSkift("ordre"))">
@@ -63,11 +71,10 @@
 				</li>
 			</ul>
 
-
 			<div class="tab-content mt-4">
 				@if (aktivTab == "ordre")
 				{
-					<!-- Opret Ordre Form -->
+					@* Indholdet for 'Ordre'-tabben. *@
 					<div class="card">
 						<div class="card-header bg-secondary text-white">
 							<h5>Søg Kunde</h5>
@@ -75,10 +82,12 @@
 						<div class="card-body">
 							<div class="form-group">
 								<input id="search" class="form-control" @bind="SøgeTekst" placeholder="Søg på Kunde ID, Navn eller Telefonnummer" />
+								@* Tekstfelt til at søge efter kunder baseret på ID, navn eller telefon. *@
 							</div>
 
 							@if (filtreredeKunder.Any())
 							{
+								@* Hvis der er fundet nogle kunder, vises de i en liste. *@
 								<ul class="list-group mt-2">
 									@foreach (var kunde in filtreredeKunder)
 									{
@@ -91,14 +100,15 @@
 							}
 							else if (!string.IsNullOrWhiteSpace(SøgeTekst))
 							{
+								@* Hvis der er søgetekst, men ingen resultater, vises denne besked. *@
 								<p class="text-muted mt-2">Ingen kunder matcher søgningen.</p>
 							}
 						</div>
 					</div>
 
-					<!-- Sektion: Tilgængelige Ydelser -->
 					@if (valgtKundeId > 0)
 					{
+						@* Vises kun, hvis en kunde er valgt. *@
 						<div class="card mt-4">
 							<div class="card-header bg-secondary text-white">
 								<h5>Tilgængelige Ydelser</h5>
@@ -159,9 +169,11 @@
 													<td>@ydelse.Ydelse.Navn</td>
 													<td>@ydelse.Ydelse.StandardPris?.ToString("F2") kr.</td>
 													<td>
+														@* Brugeren kan ændre den aftalte pris. *@
 														<InputNumber @bind-Value="ydelse.AftaltPris" class="form-control" />
 													</td>
 													<td>
+														@* Brugeren vælger, hvilken af kundens scootere ydelsen skal bruges på. *@
 														<select class="form-control" @bind="ydelse.ScooterId">
 															<option value="">-- Vælg en scooter --</option>
 															@foreach (var scooter in kundeScootere)
@@ -171,6 +183,7 @@
 														</select>
 													</td>
 													<td>
+														@* Knap til at fjerne ydelsen fra listen. *@
 														<button class="btn btn-danger btn-sm" @onclick="() => FjernYdelse(ydelse)">Fjern</button>
 													</td>
 												</tr>
@@ -178,9 +191,10 @@
 										</tbody>
 									</table>
 								}
-								<!-- Alert om manglende scootervalg -->
+
 								@if (valgteOrdreYdelser.Any(ydelse => ydelse.ScooterId == null))
 								{
+									@* Vises, hvis nogen ydelser ikke har fået tildelt en scooter endnu. *@
 									<div class="alert alert-danger mt-2">
 										Alle ydelser skal have en tilknyttet scooter, før du kan gemme ordren.
 									</div>
@@ -188,6 +202,7 @@
 
 								@if (valgteOrdreYdelser.Any() || valgteProdukter.Any())
 								{
+									@* Vises kun, hvis vi har enten ydelser eller produkter valgt. *@
 									<h5 class="mt-3">Totalpris: @TotalPris kr.</h5>
 									<button class="btn btn-primary mt-3" @onclick="VisBekræftelse">Gem Ordre</button>
 								}
@@ -201,6 +216,7 @@
 				}
 				else if (aktivTab == "lejeaftale")
 				{
+					@* Indholdet for 'Lejeaftale'-tabben. *@
 					<div class="card">
 						<div class="card-header bg-secondary text-white">
 							<h5>Opret Lejeaftale</h5>
@@ -249,9 +265,9 @@
 						</div>
 					</div>
 				}
-
 				else if (aktivTab == "produkter")
 				{
+					@* Indholdet for 'Produkter'-tabben. *@
 					<div class="card">
 						<div class="card-header bg-secondary text-white">
 							<h5>Tilføj Produkter</h5>
@@ -280,9 +296,11 @@
 												<td>@produkt.ProduktNavn</td>
 												<td>@produkt.Pris?.ToString("F2") kr.</td>
 												<td>
+													@* Brugeren kan justere antallet, før de tilføjer produktet. *@
 													<InputNumber @bind-Value="produkt.KøbsAntal" class="form-control" />
 												</td>
 												<td>
+													@* Knap til at tilføje produktet til ordren. *@
 													<button class="btn btn-success btn-sm" @onclick="() => TilføjProdukt(produkt)">Tilføj</button>
 												</td>
 											</tr>
@@ -310,6 +328,7 @@
 												<td>@produkt.Pris?.ToString("F2") kr.</td>
 												<td>@produkt.KøbsAntal</td>
 												<td>
+													@* Knap til at fjerne produktet fra ordren. *@
 													<button class="btn btn-danger btn-sm" @onclick="() => FjernProdukt(produkt)">Fjern</button>
 												</td>
 											</tr>
@@ -331,10 +350,7 @@
 	</div>
 </div>
 
-
-
-
-<!-- Bekræftelsesmodal -->
+<!-- Modal til at bekræfte oprettelse af ordren. -->
 @if (visBekræftelsesModal)
 {
 	<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
@@ -358,16 +374,22 @@
 
 @if (visSuccesBesked)
 {
+	@* Vises, hvis ordren blev oprettet succesfuldt. *@
 	<div class="alert alert-success mt-3">
 		Ordren blev oprettet succesfuldt!
 	</div>
 }
+
+@* En container til bunden med en fast højde, margin-top, centreret indhold. *@
 <div class="d-flex justify-content-center align-items-center position-relative mt-4" style="height: 200px;">
+	@* En boks med hvid tekst, afrundet kant og en blåtonet gradientbaggrund. *@
 	<div class="alert border rounded-3 text-center"
 		 style="max-width: 700px; width: 90%; padding: 20px; background: linear-gradient(to bottom, #1D3557, #457B9D); color: white;">
+		@* Overskrift i boksen med et motorcykelikon. *@
 		<h4 class="fw-bold mb-3">
 			<i class="fas fa-motorcycle"></i> Scooterland
 		</h4>
+		@* Flex, der fordeler indhold i to kolonner. *@
 		<div class="d-flex justify-content-between">
 			<div class="text-start">
 				<p class="mb-2">
@@ -390,76 +412,126 @@
 </div>
 
 <style>
+	@* CSS for .alert, der giver en gradientbaggrund og ingen kant. *@
 	.alert {
 		background: linear-gradient(to bottom, #1D3557, #457B9D); /* Match farve fra sidebar */
 		border: none; /* Fjern kant */
 	}
 
-		.alert h4 {
-			font-size: 1.75rem; /* Fremhæv overskriften */
-			color: white; /* Hvid tekst */
-		}
+	.alert h4 {
+		font-size: 1.75rem; /* Fremhæv overskriften */
+		color: white; /* Hvid tekst */
+	}
 
-		.alert p {
-			font-size: 1rem; /* Læsbar tekst */
-			color: white; /* Hvid tekst */
-		}
+	.alert p {
+		font-size: 1rem; /* Læsbar tekst */
+		color: white; /* Hvid tekst */
+	}
 
-		.alert i {
-			margin-right: 8px; /* Plads mellem ikon og tekst */
-			color: white; /* Hvid farve til ikoner */
-		}
+	.alert i {
+		margin-right: 8px; /* Plads mellem ikon og tekst */
+		color: white; /* Hvid farve til ikoner */
+	}
 
-		.alert .text-start {
-			flex: 1; /* Fordel pladsen ligeligt */
-		}
+	.alert .text-start {
+		flex: 1; /* Fordel pladsen ligeligt mellem to kolonner */
+	}
 </style>
-<link rel="stylesheet" href="css/ScooterAnimation.css">
 
+@* Link til en CSS-fil for scooterens animation. *@
+<link rel="stylesheet" href="css/ScooterAnimation.css" />
+
+@* En container til scooter-SVG'en, evt. med animation. *@
 <div class="scooter-container">
-
+	@* Vendt spejlvendt (mirror) ved hjælp af scaleX(-1). *@
 	<svg class="scooter" xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 128 128" style="transform: scaleX(-1);">
-
+		@* Orange del af scooterens design. *@
 		<path fill="#ea6c3a" d="M109.4 59.1h8.8c2 0 3.5 1.6 3.5 3.5c0 2-1.6 3.5-3.5 3.5h-8.8z" />
 		<path fill="#fac136" d="M29.6 25.3c-.4 2.8-1.1 8.1-1.5 10.9c-.2 1.1-1.4 1.8-2.4 1.3c-2.9-1.4-4.7-4.5-4.2-7.8s3.1-5.8 6.2-6.4c1.1-.2 2.1.8 1.9 2" />
+		@* Forhjul i mørk grå. *@
 		<circle cx="19.4" cy="90.2" r="17.5" fill="#2f2f2f" />
+		@* Forhjulets midte i lysere grå. *@
 		<circle cx="19.4" cy="90.2" r="9.7" fill="#65878d" />
+		@* Baghjul i mørk grå. *@
 		<circle cx="97.7" cy="90.2" r="17.5" fill="#2f2f2f" />
+		@* Baghjulets midte i lysere grå. *@
 		<circle cx="97.7" cy="90.2" r="9.7" fill="#65878d" />
+		@* Blå sektion af scooterens karosseri. *@
 		<path fill="#47c0e5" d="M95.7 54.7h.2c2.1.1 31.3 2.8 31.3 34.6c0 1.9-1.6 3.5-3.5 3.5H51.6c-7.6 0-14.7-3.3-19.7-9l-9.6-11.1c-1.3-1.5-1.8-3.5-1.4-5.5c2-9.1 5.9-17.7 11.6-25.2l1.8-2.4h7.5l-7 28.9c.5 8.7 7.8 15.5 16.5 15.6h12.3c5.6 0 10.1-4.5 10.1-10.1c0-3.5-1.8-6.7-4.8-8.6L63 61.7c-1.2-.8-2-2.2-2-3.6v-3.5h34.7z" />
+		@* Lyseblå kontur/refleksion. *@
 		<path fill="#bae9f3" d="M94.6 62.1q-.15 0 0 0c-.8 0-1.4.7-1.4 1.4c0 .8.6 1.4 1.4 1.4c12.3 0 22.2 9.9 22.2 22.2c0 .8.6 1.4 1.4 1.4s1.4-.6 1.4-1.4c0-13.8-11.2-25-25-25" />
+		@* Mørkere detaljer. *@
 		<path fill="#2f2f2f" d="M66.2 58.5L61 56.1c-.8-.4-1.3-1.2-1.3-2c0-4.7 3.8-8.6 8.6-8.6h14.5c4.9 0 9.9-.3 14.8-1c4.8-.4 8.8 3.4 8.8 8.2v3.4c0 1.1-.9 2.1-2.1 2.1l-30.8 1.3c-2.5.5-5 .1-7.3-1m43.5-31.1l-.1.2c-1.8 2.7-2.8 5.8-2.8 9v2c0 .9.6 1.8 1.5 2.1l1.2.4c1.1.3 2.3-.3 2.7-1.4l3-9.9c.4-1.2-.3-2.4-1.5-2.7l-1.7-.5c-.9-.3-1.8 0-2.3.8" />
+		@* Sort del på siden. *@
 		<path fill="#2f2f2f" d="M115.5 30c.6.2.9.8.7 1.4l-5.7 20.2c-.5 1.9-2 3.5-3.8 4.2l-2.5 1v-2.5l.6-.2c2-.7 3.5-2.3 4.1-4.4l5.2-19c.2-.5.8-.9 1.4-.7" />
+		@* Yderligere blå frontdel. *@
 		<path fill="#47c0e5" d="M42.7 37.4L44 33c.4-1.2 0-2.6-1-3.4L38.8 26c-1.7-1.4-3.8-2.3-6-2.5l-6.5-.5c-.5 0-.9.2-1.1.6l-.8 1.8c-1.3 2.9-1.9 6-1.7 9.1l.1 1.7c0 .5.4.9.9 1l4.3.6c3.4.5 5.5 4 4.2 7.3l8.6-1.7z" />
+		@* Sort detalje i fronten. *@
 		<path fill="#2f2f2f" d="M38.4 26s-1.8-.8-2.8 1.7c-1 2.4 1.1 4.6 1.1 4.6l7.5 2.5c1.5.5 3.1-.5 3.4-2.1c.2-1.1-.4-2.2-1.4-2.7z" />
+		@* Bageste blå linje bag scooteren. *@
 		<path fill="#47c0e5" d="M3 83.7h4.5c10.3.1 20.3 3.4 28.8 9.4c1.4 1 3.3-.1 3.2-1.9c-.1-2.2-.5-5.2-1.6-8.3c-2-6-6.2-11.3-12.8-13.1c-13.7-3.7-21 5.5-23.9 10.6c-.7 1.6.3 3.3 1.8 3.3" />
+		@* En streg, muligvis dekorativ. *@
 		<path fill="none" stroke="#bae9f3" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.5" d="M15 74.4s7.2-2.4 13.1 2.1c4 3 5.3 7.3 5.3 7.3" />
 	</svg>
 
 </div>
 
 @code {
+	// Liste over alle kunder, der eventuelt kan vælges.
 	private List<Kunde> kunder = new();
-	private List<Ydelse> alleYdelser = new();
-	private List<LejeScooter> ledigeScootere = new();
-	private List<OrdreYdelse> valgteOrdreYdelser = new List<OrdreYdelse>();
-	private CreateLejeAftaleDto lejeaftale = new();
-	private List<KundeScooter> kundeScootere = new();
-	private List<Produkt> alleProdukter = new();
-	private List<Produkt> valgteProdukter = new();
-	private int valgtKundeId;
-	private int? valgtLejeScooterId;
-	private int? valgtKundeScooterId;
-	private string aktivTab = "ordre";
-	private bool visBekræftelsesModal = false;
-	private bool visSuccesBesked = false;
-	private Kunde valgtKunde; // Gemmer oplysninger om den valgte kunde
 
+	// Liste over alle ydelser, der kan tilføjes en ordre.
+	private List<Ydelse> alleYdelser = new();
+
+	// Liste over ledige scootere, hvis man vælger at lave en lejeaftale.
+	private List<LejeScooter> ledigeScootere = new();
+
+	// Liste over de ydelser, som brugeren har tilføjet til denne ordre.
+	private List<OrdreYdelse> valgteOrdreYdelser = new List<OrdreYdelse>();
+
+	// Et objekt til at holde data om en potentiel lejeaftale.
+	private CreateLejeAftaleDto lejeaftale = new();
+
+	// Liste over scootere, som kunden selv har (kunde-ejede).
+	private List<KundeScooter> kundeScootere = new();
+
+	// Liste over alle produkter, der kan tilføjes til ordren.
+	private List<Produkt> alleProdukter = new();
+
+	// Liste over de produkter, som brugeren har valgt til ordren.
+	private List<Produkt> valgteProdukter = new();
+
+	// Gemmer ID på den valgte kunde.
+	private int valgtKundeId;
+
+	// Gemmer ID på den valgte "LejeScooter", hvis man har valgt at leje.
+	private int? valgtLejeScooterId;
+
+	// Eventuelt ID på en kunde-scooter, hvis relevans?
+	private int? valgtKundeScooterId;
+
+	// Styrer hvilken tab (faneblad) der er aktiv: "ordre", "lejeaftale" eller "produkter".
+	private string aktivTab = "ordre";
+
+	// Styrer visningen af en modal til at bekræfte oprettelse af ordren.
+	private bool visBekræftelsesModal = false;
+
+	// Viser en besked, hvis ordren blev succesfuldt oprettet.
+	private bool visSuccesBesked = false;
+
+	// Gemmer oplysninger om den valgte kunde, for at vise i en alert.
+	private Kunde valgtKunde;
+
+	// Mulig ekstra property til at modtage total pris fra backenden, hvis relevant.
 	private double? TotalPrisFraBackend { get; set; }
 
-	private string søgeTekst = ""; // Søgeteksten fra brugeren
-	private List<Kunde> filtreredeKunder = new(); // Den filtrerede liste af kunder
+	// Søgetekst, der angiver hvad brugeren leder efter i kundelisten.
+	private string søgeTekst = "";
 
+	// Liste over kunder, der matcher søgetekst.
+	private List<Kunde> filtreredeKunder = new();
+
+	// Egenskab for søgefelt, der også udfører søgning, når værdien ændres.
 	private string SøgeTekst
 	{
 		get => søgeTekst;
@@ -468,60 +540,63 @@
 			if (søgeTekst != value)
 			{
 				søgeTekst = value;
-				_ = PerformSearchAsync(); // Kald søgning når søgeTekst ændres
-
+				_ = PerformSearchAsync(); // Kalder søgningen asynkront
 			}
 		}
 	}
+
+	// Asynkron metode, der håndterer søgefunktionen og opdaterer UI.
 	private async Task PerformSearchAsync()
 	{
 		await SøgKunderAsync();
-		StateHasChanged(); // Tving UI-opdatering
+		StateHasChanged(); // Sørg for, at UI opdateres bagefter.
 	}
 
+	// Egenskab, der beregner den samlede pris baseret på ydelser, lejeaftale og produkter.
 	private double TotalPris => valgteOrdreYdelser.Sum(oy => oy.AftaltPris ?? oy.Ydelse.StandardPris ?? 0) + BeregnLejeAftaleTotalPris() + TotalPrisForProdukter;
+
+	// Egenskab, der beregner totalpris for alle valgte produkter.
 	private double TotalPrisForProdukter => valgteProdukter.Sum(p => (p.Pris ?? 0) * (p.KøbsAntal));
 
-
+	// Lifecycle-metode, der kører, når komponenten initialiseres.
 	protected override async Task OnInitializedAsync()
 	{
 		try
 		{
-			// Hent kunder og ydelser
+			// Henter en liste af kunder fra API'et og gemmer den i variablen `kunder`, så kunderne kan blive vist og behandlet i komponenten.
 			kunder = await Http.GetFromJsonAsync<List<Kunde>>("api/Kunde");
+			// Henter en liste af ydelser fra API'et og gemmer den i variablen `alleYdelser`, så ydelserne kan blive vist og behandlet i komponenten.
 			alleYdelser = await Http.GetFromJsonAsync<List<Ydelse>>("api/Ydelse");
 
-			// Hent produkter
+			// Henter en liste af produkter fra API'et og tildeler den til `alleProdukter`. Hvis API'et returnerer null, oprettes en tom liste for at undgå fejl.
 			alleProdukter = await Http.GetFromJsonAsync<List<Produkt>>("api/Produkt") ?? new List<Produkt>();
 
-			// Sæt standardværdien for antal, hvis den ikke allerede er sat
-			foreach (var produkt in alleProdukter)
+			foreach (var produkt in alleProdukter) // Gennemgår listen `alleProdukter` og tildeler standardværdien 1 til `KøbsAntal` for hvert produkt, hvis det ikke allerede er defineret.
 			{
 				produkt.KøbsAntal = 1;
 			}
-
-			// Hent ledige scootere
+			
+			// Henter en liste over ledige scootere fra API'et og gemmer den i variablen `ledigeScootere`. Hvis der ikke er nogen data, oprettes en tom liste som fallback.
 			ledigeScootere = await Http.GetFromJsonAsync<List<LejeScooter>>("api/lejescooter/available") ?? new List<LejeScooter>();
 
-			// Hvis ingen scootere er tilgængelige, initialiser en tom liste og log besked
-			if (!ledigeScootere.Any())
+			if (!ledigeScootere.Any()) // Kontrollerer, om listen `ledigeScootere` er tom. Hvis der ikke er nogen scootere tilgængelige, logges en besked til konsollen.
 			{
 				Console.WriteLine("Ingen ledige scootere fundet.");
 			}
 		}
-		catch (HttpRequestException ex)
+		catch (HttpRequestException ex) // Fanger specifikke fejl, der kan opstå under HTTP-forespørgsler, såsom server- eller netværksfejl, og logger en fejlmeddelelse.
 		{
 			Console.WriteLine($"Fejl ved hentning af data: {ex.Message}");
-			ledigeScootere = new List<LejeScooter>(); // Initialiser som tom liste for at undgå fejl
+			ledigeScootere = new List<LejeScooter>(); // Initialiserer listen `ledigeScootere` som tom, hvis der opstår en fejl, for at sikre, at komponenten fortsætter med at fungere.
 		}
-		catch (Exception ex)
+		catch (Exception ex) // Fanger enhver anden uforudset fejl, logger en generel fejlmeddelelse og sikrer fortsat stabilitet ved at initialisere `ledigeScootere` som en tom liste.
 		{
 			Console.WriteLine($"Uventet fejl: {ex.Message}");
 			ledigeScootere = new List<LejeScooter>();
 		}
 	}
 
-
+	// Nulstiller alle data relateret til en ordre, fx når ordren er oprettet eller annulleret.
 	private void NulstilOrdreData()
 	{
 		valgteProdukter.Clear();
@@ -531,229 +606,262 @@
 		valgtKunde = null;
 		valgtKundeId = 0;
 		TotalPrisFraBackend = null;
-		aktivTab = "ordre"; // Sæt standard-tabben tilbage
+		aktivTab = "ordre";
 		visBekræftelsesModal = false;
 		visSuccesBesked = false;
-		StateHasChanged(); // Tving UI-opdatering
+		StateHasChanged();
 	}
+
+	// Metode til at tilføje et produkt til valgteProdukter-listen.
 	private void TilføjProdukt(Produkt produkt)
 	{
+		// Hvis der ikke allerede findes et produkt med samme ID i listen, oprettes en ny instans af produktet og tilføjes til `valgteProdukter`.
 		var eksisterendeProdukt = valgteProdukter.FirstOrDefault(p => p.ProduktId == produkt.ProduktId);
-		if (eksisterendeProdukt == null)
+		if (eksisterendeProdukt == null) 
 		{
 			valgteProdukter.Add(new Produkt
 				{
-					ProduktId = produkt.ProduktId,
-					ProduktNavn = produkt.ProduktNavn,
-					Pris = produkt.Pris,
-					KøbsAntal = produkt.KøbsAntal
+					ProduktId = produkt.ProduktId, // Sætter produktets ID for det nye objekt.
+					ProduktNavn = produkt.ProduktNavn, // Overfører navnet på produktet.
+					Pris = produkt.Pris, // Tildeler produktets pris til det nye objekt.
+					KøbsAntal = produkt.KøbsAntal // Initialiserer antallet, der skal købes, med værdien fra det indgående produkt.
 				});
 		}
-		else
+		else // Hvis produktet allerede findes i listen, opdateres kun købsantallet ved at lægge det indgående produkts antal til det eksisterende antal.
 		{
-			eksisterendeProdukt.KøbsAntal += produkt.KøbsAntal; // Opdater antal
+			eksisterendeProdukt.KøbsAntal += produkt.KøbsAntal;
 		}
 	}
 
-
+	// Fjerner et produkt fra valgteProdukter-listen.
 	private void FjernProdukt(Produkt produkt)
 	{
 		valgteProdukter.Remove(produkt);
 	}
 
-
+	// Filtrerer kunder lokalt (hvis man vil undgå API-kald hver gang).
 	private void FiltrerKunder()
 	{
-		if (string.IsNullOrWhiteSpace(søgeTekst))
+		if (string.IsNullOrWhiteSpace(søgeTekst)) // Kontrollerer, om søgeteksten er tom eller kun indeholder blanke tegn.
 		{
-			filtreredeKunder = new List<Kunde>(); // Tøm listen, hvis søgefeltet er tomt
+			filtreredeKunder = new List<Kunde>(); // Initialiserer `filtreredeKunder` som en tom liste, hvis der ikke er nogen søgetekst.
 		}
 		else
 		{
-			var søgetekstLower = søgeTekst.ToLower();
+			var søgetekstLower = søgeTekst.ToLower(); // Konverterer søgeteksten til små bogstaver for at sikre, at søgningen ikke skelner mellem store og små bogstaver.
 			filtreredeKunder = kunder.Where(k =>
-			k.KundeId.ToString().Contains(søgeTekst) ||
-			(!string.IsNullOrEmpty(k.Navn) && k.Navn.ToLower().Contains(søgeTekst.ToLower())) ||
-			k.Telefonnummer?.ToString().Contains(søgeTekst) == true
-
-			).ToList();
-
+				k.KundeId.ToString().Contains(søgeTekst) || // Tjekker, om kunde-ID'et som en streng indeholder søgeteksten.
+				(!string.IsNullOrEmpty(k.Navn) && k.Navn.ToLower().Contains(søgetekstLower)) || // Tjekker, om kundens navn ikke er null og indeholder søgeteksten i små bogstaver.
+				k.Telefonnummer?.ToString().Contains(søgeTekst) == true // Tjekker, om telefonnummeret som en streng indeholder søgeteksten, og håndterer null-scenariet med en betingelse.
+			).ToList(); // Konverterer de filtrerede resultater til en liste og tildeler dem til `filtreredeKunder`.
 		}
 	}
+
+	// Asynkron søgefunktion, der kalder et API-endpoint for at få en liste af kunder.
 	private async Task SøgKunderAsync()
 	{
 		try
 		{
-			if (string.IsNullOrWhiteSpace(søgeTekst))
+			if (string.IsNullOrWhiteSpace(søgeTekst)) // Kontrollerer, om søgeteksten er tom eller kun består af blanke tegn.
 			{
-				filtreredeKunder = new List<Kunde>(); // Tøm listen, hvis søgefeltet er tomt
+				filtreredeKunder = new List<Kunde>(); // Hvis søgeteksten er tom, initialiseres `filtreredeKunder` som en tom liste.
 			}
 			else
 			{
+				// Sender en HTTP GET-forespørgsel til API'et med søgeteksten som en parameter. `Uri.EscapeDataString` bruges for at sikre korrekt encoding af søgeteksten.
 				var response = await Http.GetFromJsonAsync<List<Kunde>>($"api/Kunde/searchmany?søgeTekst={Uri.EscapeDataString(søgeTekst)}");
+				
+				// Tildeler det modtagne svar fra API'et til `filtreredeKunder`. Hvis svaret er null, oprettes en tom liste for at undgå fejl.
 				filtreredeKunder = response ?? new List<Kunde>();
 			}
 		}
-		catch (Exception ex)
+		catch (Exception ex) // Håndterer eventuelle undtagelser, der opstår under søgeprocessen.
 		{
+			// Logger en fejlmeddelelse til konsollen med oplysninger om, hvad der gik galt under søgningen.
 			Console.WriteLine($"Fejl under søgning: {ex.Message}");
-			filtreredeKunder = new List<Kunde>(); // Hvis der opstår en fejl
+
+			// Initialiserer `filtreredeKunder` som en tom liste for at sikre, at applikationen fortsat kan fungere korrekt efter en fejl.
+			filtreredeKunder = new List<Kunde>();
 		}
 	}
+
+	// Metode til at vælge en kunde ud fra kundens ID.
 	private async Task VælgKunde(int kundeId)
 	{
-		valgtKundeId = kundeId;
+		// Tildeler det valgte kunde-ID til variablen `valgtKundeId` for at holde styr på den valgte kunde.
+		valgtKundeId = kundeId; 
 
-		// Hent kunden fra filtreredeKunder eller fra API'et, hvis nødvendigt
-		valgtKunde = filtreredeKunder.FirstOrDefault(k => k.KundeId == kundeId);
+		// Søger i listen `filtreredeKunder` efter en kunde med det angivne ID og tildeler den til `valgtKunde`.
+		valgtKunde = filtreredeKunder.FirstOrDefault(k => k.KundeId == kundeId); 
 
-		if (valgtKunde == null)
+		if (valgtKunde == null) // Kontrollerer, om kunden ikke findes i listen `filtreredeKunder`.
 		{
+			// Hvis kunden ikke findes i `filtreredeKunder`, hentes kundens data fra API'et ved hjælp af en HTTP GET-forespørgsel.
 			valgtKunde = await Http.GetFromJsonAsync<Kunde>($"api/Kunde/{kundeId}");
 		}
 
-		søgeTekst = ""; // Ryd søgeteksten
-		filtreredeKunder.Clear(); // Tøm resultatlisten
-		await HentScootereForKunde(kundeId); // Hent scootere relateret til kunden
-		StateHasChanged(); // Tving UI-opdatering
-	}
-	private void RydValgtKunde()
-	{
-		valgtKunde = null;
-		valgtKundeId = 0;
-		filtreredeKunder.Clear();
-		StateHasChanged(); // Tving UI-opdatering
+		søgeTekst = ""; // Nulstiller søgeteksten for at rydde inputfeltet.
+		filtreredeKunder.Clear(); // Rydder listen `filtreredeKunder`, da filtreringen ikke længere er relevant efter valg af kunde.
+		await HentScootereForKunde(kundeId); // Kalder en metode for at hente scootere, der er tilknyttet den valgte kunde.
+		StateHasChanged(); // Opdaterer brugergrænsefladen for at afspejle ændringer i komponentens tilstand.
 	}
 
+	// Rydder det nuværende kundevalg.
+	private void RydValgtKunde()
+	{
+		valgtKunde = null; // Sætter den valgte kunde til null for at fjerne det aktuelle kundevalg.
+		valgtKundeId = 0; // Nulstiller kunde-ID'et til 0 for at markere, at ingen kunde er valgt.
+		filtreredeKunder.Clear(); // Rydder listen over filtrerede kunder for at fjerne tidligere søge- eller filtreringsresultater.
+		StateHasChanged(); // Informerer brugergrænsefladen om, at komponentens tilstand er ændret, så den kan opdatere visningen.
+	}
+
+	// Henter scootere (kunde-ejede) for en bestemt kunde via API'en.
 	private async Task HentScootereForKunde(int kundeId)
 	{
 		try
 		{
+			// Sender en HTTP GET-forespørgsel til API'et for at hente en liste over scootere, der er ejet af kunden med det angivne ID.
 			var response = await Http.GetFromJsonAsync<List<KundeScooter>>($"api/KundeScooter/{kundeId}/scootere");
+			
+			// Tildeler den modtagne liste fra API'et til variablen `kundeScootere`. Hvis svaret er null, initialiseres en tom liste som fallback.
 			kundeScootere = response ?? new List<KundeScooter>();
 		}
-		catch (Exception ex)
+		catch (Exception ex) // Fanger undtagelser, der kan opstå under API-kaldet.
 		{
+			// Logger en fejlmeddelelse til konsollen med detaljer om undtagelsen for at lette fejlsøgning.
 			Console.WriteLine($"Fejl ved hentning af scootere: {ex.Message}");
+			
+			// Initialiserer variablen `kundeScootere` som en tom liste for at sikre, at applikationen fortsætter med at fungere stabilt.
 			kundeScootere = new List<KundeScooter>();
 		}
 	}
 
+	// Beregner total pris for en eventuel lejeaftale, baseret på data i 'lejeaftale'.
 	private double BeregnLejeAftaleTotalPris()
 	{
+		// Kontrollerer, om lejeaftalen er null, om start- eller slutdato mangler, eller om daglig leje ikke er en positiv værdi.
 		if (lejeaftale == null || !lejeaftale.StartDato.HasValue || !lejeaftale.SlutDato.HasValue || lejeaftale.DagligLeje <= 0)
 		{
-			return 0; // Returner 0, hvis noget mangler
+			return 0; // Returnerer 0, hvis nogen af disse betingelser er opfyldt, da beregning ikke kan foretages korrekt.
 		}
 
+		// Beregner antallet af dage mellem slutdatoen og startdatoen.
 		var dage = (lejeaftale.SlutDato.Value - lejeaftale.StartDato.Value).Days;
-		var kilometerOmkostning = lejeaftale.KortKilometer.HasValue
-		? lejeaftale.KilometerPris * lejeaftale.KortKilometer.Value
-		: 0;
+		// Beregner kilometeromkostninger, hvis `KortKilometer` har en værdi. Ellers sættes kilometeromkostningen til 0.
+		var kilometerOmkostning = lejeaftale.KortKilometer.HasValue 
+			? lejeaftale.KilometerPris * lejeaftale.KortKilometer.Value
+			: 0;
+		// Beregner forsikringsomkostninger ved at multiplicere forsikringsprisen per dag med antallet af dage.
 		var forsikringsPris = lejeaftale.ForsikringsPris * dage;
 
+		// Returnerer den samlede pris, som består af daglig leje ganget med antal dage, plus kilometeromkostninger og forsikringsomkostninger.
 		return (lejeaftale.DagligLeje * dage) + kilometerOmkostning + forsikringsPris;
 	}
 
-
+	// Skifter den aktive tab til den, brugeren har klikket på.
 	private void AktivTabSkift(string tab) => aktivTab = tab;
 
-
-
+	// Tilføjer en ydelse til ordren, hvis den ikke allerede er der.
 	private void TilføjYdelse(Ydelse ydelse)
 	{
+		// Tjekker, om den givne ydelse allerede findes i listen `valgteOrdreYdelser` ved at sammenligne ydelsens ID.
 		if (!valgteOrdreYdelser.Any(oy => oy.Ydelse.YdelseId == ydelse.YdelseId))
 		{
-			valgteOrdreYdelser.Add(new OrdreYdelse
+			valgteOrdreYdelser.Add(new OrdreYdelse // Hvis ydelsen ikke findes i listen, oprettes en ny instans af `OrdreYdelse` og tilføjes til listen.
 				{
-					Ydelse = ydelse,
-					AftaltPris = null,
-					Dato = DateTime.Now
+					Ydelse = ydelse, // Tildeler den valgte ydelse til `Ydelse`-feltet.
+					AftaltPris = null, // Initialiserer den aftalte pris som null, da det endnu ikke er fastsat.
+					Dato = DateTime.Now // Sætter datoen til det aktuelle tidspunkt, hvor ydelsen blev tilføjet.
 				});
 		}
 	}
 
+	// Fjerner en valgt ydelse fra ordren.
 	private void FjernYdelse(OrdreYdelse ordreydelse)
 	{
 		valgteOrdreYdelser.Remove(ordreydelse);
 	}
 
+	// Viser en bekræftelsesmodal, hvis alle ydelser har en scooter valgt.
 	private void VisBekræftelse()
 	{
-		// Valider, om alle ydelser har en scooter valgt
+		// Tjekker, om nogen af ydelserne i `valgteOrdreYdelser` ikke har en scooter tilknyttet (ScooterId er null).
 		if (valgteOrdreYdelser.Any(ydelse => ydelse.ScooterId == null))
 		{
+			// Hvis der findes ydelser uden en tilknyttet scooter, vises en fejlmeddelelse i konsollen.
 			Console.WriteLine("Alle ydelser skal have en tilknyttet scooter.");
-			return; // Forhindr, at modal vises
+			return; // Returnerer fra metoden uden at udføre yderligere handlinger, da betingelsen ikke er opfyldt.
 		}
 
-		visBekræftelsesModal = true;
+		visBekræftelsesModal = true; // Sætter `visBekræftelsesModal` til true for at vise en bekræftelsesmodal i brugergrænsefladen.
 	}
 
-
+	// Lukker bekræftelsesmodalen uden at oprette ordren.
 	private void LukBekræftelsesModal()
 	{
 		visBekræftelsesModal = false;
 	}
 
+	// Bekræfter oprettelsen ved at sende data til serveren.
 	private async Task BekræftOprettelse()
 	{
-		visBekræftelsesModal = false;
+		visBekræftelsesModal = false; // Skjuler bekræftelsesmodalen, da brugeren har valgt at fortsætte med oprettelsen.
 
+		// Kontrollerer, om der ikke er valgt en kunde (valgtKundeId er 0), eller om der hverken er valgt nogen ydelser eller udfyldt en lejeaftale.
 		if (valgtKundeId == 0 || (!valgteOrdreYdelser.Any() && lejeaftale == null))
 		{
+			// Logger en fejlmeddelelse i konsollen, som instruerer brugeren i at vælge en kunde og tilføje mindst én ydelse eller udfylde lejeaftalen.
 			Console.WriteLine("Vælg en kunde og tilføj mindst én ydelse eller udfyld lejeaftaledetaljer.");
-			return;
+			return; // Afslutter metoden, da kravene for oprettelse ikke er opfyldt.
 		}
 
-		// Tilføj kun lejeaftale, hvis der er en scooter valgt
+		// Hvis der er valgt en scooter (valgtLejeScooterId har en værdi), tildeles den valgte scooter-ID til lejeaftalen.
 		if (valgtLejeScooterId.HasValue)
 		{
-			lejeaftale.LejeScooterId = valgtLejeScooterId.Value;
+			lejeaftale.LejeScooterId = valgtLejeScooterId.Value; // Angiver scooter-ID'et i lejeaftalen.
 		}
 		else
 		{
-			lejeaftale = null; // Ingen lejeaftale
+			lejeaftale = null; // Hvis der ikke er valgt en scooter, sættes lejeaftalen til null, da den ikke er relevant.
 		}
 
 		var ordreDTO = new CreateOrdreDto
 			{
-				KundeId = valgtKundeId,
-				Dato = DateTime.Now,
-				TotalPris = TotalPris,
+				KundeId = valgtKundeId, // Tildeler det valgte kunde-ID til DTO'en for at knytte ordren til en kunde.
+				Dato = DateTime.Now, // Indstiller ordredatoen til det aktuelle tidspunkt.
+				TotalPris = TotalPris, // Angiver den samlede pris for ordren baseret på beregninger eller brugerinput.
 				OrdreYdelser = valgteOrdreYdelser.Select(oy => new CreateOrdreYdelseDto
 				{
-					YdelseId = oy.Ydelse.YdelseId,
-					AftaltPris = oy.AftaltPris,
-					Dato = DateTime.Now,
-					ScooterId = oy.ScooterId
-				}).ToList(),
-				LejeAftale = lejeaftale,
+					YdelseId = oy.Ydelse.YdelseId, // Overfører ydelsens unikke ID fra den valgte ydelse.
+					AftaltPris = oy.AftaltPris, // Indstiller den aftalte pris for ydelsen.
+					Dato = DateTime.Now, // Registrerer datoen for ydelsen som det aktuelle tidspunkt.
+					ScooterId = oy.ScooterId // Angiver ID'et for den tilknyttede scooter, hvis relevant.
+				}).ToList(), // Konverterer listen over valgte ydelser til en liste af DTO'er for inkludering i ordren.
+				LejeAftale = lejeaftale, // Tildeler en eventuel lejeaftale til ordren.
 				OrdreProdukter = valgteProdukter.Select(p => new CreateOrdreProduktDto
 				{
-					ProduktId = p.ProduktId,
-					KøbsAntal = p.KøbsAntal,
-					Pris = p.Pris ?? 0
-				}).ToList() // Tilføj produkterne
+					ProduktId = p.ProduktId, // Overfører produktets ID fra det valgte produkt.
+					KøbsAntal = p.KøbsAntal, // Indstiller antallet af købte enheder af produktet.
+					Pris = p.Pris ?? 0 // Tildeler prisen for produktet, eller 0 hvis prisen er null.
+				}).ToList() // Konverterer listen over valgte produkter til en liste af DTO'er for inkludering i ordren.
 			};
 
 		try
 		{
-			var response = await Http.PostAsJsonAsync("api/ordre", ordreDTO);
-			if (response.IsSuccessStatusCode)
+			var response = await Http.PostAsJsonAsync("api/ordre", ordreDTO); // Sender ordre-DTO'en som JSON til API-endpointet for at oprette ordren.
+			if (response.IsSuccessStatusCode) // Kontrollerer om API-svaret indikerer succes.
 			{
-				visSuccesBesked = true;
-				NulstilOrdreData(); // Nulstil data
+				visSuccesBesked = true; // Hvis ordren blev oprettet korrekt, vises en succesbesked.
+				NulstilOrdreData(); // Rydder de midlertidige data og forbereder applikationen til en ny ordre.
 			}
 			else
 			{
-				Console.WriteLine("Fejl ved oprettelse af ordre.");
+				Console.WriteLine("Fejl ved oprettelse af ordre."); // Logger en fejlbesked, hvis API-svaret indikerer fejl.
 			}
 		}
 		catch (Exception ex)
 		{
-			Console.WriteLine($"En undtagelse opstod: {ex.Message}");
+			Console.WriteLine($"En undtagelse opstod: {ex.Message}"); // Logger en undtagelse, hvis der opstod en fejl under API-kaldet.
 		}
 	}
 }
-

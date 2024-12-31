@@ -1,94 +1,94 @@
-﻿using ScooterLandProjectOpg.Server.Context;
-using ScooterLandProjectOpg.Server.Interfaces;
-using ScooterLandProjectOpg.Shared.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using ScooterLandProjectOpg.Server.Context; // Importerer databasekonteksten for applikationen.
+using ScooterLandProjectOpg.Server.Interfaces; // Importerer interface-definitioner for repository-metoder.
+using ScooterLandProjectOpg.Shared.Models; // Importerer datamodeller som LejeAftale og Ordre.
+using Microsoft.EntityFrameworkCore; // Importerer Entity Framework Core til databaseinteraktion.
 
-namespace ScooterLandProjectOpg.Server.Services
+namespace ScooterLandProjectOpg.Server.Services // Definerer navnerummet for tjenesten.
 {
-	public class LejeAftaleService : Repository<LejeAftale>, ILejeAftaleRepository
-	{
-		private readonly ScooterLandContext _context;
+    // Arver fra Repository<LejeAftale> og implementerer ILejeAftaleRepository.
+    public class LejeAftaleService : Repository<LejeAftale>, ILejeAftaleRepository 
+    {
+        // Felt til databasekonteksten.
+        private readonly ScooterLandContext _context; 
 
-		public LejeAftaleService(ScooterLandContext context) : base(context)
-		{
-			_context = context;
-		}
+        // Constructor der initialiserer konteksten og sender den videre til basisklassen.
+        public LejeAftaleService(ScooterLandContext context) : base(context) 
+        {
+            _context = context; // Initialiserer den private kontekstvariabel.
+        }
 
-		//Henter alt omkring lejeaftaler med kunder og deres scooter som de har lejet.
-		public async Task<IEnumerable<LejeAftale>> GetAllWithKundeAndScootersAsync()
-		{
-			return await _context.Set<LejeAftale>()
-				.Include(la => la.Kunde)
-				.Include(la => la.LejeScooter)
-				.ToListAsync();
-		}
+        // Henter alle lejeaftaler med tilknyttede kunder og scootere.
+        public async Task<IEnumerable<LejeAftale>> GetAllWithKundeAndScootersAsync()
+        {
+            return await _context.Set<LejeAftale>() // Henter lejeaftaler fra databasen.
+                .Include(la => la.Kunde) // Inkluderer relaterede kunder.
+                .Include(la => la.LejeScooter) // Inkluderer relaterede scootere.
+                .ToListAsync(); // Konverterer resultatet til en liste.
+        }
 
-		//Henter alt omkring en lejeaftale med en kunde og hans scooter som han har lejet.
-		public async Task<LejeAftale> GetLejeAftaleWithDetailsAsync(int id)
-		{
-			return await _context.Set<LejeAftale>()
-				.Include(la => la.Kunde)
-				.Include(la => la.LejeScooter)
-				.FirstOrDefaultAsync(la => la.LejeId == id);
-		}
-		public async Task<IEnumerable<LejeAftale>> SearchLejeAftalerAsync(string query)
-		{
-			return await _context.Set<LejeAftale>()
-				.Include(la => la.Kunde)
-				.Where(la => la.Kunde.Navn.Contains(query) ||
-							 la.KundeId.ToString().Contains(query) ||
-							 la.LejeId.ToString().Contains(query))
-				.ToListAsync();
-		}
-		
-		public async Task<Ordre> UpdateSelvrisikoAsync(int lejeId, double selvrisiko)
-		{
-			var lejeAftale = await _context.Set<LejeAftale>()
-				.Include(la => la.Ordre)
-				.FirstOrDefaultAsync(la => la.LejeId == lejeId);
+        // Henter en specifik lejeaftale med detaljer som kunde og scooter.
+        public async Task<LejeAftale> GetLejeAftaleWithDetailsAsync(int id)
+        {
+            return await _context.Set<LejeAftale>() // Henter lejeaftaler fra databasen.
+                .Include(la => la.Kunde) // Inkluderer relateret kunde.
+                .Include(la => la.LejeScooter) // Inkluderer relaterede scootere.
+                .FirstOrDefaultAsync(la => la.LejeId == id); // Finder den første lejeaftale med det givne id.
+        }
 
-			if (lejeAftale == null)
-				throw new KeyNotFoundException($"Lejeaftale med ID {lejeId} blev ikke fundet.");
+        // Søger efter lejeaftaler baseret på forespørgselsstrengen.
+        public async Task<IEnumerable<LejeAftale>> SearchLejeAftalerAsync(string query)
+        {
+            return await _context.Set<LejeAftale>() // Henter lejeaftaler fra databasen.
+                .Include(la => la.Kunde) // Inkluderer relateret kunde.
+                .Where(la => la.Kunde.Navn.Contains(query) || // Filtrerer på kundens navn.
+                             la.KundeId.ToString().Contains(query) || // Filtrerer på KundeId.
+                             la.LejeId.ToString().Contains(query)) // Filtrerer på LejeId.
+                .ToListAsync(); // Konverterer resultatet til en liste.
+        }
 
-			lejeAftale.Selvrisiko = selvrisiko;
+        // Opdaterer selvrisikoen for en given lejeaftale.
+        public async Task<Ordre> UpdateSelvrisikoAsync(int lejeId, double selvrisiko)
+        {
+            var lejeAftale = await _context.Set<LejeAftale>() // Henter lejeaftalen fra databasen.
+                .Include(la => la.Ordre) // Inkluderer relateret ordre.
+                .FirstOrDefaultAsync(la => la.LejeId == lejeId); // Finder lejeaftalen med det givne id.
 
-			// Gem ændringer
-			_context.Update(lejeAftale);
-			await _context.SaveChangesAsync();
+            if (lejeAftale == null) // Hvis lejeaftalen ikke findes, kastes en fejl.
+                throw new KeyNotFoundException($"Lejeaftale med ID {lejeId} blev ikke fundet.");
 
-			// Returnér opdateret ordre
-			return await _context.Set<Ordre>()
-				.Include(o => o.LejeAftale)
-				.Include(o => o.OrdreProdukter)
-				.FirstOrDefaultAsync(o => o.OrdreId == lejeAftale.Ordre.OrdreId);
-		}
+            lejeAftale.Selvrisiko = selvrisiko; // Opdaterer selvrisikoen.
 
-		public async Task<LejeAftale?> UpdateKortKilometerAsync(int lejeId, int? kortKilometer)
-		{
-			// Hent LejeAftale med relaterede data, hvis nødvendigt
-			var lejeAftale = await _context.LejeAftaler
-				.Include(la => la.Ordre) // Indlæs den relaterede ordre
-				.FirstOrDefaultAsync(la => la.LejeId == lejeId);
+            _context.Update(lejeAftale); // Opdaterer lejeaftalen i databasen.
+            await _context.SaveChangesAsync(); // Gemmer ændringerne.
 
-			if (lejeAftale == null)
-			{
-				throw new KeyNotFoundException($"Lejeaftale med ID {lejeId} blev ikke fundet.");
-			}
+            return await _context.Set<Ordre>() // Henter den relaterede ordre.
+                .Include(o => o.LejeAftale) // Inkluderer lejeaftalen.
+                .Include(o => o.OrdreProdukter) // Inkluderer ordreprodukter.
+                .FirstOrDefaultAsync(o => o.OrdreId == lejeAftale.Ordre.OrdreId); // Returnerer ordren baseret på id.
+        }
 
-			// Opdater KortKilometer
-			lejeAftale.KortKilometer = kortKilometer;
+        // Opdaterer antallet af kørte kilometer for en given lejeaftale.
+        public async Task<LejeAftale?> UpdateKortKilometerAsync(int lejeId, int? kortKilometer)
+        {
+            var lejeAftale = await _context.LejeAftaler // Henter lejeaftaler fra databasen.
+                .Include(la => la.Ordre) // Inkluderer relateret ordre.
+                .FirstOrDefaultAsync(la => la.LejeId == lejeId); // Finder lejeaftalen med det givne id.
 
-			// Hvis der er en relateret ordre, opdater dens TotalPris
-			if (lejeAftale.Ordre != null)
-			{
-				lejeAftale.Ordre.TotalPris = lejeAftale.TotalPris; // Genberegn totalprisen
-			}
+            if (lejeAftale == null) // Hvis lejeaftalen ikke findes, kastes en fejl.
+            {
+                throw new KeyNotFoundException($"Lejeaftale med ID {lejeId} blev ikke fundet.");
+            }
 
-			// Gem ændringer
-			_context.LejeAftaler.Update(lejeAftale);
-			await _context.SaveChangesAsync();
-			return lejeAftale;
-		}
-	}
+            lejeAftale.KortKilometer = kortKilometer; // Opdaterer antallet af kørte kilometer.
+
+            if (lejeAftale.Ordre != null) // Hvis der er en relateret ordre, opdateres dens totalpris.
+            {
+                lejeAftale.Ordre.TotalPris = lejeAftale.TotalPris; // Genberegner totalprisen.
+            }
+
+            _context.LejeAftaler.Update(lejeAftale); // Opdaterer lejeaftalen i databasen.
+            await _context.SaveChangesAsync(); // Gemmer ændringerne.
+            return lejeAftale; // Returnerer den opdaterede lejeaftale.
+        }
+    }
 }
-

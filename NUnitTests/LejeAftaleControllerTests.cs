@@ -1,92 +1,90 @@
-﻿using NUnit.Framework;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ScooterLandProjectOpg.Server.Controllers;
-using ScooterLandProjectOpg.Server.Context;
-using ScooterLandProjectOpg.Server.Services; // Brug det eksisterende repository
-using ScooterLandProjectOpg.Shared.Models;
-using System.Linq;
-using System.Threading.Tasks;
-using ScooterLandProjectOpg.Server.Interfaces;
+﻿using NUnit.Framework; // Importerer NUnit til testformål.
+using Microsoft.AspNetCore.Mvc; // Bruges til at arbejde med ActionResult og controllers.
+using Microsoft.EntityFrameworkCore; // Bruges til at konfigurere en in-memory database.
+using ScooterLandProjectOpg.Server.Controllers; // Importerer den controller, der skal testes.
+using ScooterLandProjectOpg.Server.Context; // Importerer konteksten for databasen.
+using ScooterLandProjectOpg.Server.Services; // Importerer servicen til lejeaftaler.
+using ScooterLandProjectOpg.Shared.Models; // Importerer modellerne til brug i tests.
+using System.Linq; // Bruges til LINQ-forespørgsler.
+using System.Threading.Tasks; // Understøtter asynkron programmering.
+using ScooterLandProjectOpg.Server.Interfaces; // Importerer grænseflader til repository-mønstre.
 
-namespace ScooterLandProjectOpgNUnitTests
+namespace ScooterLandProjectOpgNUnitTests // Navnerummet for tests.
 {
-    [TestFixture]
-    public class LejeAftaleControllerTests
+    [TestFixture] // Marker klassen som en NUnit testklasse.
+    public class LejeAftaleControllerTests // Testklasse for LejeAftaleController.
     {
-        private LejeAftaleController _controller;
-        private ScooterLandContext _context;
+        private LejeAftaleController _controller; // Controlleren der skal testes.
+        private ScooterLandContext _context; // Databasekonteksten.
 
-        [SetUp]
+        [SetUp] // Kører før hver test.
         public void Setup()
         {
-            // Opretter en in-memory database
+            // Opretter en in-memory database for test.
             var options = new DbContextOptionsBuilder<ScooterLandContext>()
-                .UseInMemoryDatabase("TestDatabase") // Brug en in-memory database
+                .UseInMemoryDatabase("TestDatabase") // Bruger en in-memory database.
                 .Options;
 
-            _context = new ScooterLandContext(options);
+            _context = new ScooterLandContext(options); // Initialiserer databasekonteksten.
 
-            // Opretter LejeAftaleRepository med den in-memory database
-            var repository = new LejeAftaleService(_context); // Bruger det eksisterende repository
-            _controller = new LejeAftaleController(repository); // Bruger controlleren som den er
+            // Opretter LejeAftaleService med den in-memory database.
+            var repository = new LejeAftaleService(_context); // Initialiserer servicen.
+            _controller = new LejeAftaleController(repository); // Initialiserer controlleren.
         }
 
-        [TearDown]
+        [TearDown] // Kører efter hver test.
         public void TearDown()
         {
-            // Rydder databasen mellem testene
+            // Rydder databasen mellem tests.
             _context.LejeAftaler.RemoveRange(_context.LejeAftaler);
             _context.SaveChanges();
         }
 
-        [Test]
+        [Test] // Marker denne metode som en test.
         public async Task AddLejeAftale_ShouldReturnCreatedResult()
         {
-            // Arrange
+            // Arrange:
+            // Forbereder en lejeaftale til testen.
             var lejeAftale = new LejeAftale
             {
-                LejeId = 0, // Brug en unik ID
-                StartDato = DateTime.Now, // Sørg for at StartDato er sat
-                SlutDato = DateTime.Now.AddDays(7), // Sørg for at SlutDato er sat
-                KundeId = 1, // Sørg for at KundeId er sat
-                DagligLeje = 100, // Sørg for at DagligLeje er sat
-                ForsikringsPris = 50, // Sørg for at ForsikringsPris er sat
-                KilometerPris = 0.53, // Sørg for at KilometerPris er sat
-                Selvrisiko = 1000, // Sørg for at Selvrisiko er sat
-                KortKilometer = 100, // Sørg for at KortKilometer er sat (valgfrit)
+                LejeId = 0, // Sætter en unik ID.
+                StartDato = DateTime.Now, // Sætter startdatoen.
+                SlutDato = DateTime.Now.AddDays(7), // Sætter slutdatoen.
+                KundeId = 1, // Sætter kunde-ID.
+                DagligLeje = 100, // Sætter daglig leje.
+                ForsikringsPris = 50, // Sætter forsikringspris.
+                KilometerPris = 0.53, // Sætter kilometerpris.
+                Selvrisiko = 1000, // Sætter selvrisiko.
+                KortKilometer = 100 // Sætter kort kilometer.
             };
 
-            // Act
-            ActionResult<LejeAftale> result = await _controller.Add(lejeAftale); // Returnerer ActionResult<LejeAftale>
+            // Act:
+            // Kalder controllerens metode til at tilføje lejeaftalen.
+            ActionResult<LejeAftale> result = await _controller.Add(lejeAftale);
 
-            // Assert
-            var createdResult = result.Result as CreatedAtActionResult;
-            Assert.IsNotNull(createdResult); // Resultatet skal være ikke-null
-            Assert.AreEqual(201, createdResult?.StatusCode); // Statuskoden skal være 201 (Created)
+            // Assert:
+            // Verificerer resultatet.
+            var createdResult = result.Result as CreatedAtActionResult; // Henter det returnerede resultat.
+            Assert.IsNotNull(createdResult); // Tjekker at resultatet ikke er null.
+            Assert.AreEqual(201, createdResult?.StatusCode); // Tjekker at statuskoden er 201 (Created).
 
-            var createdLejeAftale = createdResult?.Value as LejeAftale;
-            Assert.IsNotNull(createdLejeAftale); // Tjek at LejeAftale ikke er null
-            Assert.AreEqual(lejeAftale.LejeId, createdLejeAftale?.LejeId); // Verificer at LejeId er korrekt
+            var createdLejeAftale = createdResult?.Value as LejeAftale; // Henter den oprettede lejeaftale.
+            Assert.IsNotNull(createdLejeAftale); // Tjekker at den oprettede lejeaftale ikke er null.
+            Assert.AreEqual(lejeAftale.LejeId, createdLejeAftale?.LejeId); // Tjekker at LejeId matcher.
         }
 
-       
-
-        [Test]
+        [Test] // Marker denne metode som en test.
         public async Task GetLejeAftaleById_ShouldReturnNotFound_WhenIdDoesNotExist()
         {
-            // Act
-            ActionResult<LejeAftale> result = await _controller.GetById(999); // Kald med en ID, der ikke findes
+            // Act:
+            // Kalder controllerens metode med en ikke-eksisterende ID.
+            ActionResult<LejeAftale> result = await _controller.GetById(999);
 
-            // Assert
-            var notFoundResult = result.Result as NotFoundObjectResult;
-            Assert.IsNotNull(notFoundResult); // Det skal ikke være null
-            Assert.AreEqual(404, notFoundResult?.StatusCode); // Statuskoden skal være 404 (Not Found)
+            // Assert:
+            // Verificerer at resultatet er NotFound.
+            var notFoundResult = result.Result as NotFoundObjectResult; // Henter det returnerede resultat.
+            Assert.IsNotNull(notFoundResult); // Tjekker at resultatet ikke er null.
+            Assert.AreEqual(404, notFoundResult?.StatusCode); // Tjekker at statuskoden er 404 (Not Found).
         }
     }
-
-
-
-
-
 }

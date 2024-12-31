@@ -1,71 +1,71 @@
-using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.EntityFrameworkCore;
-using ScooterLandProjectOpg.Server.Context;
-using ScooterLandProjectOpg.Server.Interfaces;
-using ScooterLandProjectOpg.Server.PDFServices;
-using ScooterLandProjectOpg.Server.Services;
+using Microsoft.AspNetCore.ResponseCompression; // Importerer namespaces til komprimering af HTTP-svar.
+using Microsoft.EntityFrameworkCore; // Importerer Entity Framework Core til databaseoperationer.
+using ScooterLandProjectOpg.Server.Context; // Importerer databasekonteksten for projektet.
+using ScooterLandProjectOpg.Server.Interfaces; // Importerer interfaces for dependency injection.
+using ScooterLandProjectOpg.Server.PDFServices; // Importerer PDF-relaterede tjenester.
+using ScooterLandProjectOpg.Server.Services; // Importerer implementeringer af repositories og services.
 
-var builder = WebApplication.CreateBuilder(args);
+// Dependency Injection (DI) er en programmeringsteknik, der gør en klasse uafhængig af sine afhængigheder.
+// Det betyder, at en klasse ikke selv opretter eller styrer sine nødvendige objekter (afhængigheder), men i stedet får dem leveret udefra, typisk via en container.
+// Dette gør koden mere fleksibel, testbar og lettere at vedligeholde.
+// En "afhængighed" kan f.eks. være en tjeneste eller et objekt, som klassen har brug for at fungere.
 
-// Add services to the container.
 
+var builder = WebApplication.CreateBuilder(args); // Opretter en ny webapplikation med de leverede argumenter.
+
+// Tilføjer controller- og view-tjenester til DI-containeren og konfigurerer JSON-indstillinger.
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
 {
-	options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; // Undgår reference loops i JSON-serialisering.
 });
 
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(); // Tilføjer Razor Pages-tjenester til DI-containeren.
 
-//Her tilføjes der scopes for alle Repositories:
-builder.Services.AddScoped<IKundeRepository, KundeService>();
-builder.Services.AddScoped<IBetalingRepository, BetalingsService>();
-builder.Services.AddScoped<IKundeScooterRepository, KundeScooterService>();
-builder.Services.AddScoped<ILejeAftaleRepository, LejeAftaleService>();
-builder.Services.AddScoped<ILejeScooterRepository, LejeScooterService>();
-builder.Services.AddScoped<IMekanikerRepository, MekanikerService>();
-builder.Services.AddScoped<IOrdreRepository, OrdreService>();
-builder.Services.AddScoped<IOrdreYdelseRepository, OrdreYdelseService>();
-builder.Services.AddScoped<IYdelseRepository, YdelseService>();
-builder.Services.AddScoped<IProduktRepository, ProduktService>();
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+// Tilføjer scoped services for alle repositories, som bruges til DI.
+builder.Services.AddScoped<IKundeRepository, KundeService>(); // Kunde repository.
+builder.Services.AddScoped<IBetalingRepository, BetalingsService>(); // Betaling repository.
+builder.Services.AddScoped<IKundeScooterRepository, KundeScooterService>(); // KundeScooter repository.
+builder.Services.AddScoped<ILejeAftaleRepository, LejeAftaleService>(); // LejeAftale repository.
+builder.Services.AddScoped<ILejeScooterRepository, LejeScooterService>(); // LejeScooter repository.
+builder.Services.AddScoped<IMekanikerRepository, MekanikerService>(); // Mekaniker repository.
+builder.Services.AddScoped<IOrdreRepository, OrdreService>(); // Ordre repository.
+builder.Services.AddScoped<IOrdreYdelseRepository, OrdreYdelseService>(); // OrdreYdelse repository.
+builder.Services.AddScoped<IYdelseRepository, YdelseService>(); // Ydelse repository.
+builder.Services.AddScoped<IProduktRepository, ProduktService>(); // Produkt repository.
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>)); // Generisk repository for alle modeller.
 
-//Denne tilføjes fordi vi har en seperat fil som generere faktura. 
+// Tilføjer FakturaService som en transient service, da det er en separat tjeneste til generering af fakturaer.
 builder.Services.AddTransient<FakturaService>();
 
-
-
-
-// Hent connection string fra appsettings.json
+// Konfigurerer databasen ved hjælp af en connection string fra appsettings.json.
 builder.Services.AddDbContext<ScooterLandContext>(options =>
 {
-	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")); // Bruger connection string til SQL Server.
 });
 
-var app = builder.Build();
+var app = builder.Build(); // Bygger webapplikationen.
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Konfigurerer middleware og HTTP request pipeline.
+if (app.Environment.IsDevelopment()) // Tjekker, om miljøet er "Development".
 {
-	app.UseWebAssemblyDebugging();
+    app.UseWebAssemblyDebugging(); // Aktiverer debugging for WebAssembly i udviklingsmiljøet.
 }
 else
 {
-	app.UseExceptionHandler("/Error");
-	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-	app.UseHsts();
+    app.UseExceptionHandler("/Error"); // Bruger en fejlside i produktionsmiljøet.
+    app.UseHsts(); // Aktiverer HTTP Strict Transport Security (HSTS) med en standardindstilling på 30 dage.
 }
 
-app.UseHttpsRedirection();
+app.UseHttpsRedirection(); // Omdirigerer alle HTTP-anmodninger til HTTPS.
 
-app.UseBlazorFrameworkFiles();
-app.UseStaticFiles();
+app.UseBlazorFrameworkFiles(); // Aktiverer Blazor-framework-filer til klientdelen af applikationen.
+app.UseStaticFiles(); // Gør statiske filer som CSS og JS tilgængelige.
 
-app.UseRouting();
+app.UseRouting(); // Aktiverer routing-middleware til behandling af URL-forespørgsler.
 
+app.MapRazorPages(); // Tilknytter Razor Pages til request pipeline.
+app.MapControllers(); // Tilknytter API-controllere til request pipeline.
 
-app.MapRazorPages();
-app.MapControllers();
+app.MapFallbackToFile("index.html"); // Fallback, der indlæser index.html for ikke-matchede anmodninger.
 
-app.MapFallbackToFile("index.html");
-
-app.Run();
+app.Run(); // Starter applikationen og begynder at lytte efter anmodninger.

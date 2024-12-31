@@ -1,109 +1,118 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ScooterLandProjectOpg.Server.Context;
-using ScooterLandProjectOpg.Server.Interfaces;
-using ScooterLandProjectOpg.Shared.Models;
+﻿using Microsoft.EntityFrameworkCore; // Importerer Entity Framework Core til databaseinteraktion.
+using ScooterLandProjectOpg.Server.Context; // Importerer konteksten til at arbejde med databasen.
+using ScooterLandProjectOpg.Server.Interfaces; // Importerer interface-definitioner for repository-metoder.
+using ScooterLandProjectOpg.Shared.Models; // Importerer datamodeller for Kunde.
 
-namespace ScooterLandProjectOpg.Server.Services
+namespace ScooterLandProjectOpg.Server.Services // Definerer navnerummet for tjenesten.
 {
-	public class KundeService : Repository<Kunde>, IKundeRepository
-	{
-		private readonly ScooterLandContext _context;
+    // Arver fra Repository<Kunde> og implementerer IKundeRepository.
+    public class KundeService : Repository<Kunde>, IKundeRepository 
+    {
+        // Felt til databasekonteksten.
+        private readonly ScooterLandContext _context; 
 
-		public KundeService(ScooterLandContext context) : base(context)
-		{
-			_context = context;
-		}
+        // Constructor der initialiserer konteksten og sender den videre til basisklassen.
+        public KundeService(ScooterLandContext context) : base(context) 
+        {
+            _context = context; // Initialiserer den private kontekstvariabel.
+        }
 
-		//Henter alle kunder med en ordre.
-		public async Task<IEnumerable<Kunde>> GetAllWithOrdersAsync()
-		{
-			return await _context.Kunder
-				.Include(k => k.Ordre) 
-				.ToListAsync();
-		}
+        // Henter alle kunder med tilknyttede ordrer.
+        public async Task<IEnumerable<Kunde>> GetAllWithOrdersAsync()
+        {
+            return await _context.Kunder // Henter kunder fra databasen.
+                .Include(k => k.Ordre) // Inkluderer relaterede ordrer.
+                .ToListAsync(); // Konverterer resultatet til en liste.
+        }
 
-		//Henter en specifikt kunde med de scootere han har.
-		public async Task<Kunde> GetKundeWithScootersAsync(int id)
-		{
-			return await _context.Kunder
-				.Include(k => k.KundeScooter)
-				.FirstOrDefaultAsync(k => k.KundeId == id);
-		}
-		
-		// Søg efter kunde via navn.
-		public async Task<IEnumerable<Kunde>> SearchByNameAsync(string name)
-		{
-			return await _context.Kunder
-				.Where(k => EF.Functions.Like(k.Navn, $"%{name}%")) 
-				.ToListAsync();
-		}
+        // Henter en specifik kunde med tilknyttede scootere.
+        public async Task<Kunde> GetKundeWithScootersAsync(int id)
+        {
+            return await _context.Kunder // Henter kunder fra databasen.
+                .Include(k => k.KundeScooter) // Inkluderer relaterede KundeScooter.
+                .FirstOrDefaultAsync(k => k.KundeId == id); // Finder den første kunde med det givne id.
+        }
 
-		public async Task DeleteAsync(int id)
-		{
-			var kunde = await _context.Kunder.FindAsync(id);
-			if (kunde == null)
-			{
-				throw new Exception($"Kunde med ID {id} blev ikke fundet.");
-			}
+        // Søger efter kunder baseret på navn.
+        public async Task<IEnumerable<Kunde>> SearchByNameAsync(string name)
+        {
+            return await _context.Kunder // Henter kunder fra databasen.
+                .Where(k => EF.Functions.Like(k.Navn, $"%{name}%")) // Filtrerer på navnet ved hjælp af EF's Like-funktion.
+                .ToListAsync(); // Konverterer resultatet til en liste.
+        }
 
-			_context.Kunder.Remove(kunde); // Cascade delete håndterer relaterede data
-			await _context.SaveChangesAsync();
-		}
-		public new async Task UpdateAsync(Kunde entity)
-		{
-			await base.UpdateAsync(entity); // Brug af base klassen' UpdateAsync
-		}
+        // Sletter en kunde baseret på id.
+        public async Task DeleteAsync(int id)
+        {
+            var kunde = await _context.Kunder.FindAsync(id); // Finder kunden baseret på id.
+            if (kunde == null) // Hvis kunden ikke findes, kastes en fejl.
+            {
+                throw new Exception($"Kunde med ID {id} blev ikke fundet.");
+            }
 
-		public new async Task<Kunde> AddAsync(Kunde entity)
-		{
-			return await base.AddAsync(entity); // Brug af base klassen' AddAsync
-		}
+            _context.Kunder.Remove(kunde); // Fjerner kunden fra databasen.
+            await _context.SaveChangesAsync(); // Gemmer ændringerne.
+        }
 
+        // Opdaterer en kunde.
+        public new async Task UpdateAsync(Kunde entity)
+        {
+            await base.UpdateAsync(entity); // Kalder basisklassens UpdateAsync-metode.
+        }
+
+        // Tilføjer en ny kunde.
+        public new async Task<Kunde> AddAsync(Kunde entity)
+        {
+            return await base.AddAsync(entity); // Kalder basisklassens AddAsync-metode.
+        }
+
+        // Henter ordrer for en specifik kunde baseret på KundeId.
         public async Task<IEnumerable<Ordre>> GetOrdrerForKundeAsync(int kundeId)
         {
-            return await _context.Ordrer
-                .Where(o => o.KundeId == kundeId)
-                 .Include(o => o.Kunde)
-                .Include(o => o.OrdreYdelse)
-                    .ThenInclude(oy => oy.Ydelse)
-                .ToListAsync();
+            return await _context.Ordrer // Henter ordrer fra databasen.
+                .Where(o => o.KundeId == kundeId) // Filtrerer på KundeId.
+                .Include(o => o.Kunde) // Inkluderer relateret Kunde-data.
+                .Include(o => o.OrdreYdelse) // Inkluderer OrdreYdelse.
+                    .ThenInclude(oy => oy.Ydelse) // Inkluderer Ydelse via OrdreYdelse.
+                .ToListAsync(); // Konverterer resultatet til en liste.
         }
-		
-		public async Task<Kunde> GetKundeWithManyDetailsByIdAsync(int kundeId)
-		{
-			return await _context.Kunder
-				.Include(k => k.Ordre)
-					.ThenInclude(o => o.OrdreYdelse)
-						.ThenInclude(oy => oy.Ydelse)
-				.Include(k => k.Ordre)
-					.ThenInclude(o => o.OrdreProdukter)
-						.ThenInclude(op => op.Produkt)
-				.Include(k => k.Ordre)
-					.ThenInclude(o => o.LejeAftale) // Relater til lejeaftale
-						.ThenInclude(la => la.LejeScooter) // Og tilhørende scootere
-				.Include(k => k.KundeScooter) // Hvis nødvendigt
-				.FirstOrDefaultAsync(k => k.KundeId == kundeId);
-		}
 
-		public async Task<IEnumerable<Kunde>> SearchKunderAsync(string søgeTekst)
-		{
-			if (string.IsNullOrWhiteSpace(søgeTekst))
-				return new List<Kunde>();
+        // Henter en kunde med mange detaljer baseret på KundeId.
+        public async Task<Kunde> GetKundeWithManyDetailsByIdAsync(int kundeId)
+        {
+            return await _context.Kunder // Henter kunder fra databasen.
+                .Include(k => k.Ordre) // Inkluderer ordrer.
+                    .ThenInclude(o => o.OrdreYdelse) // Inkluderer OrdreYdelse.
+                        .ThenInclude(oy => oy.Ydelse) // Inkluderer Ydelse via OrdreYdelse.
+                .Include(k => k.Ordre) // Inkluderer ordrer.
+                    .ThenInclude(o => o.OrdreProdukter) // Inkluderer OrdreProdukter.
+                        .ThenInclude(op => op.Produkt) // Inkluderer Produkter via OrdreProdukter.
+                .Include(k => k.Ordre) // Inkluderer ordrer.
+                    .ThenInclude(o => o.LejeAftale) // Inkluderer LejeAftale.
+                        .ThenInclude(la => la.LejeScooter) // Inkluderer scootere via LejeAftale.
+                .Include(k => k.KundeScooter) // Inkluderer KundeScooter.
+                .FirstOrDefaultAsync(k => k.KundeId == kundeId); // Finder den første kunde med det givne id.
+        }
 
-			var søgning = søgeTekst.Trim().ToLower();
+        // Søger efter kunder baseret på tekst, der kan være id, telefonnummer eller navn.
+        public async Task<IEnumerable<Kunde>> SearchKunderAsync(string søgeTekst)
+        {
+            if (string.IsNullOrWhiteSpace(søgeTekst)) // Tjekker, om søgeteksten er tom eller kun består af mellemrum.
+                return new List<Kunde>(); // Returnerer en tom liste, hvis søgeteksten er tom.
 
-			// Check om søgeteksten er numerisk
-			bool isNumeric = int.TryParse(søgning, out int numericValue);
+            var søgning = søgeTekst.Trim().ToLower(); // Trimmer og konverterer søgeteksten til små bogstaver.
 
-			// Filtrér efter ID, telefonnummer eller navn
-			var kunder = await _context.Kunder
-				.Where(k =>
-					(isNumeric && (k.KundeId == numericValue ||
-								   (k.Telefonnummer.HasValue && k.Telefonnummer.Value == numericValue))) ||
-					(!isNumeric && k.Navn != null && k.Navn.ToLower().Contains(søgning)))
-				.ToListAsync();
+            bool isNumeric = int.TryParse(søgning, out int numericValue); // Tjekker, om søgeteksten er numerisk.
 
-			return kunder;
-		}
-	}
+            // Filtrerer kunder baseret på id, telefonnummer eller navn.
+            var kunder = await _context.Kunder
+                .Where(k =>
+                    (isNumeric && (k.KundeId == numericValue ||
+                                   (k.Telefonnummer.HasValue && k.Telefonnummer.Value == numericValue))) ||
+                    (!isNumeric && k.Navn != null && k.Navn.ToLower().Contains(søgning)))
+                .ToListAsync();
+
+            return kunder; // Returnerer den filtrerede liste af kunder.
+        }
+    }
 }

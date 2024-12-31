@@ -1,46 +1,52 @@
-﻿using ScooterLandProjectOpg.Server.Context;
-using ScooterLandProjectOpg.Server.Interfaces;
-using ScooterLandProjectOpg.Shared.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using ScooterLandProjectOpg.Server.Context; // Importerer konteksten til at arbejde med databasen.
+using ScooterLandProjectOpg.Server.Interfaces; // Importerer interface-definitioner for repository-metoder.
+using ScooterLandProjectOpg.Shared.Models; // Importerer datamodeller for KundeScooter.
+using Microsoft.EntityFrameworkCore; // Importerer EF Core til databaseinteraktion.
 
-namespace ScooterLandProjectOpg.Server.Services
+namespace ScooterLandProjectOpg.Server.Services // Definerer navnerummet for tjenesten.
 {
-	public class KundeScooterService : Repository<KundeScooter>, IKundeScooterRepository
-	{
-		private readonly ScooterLandContext _context;
+    // Arver fra Repository<KundeScooter> og implementerer IKundeScooterRepository.
+    public class KundeScooterService : Repository<KundeScooter>, IKundeScooterRepository 
+    {
+        // Felt til databasekonteksten.
+        private readonly ScooterLandContext _context; 
 
-		public KundeScooterService(ScooterLandContext context) : base(context)
-		{
-			_context = context;
-		}
+        // Constructor der initialiserer konteksten og sender den videre til basisklassen.
+        public KundeScooterService(ScooterLandContext context) : base(context) 
+        {
+            _context = context; // Initialiserer den private kontekstvariabel.
+        }
 
-		//Henter alle kundescooter som er relateret til en kunde.
-		public async Task<IEnumerable<KundeScooter>> GetScootersWithKundeAsync()
-		{
-			return await _context.Set<KundeScooter>()
-				.Include(ks => ks.Kunde) 
-				.ToListAsync();
-		}
-        // Denne metode er designet til at hente en specifik scooter baseret på dens ScooterId.
+        // Henter alle KundeScooter-objekter med relateret Kunde-data.
+        public async Task<IEnumerable<KundeScooter>> GetScootersWithKundeAsync()
+        {
+            return await _context.Set<KundeScooter>() // Henter KundeScooter fra databasen.
+                .Include(ks => ks.Kunde) // Inkluderer relateret Kunde-data.
+                .ToListAsync(); // Konverterer resultatet til en liste.
+        }
+
+        // Tilføjer en ny KundeScooter til databasen og returnerer det oprettede objekt.
         public async Task<KundeScooter> AddScooterAsync(KundeScooter scooter)
         {
-            _context.KunderScootere.Add(scooter); 
-            await _context.SaveChangesAsync(); 
-            return scooter; 
+            _context.KunderScootere.Add(scooter); // Tilføjer scooteren til konteksten.
+            await _context.SaveChangesAsync(); // Gemmer ændringerne i databasen.
+            return scooter; // Returnerer det oprettede objekt.
         }
-        // Denne metode henter alle scootere relateret til en bestemt kunde baseret på KundeId
+
+        // Henter alle scootere relateret til en bestemt kunde baseret på KundeId.
         public async Task<List<KundeScooter>> GetScootersByKundeIdAsync(int kundeId)
         {
-            return await _context.KunderScootere
-                .Where(ks => ks.KundeId == kundeId)
-                .ToListAsync();
+            return await _context.KunderScootere // Henter KundeScooter fra databasen.
+                .Where(ks => ks.KundeId == kundeId) // Filtrerer på KundeId.
+                .ToListAsync(); // Konverterer resultatet til en liste.
         }
+
+        // Henter en specifik scooter og dens relaterede Kunde baseret på ScooterId.
         public async Task<KundeScooter> GetScooterWithKundeByIdAsync(int id)
         {
-            // Implementering af den manglende metode
-            return await _context.KunderScootere
-                .Include(ks => ks.Kunde) // Hent relateret Kunde-data
-                .FirstOrDefaultAsync(ks => ks.ScooterId == id); // Find scooter med det givne id
+            return await _context.KunderScootere // Henter KundeScooter fra databasen.
+                .Include(ks => ks.Kunde) // Inkluderer relateret Kunde-data.
+                .FirstOrDefaultAsync(ks => ks.ScooterId == id); // Finder den første scooter med det givne id.
         }
     }
 }

@@ -1,188 +1,233 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ScooterLandProjectOpg.Client;
-using ScooterLandProjectOpg.Server.Context;
-using ScooterLandProjectOpg.Server.Interfaces;
-using ScooterLandProjectOpg.Shared.DTO;
-using ScooterLandProjectOpg.Shared.Enum;
-using ScooterLandProjectOpg.Shared.Models;
+﻿using Microsoft.AspNetCore.Http; // Gør HTTP-relaterede klasser og StatusCodes tilgængelige.
+using Microsoft.AspNetCore.Mvc; // Giver adgang til MVC-funktionalitet, som ControllerBase, ActionResult, osv.
+using Microsoft.EntityFrameworkCore; // Muliggør brug af EF Core-funktioner, fx til databaseopslag.
+using ScooterLandProjectOpg.Client; // Inkluderer klient-relateret kode, hvis der er behov for at referere til klient-side aspekter.
+using ScooterLandProjectOpg.Server.Context; // Giver adgang til ScooterLandContext, der repræsenterer databasen.
+using ScooterLandProjectOpg.Server.Interfaces; // Importerer interfacet IOrdreRepository, som definerer datatilgang for ordrer.
+using ScooterLandProjectOpg.Shared.DTO; // Importerer data transfer objekter, fx CreateOrdreDto, der bruges til at oprette ordrer.
+using ScooterLandProjectOpg.Shared.Enum; // Giver adgang til enum-typer, eksempelvis OrdreStatus.
+using ScooterLandProjectOpg.Shared.Models; // Giver adgang til model-klasser som Ordre, Betaling, LejeAftale osv.
 
-namespace ScooterLandProjectOpg.Server.Controllers
+namespace ScooterLandProjectOpg.Server.Controllers // Angiver, at denne controller hører til i ScooterLandProjectOpg.Server.Controllers-namespace.
+
 {
-	[Route("api/[controller]")]
-	[ApiController]
-	public class OrdreController : ControllerBase
-	{
-		private readonly IOrdreRepository _ordreRepository;
-		private readonly ScooterLandContext _context;
+    // Marker klassen som en API-controller, der håndterer HTTP-requests på ruten 'api/Ordre'.
+    [Route("api/[controller]")]
+    [ApiController]
 
-		public OrdreController(IOrdreRepository ordreRepository, ScooterLandContext context)
-		{
-			_ordreRepository = ordreRepository;
-			_context = context;
-		}
-		// GET: api/ordrer/{id}
-		[HttpGet("{id}")]
-		public async Task<ActionResult<Ordre>> GetById(int id)
-		{
-			// Hent ordren med detaljer via repository
-			var ordre = await _ordreRepository.GetWithDetailsByIdAsync(id);
+    // Arver fra ControllerBase, hvilket giver grundlæggende funktioner til en web-API.
+    public class OrdreController : ControllerBase
+    {
+        private readonly IOrdreRepository _ordreRepository; // Felt til at holde en instans af IOrdreRepository, der håndterer databasekald for ordrer.
+        private readonly ScooterLandContext _context; // Databasekontekst, så vi kan lave ændringer i databasen direkte (ud over repository).
 
-			if (ordre == null)
-			{
-				return NotFound($"Ordre with ID {id} not found.");
-			}
+        // Constructor, der injicerer IOrdreRepository og ScooterLandContext.
+        public OrdreController(IOrdreRepository ordreRepository, ScooterLandContext context)
+        {
+            _ordreRepository = ordreRepository;
+            _context = context;
+        }
 
-			return Ok(ordre); // Returner ordredetaljerne
-		}
+        // GET: api/ordrer/{id}
+        [HttpGet("{id}")] // Endpoint til at hente en specifik ordre inklusiv detaljer.
+        public async Task<ActionResult<Ordre>> GetById(int id)
+        {
+            // Bruger repository til at hente ordren med dens tilknyttede detaljer.
+            var ordre = await _ordreRepository.GetWithDetailsByIdAsync(id);
+
+            // Returnerer 404 Not Found, hvis ordren ikke eksisterer.
+            if (ordre == null)
+            {
+                return NotFound($"Ordre with ID {id} not found."); 
+            }
+
+            // Returnerer 200 OK med ordren, hvis den blev fundet.
+            return Ok(ordre); 
+        }
+
         // GET: api/Mekaniker
-        [HttpGet]
+        [HttpGet] // Endpoint til at hente en liste af ordrer.
         public async Task<ActionResult<IEnumerable<Ordre>>> GetAll()
         {
+            // Henter alle ordrer fra databasen via repository.
             var ordre = await _ordreRepository.GetAllAsync();
-			return Ok(ordre);
+            // Returnerer 200 OK med listen af ordrer.
+            return Ok(ordre); 
         }
-		public async Task<ActionResult<Ordre>> Add([FromBody] CreateOrdreDto ordreDTO)
-		{
-			if (ordreDTO == null || ordreDTO.KundeId == 0)
-			{
-				return BadRequest("Ordre data is invalid.");
-			}
 
-			try
-			{
-				var ordre = new Ordre
-				{
-					KundeId = ordreDTO.KundeId,
-					Dato = ordreDTO.Dato,
-					TotalPris = 0, // Start med 0 og beregn totalen senere
-					OrdreYdelse = ordreDTO.OrdreYdelser?.Select(oy => new OrdreYdelse
-					{
-						YdelseId = oy.YdelseId,
-						AftaltPris = oy.AftaltPris ?? 0,
-						Dato = oy.Dato ?? DateTime.Now,
-						ScooterId = oy.ScooterId
-					}).ToList()
-				};
+        // Metode til at oprette en ny ordre baseret på et CreateOrdreDto-objekt.
+        public async Task<ActionResult<Ordre>> Add([FromBody] CreateOrdreDto ordreDTO)
+        {
+            if (ordreDTO == null || ordreDTO.KundeId == 0)
+            {
+                // Returnerer 400 Bad Request, hvis DTO er null eller KundeId mangler.
+                return BadRequest("Ordre data is invalid."); 
+            }
 
-				// Valider, at alle ydelser har en scooter valgt
-				if (ordre.OrdreYdelse != null && ordre.OrdreYdelse.Any(oy => oy.ScooterId == null))
-				{
-					return BadRequest("Alle ydelser skal have en tilknyttet scooter.");
-				}
+            try
+            {
+                var ordre = new Ordre
+                {
+                    KundeId = ordreDTO.KundeId, // Sætter KundeId fra DTO'en.
+                    Dato = ordreDTO.Dato, // Bruger Dato fra DTO'en, ellers standardværdi.
+                    TotalPris = 0, // Start på 0 og læg til, når ydelser og produkter er beregnet
+                    OrdreYdelse = ordreDTO.OrdreYdelser?.Select(oy => new OrdreYdelse // Mapper OrdreYdelse fra DTO til en liste af OrdreYdelse-objekter. 
+                    {
+                        YdelseId = oy.YdelseId, 
+                        AftaltPris = oy.AftaltPris ?? 0, // Bruger enten aftalt pris eller 0, hvis den ikke er sat.
+                        Dato = oy.Dato ?? DateTime.Now, // Bruger enten givet dato eller nuværende tidspunkt som fallback.
+                        ScooterId = oy.ScooterId // ScooterId bestemmer, hvilken kunde-scooter ydelsen knyttes til.
+                    }).ToList()
+                };
 
-				// Beregn totalpris fra ydelser
-				if (ordre.OrdreYdelse != null && ordre.OrdreYdelse.Any())
-				{
-					foreach (var ydelse in ordre.OrdreYdelse)
-					{
-						// Brug AftaltPris hvis tilgængelig, ellers StandardPris
-						var ydelsePris = ydelse.AftaltPris > 0
-							? ydelse.AftaltPris
-							: (await _context.Ydelser.FindAsync(ydelse.YdelseId))?.StandardPris ?? 0;
+                // Tjek om alle ydelser har en scooter valgt
+                if (ordre.OrdreYdelse != null && ordre.OrdreYdelse.Any(oy => oy.ScooterId == null))
+                {
+                    // Forhindrer oprettelse, hvis nogen ydelser ikke har en scooter.
+                    return BadRequest("Alle ydelser skal have en tilknyttet scooter."); 
+                }
 
-						ordre.TotalPris += ydelsePris;
-					}
-				}
-				// Håndter lejeaftale, hvis der er en
-				if (ordreDTO.LejeAftale != null)
-				{
-					var nyLejeAftale = new LejeAftale
-					{
-						KundeId = ordreDTO.KundeId,
-						StartDato = ordreDTO.LejeAftale.StartDato,
-						SlutDato = ordreDTO.LejeAftale.SlutDato,
-						DagligLeje = ordreDTO.LejeAftale.DagligLeje,
-						ForsikringsPris = ordreDTO.LejeAftale.ForsikringsPris,
-						KilometerPris = ordreDTO.LejeAftale.KilometerPris,
-						KortKilometer = ordreDTO.LejeAftale.KortKilometer
-					};
-					_context.LejeAftaler.Add(nyLejeAftale);
-					await _context.SaveChangesAsync();
+                // Beregn totalpris fra ydelser
+                if (ordre.OrdreYdelse != null && ordre.OrdreYdelse.Any())
+                {
+                    foreach (var ydelse in ordre.OrdreYdelse)
+                    {
+                        // Brug aftalt pris, hvis > 0, ellers find ydelsens standardpris i databasen.
+                        var ydelsePris = ydelse.AftaltPris > 0
+                            ? ydelse.AftaltPris
+                            : (await _context.Ydelser.FindAsync(ydelse.YdelseId))?.StandardPris ?? 0;
 
-					ordre.LejeId = nyLejeAftale.LejeId;
-					ordre.TotalPris += nyLejeAftale.TotalPris;
-				}
+                        // Læg ydelsens pris til ordre-totalen.
+                        ordre.TotalPris += ydelsePris;
+                    }
+                }
 
-				_context.Ordrer.Add(ordre);
-				await _context.SaveChangesAsync();
+                // Hvis der er en lejeaftale i DTO'en, håndteres den her
+                if (ordreDTO.LejeAftale != null)
+                {
+                    // Opret et nyt LejeAftale-objekt baseret på de givne data.
+                    var nyLejeAftale = new LejeAftale
+                    {
+                        KundeId = ordreDTO.KundeId,
+                        StartDato = ordreDTO.LejeAftale.StartDato,
+                        SlutDato = ordreDTO.LejeAftale.SlutDato,
+                        DagligLeje = ordreDTO.LejeAftale.DagligLeje,
+                        ForsikringsPris = ordreDTO.LejeAftale.ForsikringsPris,
+                        KilometerPris = ordreDTO.LejeAftale.KilometerPris,
+                        KortKilometer = ordreDTO.LejeAftale.KortKilometer
+                    };
+                    
+                    // Tilføj lejeaftalen til konteksten.
+                    _context.LejeAftaler.Add(nyLejeAftale); 
+                    // Gem ændringer for at få genereret en LejeId.
+                    await _context.SaveChangesAsync(); 
 
-				if (ordreDTO.LejeAftale?.LejeScooterId != null)
-				{
-					var lejeScooter = await _context.LejeScootere.FindAsync(ordreDTO.LejeAftale.LejeScooterId);
-					if (lejeScooter == null)
-					{
-						return BadRequest($"Scooter med ID {ordreDTO.LejeAftale.LejeScooterId} findes ikke.");
-					}
+                    // Sæt ordre.LejeId til den netop oprettede lejeaftales ID.
+                    ordre.LejeId = nyLejeAftale.LejeId; 
+                    // Læg lejeaftalens totalpris til ordretotalen, hvis relevant.
+                    ordre.TotalPris += nyLejeAftale.TotalPris; 
+                }
 
-					lejeScooter.LejeId = ordre.LejeId;
-					lejeScooter.ErTilgængelig = false; // Scooteren er nu ikke længere tilgængelig
-					_context.LejeScootere.Update(lejeScooter);
-				}
+                // Tilføj ordren til databasen
+                _context.Ordrer.Add(ordre); 
+                // Gem ændringer for at få et OrdreId.
+                await _context.SaveChangesAsync(); 
 
-				await _context.SaveChangesAsync();
+                if (ordreDTO.LejeAftale?.LejeScooterId != null)
+                {
+                    // Find den valgte leje-scooter.
+                    var lejeScooter = await _context.LejeScootere.FindAsync(ordreDTO.LejeAftale.LejeScooterId);
+                    if (lejeScooter == null)
+                    {
+                        // Returnerer fejl, hvis scooteren ikke findes.
+                        return BadRequest($"Scooter med ID {ordreDTO.LejeAftale.LejeScooterId} findes ikke.");
+                    }
+                    
+                    // Tildeler scooteren den oprettede lejeaftale og markerer den som ikke længere ledig.
+                    lejeScooter.LejeId = ordre.LejeId;
+                    lejeScooter.ErTilgængelig = false; // Gør scooteren utilgængelig, da den er lejet
+                    _context.LejeScootere.Update(lejeScooter);
+                }
 
-				// Håndter produkter
-				if (ordreDTO.OrdreProdukter != null && ordreDTO.OrdreProdukter.Any())
-				{
-					foreach (var produktDTO in ordreDTO.OrdreProdukter)
-					{
-						var produkt = await _context.Produkter.FindAsync(produktDTO.ProduktId);
-						if (produkt == null) return BadRequest($"Produkt med ID {produktDTO.ProduktId} findes ikke.");
-						if (produkt.LagerAntal < produktDTO.KøbsAntal) return BadRequest($"Ikke nok på lager for produkt: {produkt.ProduktNavn}.");
+                // Gem eventuelle ændringer vedr. leje-scooter
+                await _context.SaveChangesAsync(); 
 
-						produkt.LagerAntal -= produktDTO.KøbsAntal;
-						_context.Produkter.Update(produkt);
+                // Håndter produkter
+                if (ordreDTO.OrdreProdukter != null && ordreDTO.OrdreProdukter.Any())
+                {
+                    foreach (var produktDTO in ordreDTO.OrdreProdukter)
+                    {
+                        // Find produktet i databasen.
+                        var produkt = await _context.Produkter.FindAsync(produktDTO.ProduktId);
+                        if (produkt == null) return BadRequest($"Produkt med ID {produktDTO.ProduktId} findes ikke.");
+                        // Tjek lagerbeholdning.
+                        if (produkt.LagerAntal < produktDTO.KøbsAntal) return BadRequest($"Ikke nok på lager for produkt: {produkt.ProduktNavn}.");
 
-						var ordreProdukt = new OrdreProdukt
-						{
-							ProduktId = produkt.ProduktId,
-							OrdreId = ordre.OrdreId,
-							Antal = produktDTO.KøbsAntal,
-							Pris = produkt.Pris ?? 0
-						};
-						_context.OrdreProdukter.Add(ordreProdukt);
-						ordre.TotalPris += (produkt.Pris ?? 0) * produktDTO.KøbsAntal;
-					}
-				}
+                        // Reducer lagerantallet baseret på det købte antal.
+                        produkt.LagerAntal -= produktDTO.KøbsAntal;
+                        _context.Produkter.Update(produkt);
 
-				await _context.SaveChangesAsync();
+                        // Opret et OrdreProdukt-objekt, der beskriver, hvilke produkter der er købt i denne ordre.
+                        var ordreProdukt = new OrdreProdukt
+                        {
+                            ProduktId = produkt.ProduktId,
+                            OrdreId = ordre.OrdreId,
+                            Antal = produktDTO.KøbsAntal,
+                            Pris = produkt.Pris ?? 0
+                        };
+                        // Tilføj koblingen mellem ordre og produkt til konteksten.
+                        _context.OrdreProdukter.Add(ordreProdukt);
+                        // Læg produktets pris * antal til den samlede ordre-total.
+                        ordre.TotalPris += (produkt.Pris ?? 0) * produktDTO.KøbsAntal;
+                    }
+                }
 
-				var betaling = new Betaling
-				{
-					OrdreId = ordre.OrdreId,
-					Beløb = ordre.TotalPris,
-					Betalt = false
-				};
-				_context.Betalinger.Add(betaling);
-				await _context.SaveChangesAsync();
+                // Gem ændringer for at opdatere ordre-totalen og lageret.
+                await _context.SaveChangesAsync(); 
 
-				return CreatedAtAction(nameof(GetById), new { id = ordre.OrdreId }, ordre);
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(500, $"Fejl under oprettelse af ordre: {ex.Message}");
-			}
-		}
+                // Opret en betaling for ordren
+                var betaling = new Betaling
+                {
+                    OrdreId = ordre.OrdreId,
+                    Beløb = ordre.TotalPris,
+                    Betalt = false
+                };
+                
+                // Tilføj betalingen til konteksten.
+                _context.Betalinger.Add(betaling);
+                // Gem ændringer for at oprette betalingen i databasen.
+                await _context.SaveChangesAsync();
 
-		// API-endpoint til opdatering af ordrestatus
-		[HttpPut("{ordreId}/status")]
+                // Returnerer 201 Created med den nyligt oprettede ordre.
+                return CreatedAtAction(nameof(GetById), new { id = ordre.OrdreId }, ordre);
+            }
+            catch (Exception ex)
+            {
+                // Returnerer 500 Internal Server Error, hvis en uventet fejl opstår.
+                return StatusCode(500, $"Fejl under oprettelse af ordre: {ex.Message}");
+            }
+        }
+
+        [HttpPut("{ordreId}/status")] // PUT-endpoint på 'api/Ordre/{ordreId}/status' til at opdatere en ordres status.
         public async Task<IActionResult> UpdateOrdreStatus(int ordreId, [FromBody] OrdreStatus nyStatus)
         {
             try
             {
+                // Opdaterer ordren i databasen med den nye status.
                 await _ordreRepository.UpdateOrdreStatusAsync(ordreId, nyStatus);
+                // Returnerer 200 OK med en succesbesked.
                 return Ok(new { message = "Ordrestatus opdateret med succes." });
             }
             catch (KeyNotFoundException ex)
             {
+                // Returnerer 404, hvis ordren ikke findes.
                 return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
+                // Returnerer 500, hvis en serverfejl opstår.
                 return StatusCode(500, new { message = "Der opstod en fejl under opdatering af ordrestatus.", error = ex.Message });
             }
         }
-	}
+    }
 }

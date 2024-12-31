@@ -1,42 +1,68 @@
-﻿@page
-@model ScooterLandProjectOpg.Server.Pages.ErrorModel
+﻿@page 
+@model ScooterLandProjectOpg.Server.Pages.ErrorModel 
 
 <!DOCTYPE html>
+@* Definerer, at dokumentets sprog er engelsk. *@
 <html lang="en">
 
+@* Indeholder metadata og referencer til CSS. *@
 <head>
+    @* Sætter tegnsætning til UTF-8. *@
     <meta charset="utf-8" />
+
+    @* Gør siden responsiv på forskellige skærmstørrelser og forhindrer zoom (user-scalable = no). *@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    @* Viser "Error" i browserens titellinje. *@
     <title>Error</title>
+
+    @* Refererer til Bootstrap-CSS for styling. ~/ betyder, at stien er relativ til webroden. *@
     <link href="~/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+
+    @* Refererer til app.css for yderligere styling, asp-append-version sikrer cache-busting. *@
     <link href="~/css/app.css" rel="stylesheet" asp-append-version="true" />
 </head>
 
+@* Body-sektionen, hvor hovedindholdet placeres. *@
 <body>
+    @* En wrapper/container for siden. *@
     <div class="main">
+
+        @* En container med noget padding (px-4) for indholdet. *@
         <div class="content px-4">
+
+            @* En rød overskrift, der viser "Error.". *@
             <h1 class="text-danger">Error.</h1>
+
+            @* Endnu en rød overskrift, der uddyber fejlen. *@
             <h2 class="text-danger">An error occurred while processing your request.</h2>
 
             @if (Model.ShowRequestId)
             {
+                @* Viser et kodeblok, der kun kører hvis ShowRequestId er true. *@
                 <p>
                     <strong>Request ID:</strong> <code>@Model.RequestId</code>
                 </p>
+                @* Viser en Request ID i en kodeblok, hvis den er tilgængelig. *@
             }
 
+            @* En underoverskrift, der fortæller om udviklingstilstand. *@
             <h3>Development Mode</h3>
+
             <p>
                 Swapping to the <strong>Development</strong> environment displays detailed information about the error that occurred.
             </p>
+            @* Informerer om, at hvis man skifter til "Development" environment, vises mere detaljeret fejlinfo. *@
+
             <p>
                 <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
                 It can result in displaying sensitive information from exceptions to end users.
                 For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
                 and restarting the app.
             </p>
+            @* Advarer mod at bruge Development environment i produktion, da det kan afsløre følsomme oplysninger. *@
+
         </div>
     </div>
 </body>
-
 </html>

@@ -1,26 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System; // Inkluderer funktionalitet til arbejde med datoer og tider.
+using System.Collections.Generic; // Tillader brug af generiske samlinger som List.
+using System.ComponentModel.DataAnnotations; // Indeholder funktioner til validering af data, f.eks. Required og Range.
+using System.Linq; // Giver LINQ-metoder til datasæt.
+using System.Text; // Indeholder funktioner til tekstmanipulation.
+using System.Threading.Tasks; // Understøtter asynkron programmering.
 
-namespace ScooterLandProjectOpg.Shared.DTO
+namespace ScooterLandProjectOpg.Shared.DTO // Definerer navnerummet for Data Transfer Objects, der er del af projektet.
 {
-	public class OrdreYdelseDto
-	{
-		//Denne DTO er lavet for at kunne vise information omkring en specifik ydelse og hvilken scooter ydelsen laves på.
-		public int OrdreYdelseId { get; set; }
-		public string? YdelseNavn { get; set; } // Navn på ydelsen
-		public string? ScooterMaerke { get; set; } // Scooterens mærke
-		public string? ScooterModel { get; set; } // Scooterens model
-		public string? ProduktionsAar { get; set; } // Scooterens årgang
-		[Required(ErrorMessage = "Startdato er påkrævet.")]
-		public DateTime? StartDato { get; set; } // Startdato for arbejdet
-		[Required(ErrorMessage = "Slutdato er påkrævet.")]
-		public DateTime? SlutDato { get; set; } // Slutdato for arbejdet
+    // En klasse, der definerer en DTO til repræsentation af detaljer om en ordreydelse.
+    public class OrdreYdelseDto 
+    {
+        public int OrdreYdelseId { get; set; } // ID, der entydigt identificerer ordreydelsen.
 
-		[Range(1, int.MaxValue, ErrorMessage = "Timer skal være større end 0.")]
-		public double? Timer { get; set; } // Timer for arbejdet
-	}
+        public string? YdelseNavn { get; set; } // Navnet på ydelsen, f.eks. service eller reparation.
+
+        public string? ScooterMaerke { get; set; } // Mærke på scooteren, der er forbundet med ydelsen.
+
+        public string? ScooterModel { get; set; } // Model på scooteren, der er forbundet med ydelsen.
+
+        public string? ProduktionsAar { get; set; } // Årgangen for scooteren, hvis det er relevant.
+
+        [Required(ErrorMessage = "Startdato er påkrævet.")] // Validering, der kræver en startdato.
+        public DateTime? StartDato { get; set; } // Startdato for det arbejde, der skal udføres.
+
+        [Required(ErrorMessage = "Slutdato er påkrævet.")] // Validering, der kræver en slutdato.
+        public DateTime? SlutDato { get; set; } // Slutdato for det arbejde, der skal udføres.
+
+        [Range(1, int.MaxValue, ErrorMessage = "Timer skal være større end 0.")] // Validering for at sikre, at timer er positivt.
+        public double? Timer { get; set; } // Antal timer brugt på arbejdet, kan være null hvis ikke oplyst.
+    }
 }

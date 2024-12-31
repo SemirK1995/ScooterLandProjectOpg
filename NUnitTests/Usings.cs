@@ -1,1 +1,1 @@
-global using NUnit.Framework;
+global using NUnit.Framework; // Angiver en global brug af NUnit.Framework, så alle filer i projektet automatisk kan bruge NUnit uden at tilføje en separat using-sætning i hver fil.

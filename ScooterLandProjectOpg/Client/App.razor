@@ -1,12 +1,26 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿@* Definerer en Blazor-router, som styrer navigationen mellem forskellige sider i applikationen.
+   `AppAssembly` angiver den assembly (projekt) hvor komponenterne findes, her `App`. *@
+<Router AppAssembly="@typeof(App).Assembly">
+    @* Definerer, hvad der skal ske, når en rute matcher en eksisterende komponent.
+       `Context="routeData"` binder konteksten for den aktuelle rute til variablen `routeData`. *@
     <Found Context="routeData">
+        @* Viser komponenten, der matcher den aktuelle rute, baseret på `routeData`.
+        DefaultLayout` angiver, at layoutet `MainLayout` bruges, hvis komponenten ikke har et specifikt layout. *@
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        @* Sørger for, at fokus flyttes til den første `h1`-overskrift i komponenten, når der navigeres til en ny side.
+        Dette forbedrer tilgængeligheden for skærmlæsere og tastaturnavigation. *@
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
+    @* Definerer, hvad der skal vises, hvis ingen rute matcher den aktuelle URL. *@
     <NotFound>
+        @* Sætter sidetitlen til "Not found", hvilket opdaterer titlen i browserens faneblad. *@
         <PageTitle>Not found</PageTitle>
+        @* Bruger `MainLayout` som layout for indholdet, der vises, når en rute ikke findes. *@
         <LayoutView Layout="@typeof(MainLayout)">
+            @* Viser en besked til brugeren om, at der ikke er noget indhold på den angivne adresse.
+            `role="alert"` gør beskeden til en tilgængelighedsbesked, som skærmlæsere vil annoncere. *@
             <p role="alert">Sorry, there's nothing at this address.</p>
         </LayoutView>
     </NotFound>
+@* Afslutter router-komponenten, der styrer navigationslogikken. *@
 </Router>

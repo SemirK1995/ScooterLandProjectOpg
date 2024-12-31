@@ -1,16 +1,36 @@
-﻿<div class="alert alert-secondary mt-4">
+﻿@* Starter en div-container med klasserne "alert", "alert-secondary", og "mt-4".
+   "alert" og "alert-secondary" bruges typisk til at style en advarsels- eller informationsboks.
+   "mt-4" tilføjer margin-top for at skabe afstand fra indhold ovenover. *@
+<div class="alert alert-secondary mt-4">
+    @* Tilføjer et ikon med klassen "oi oi-pencil" (Open Iconic ikonbibliotek) for at vise en blyant.
+    "me-2" tilføjer margin-end (afstand til højre for ikonet).
+    "aria-hidden=true" gør ikonet skjult for skærmlæsere, da det kun er visuelt dekorativt. *@
     <span class="oi oi-pencil me-2" aria-hidden="true"></span>
+    @* Viser indholdet af parameteren `Title` som fed tekst ved hjælp af `strong`-elementet.
+    @Title` er en dynamisk værdi, der kan leveres til komponenten af dens forælder. *@
     <strong>@Title</strong>
 
+    @* Starter en span-container med klassen "text-nowrap", der forhindrer teksten i at bryde til en ny linje. *@
     <span class="text-nowrap">
+        @* Statisk tekst, der opfordrer brugeren til at tage en undersøgelse. *@
         Please take our
+        @* Tilføjer et hyperlink til en ekstern undersøgelse.
+        "target=_blank" åbner linket i en ny fane.
+        "class=font-weight-bold" gør teksten fed, og "link-dark" gør linkets farve mørk. *@
         <a target="_blank" class="font-weight-bold link-dark" href="https://go.microsoft.com/fwlink/?linkid=2186157">brief survey</a>
+    @* Afslutter span-containeren, der indeholder den statiske tekst og hyperlinket. *@
     </span>
+    @* Tilføjer en statisk tekst, der afslutter opfordringen til handling. *@
     and tell us what you think.
+@* Afslutter div-containeren for informations- eller advarselsboksen. *@
 </div>
 
+@* Definerer en kodeblok, der indeholder parameteren for komponenten. *@
 @code {
-    // Demonstrates how a parent component can supply parameters
+
+    @* Angiver, at `Title` er en parameter, som kan modtages fra en forælderkomponent eller side. *@
     [Parameter]
+    @* Definerer en offentlig egenskab `Title` af typen `string?`, som gør det muligt at overføre en titelværdi til komponenten.
+    `string?` betyder, at værdien kan være null, så parameteren er valgfri. *@
     public string? Title { get; set; }
 }
