@@ -169,28 +169,29 @@ namespace ScooterLandProjectOpg.Server.Services // Definerer et navneområde for
             await _context.SaveChangesAsync();
         }
 
-        // Henter detaljeret fakturadata for en specifik betaling, inklusive relaterede ordrer, lejeaftaler, ydelser og produkter.
+        // Henter detaljeret fakturadata for en specifik betaling.
+        // Inkluderer relaterede ordrer og deres tilknyttede data, såsom lejeaftaler, ydelser, produkter, mekanikeroplysninger og kundeoplysninger.
         public async Task<Betaling> GetFakturaDetaljerAsync(int betalingsId)
         {
             return await _context.Betalinger
-                .Include(b => b.Ordre)
-                    .ThenInclude(o => o.LejeAftale)
+                .Include(b => b.Ordre) // Inkluderer den ordre, der er knyttet til betalingen.
+                    .ThenInclude(o => o.LejeAftale) // Inkluderer lejeaftaleoplysninger og de scootere, der er knyttet til lejeaftalen.
                         .ThenInclude(la => la.LejeScooter)
-                .Include(b => b.Ordre)
+                .Include(b => b.Ordre) // Inkluderer ordreydelser og tilhørende scootere.
                     .ThenInclude(o => o.OrdreYdelse)
                         .ThenInclude(oy => oy.Scooter)
-                .Include(b => b.Ordre)
-                    .ThenInclude(o => o.OrdreYdelse)
+                .Include(b => b.Ordre) // Inkluderer detaljer om de ydelser, der er knyttet til ordreydelserne.
+                    .ThenInclude(o => o.OrdreYdelse) 
                         .ThenInclude(oy => oy.Ydelse)
-                .Include(b => b.Ordre)
-                    .ThenInclude(o => o.OrdreYdelse)
-                        .ThenInclude(oy => oy.Mekaniker) // Tilføj denne linje for mekanikeroplysninger
-                .Include(b => b.Ordre)
+                .Include(b => b.Ordre) // Inkluderer mekanikeroplysninger relateret til hver ydelse.
+                    .ThenInclude(o => o.OrdreYdelse) 
+                        .ThenInclude(oy => oy.Mekaniker)  
+                .Include(b => b.Ordre) // Inkluderer kundeoplysninger for den kunde, der er knyttet til ordren.
                     .ThenInclude(o => o.Kunde)
                 .Include(b => b.Ordre) // Tilføj produkterne
-                    .ThenInclude(o => o.OrdreProdukter)
+                    .ThenInclude(o => o.OrdreProdukter) // Inkluderer de produkter, der er knyttet til ordren, og deres detaljer.
                         .ThenInclude(op => op.Produkt)
-                .FirstOrDefaultAsync(b => b.BetalingsId == betalingsId);
+                .FirstOrDefaultAsync(b => b.BetalingsId == betalingsId); // Finder den første betaling, der matcher det angivne betalings-ID.
         }
 
         // Opretter betalinger for ordrer uden eksisterende betalinger og returnerer antallet af oprettede betalinger.

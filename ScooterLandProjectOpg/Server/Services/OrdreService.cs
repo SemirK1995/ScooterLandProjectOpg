@@ -18,44 +18,52 @@ namespace ScooterLandProjectOpg.Server.Services // Definerer namespace for tjene
             _context = context; // Initialiserer lokal databasekontekst.
         }
 
-		//Henter alle ordre med en kunde, betalinger og ordreydelse detaljer.
+		//Henter alle ordre med en kunde, betalinger og ordreydelse detaljer
 		public async Task<IEnumerable<Ordre>> GetAllWithDetailsAsync()
 		{
 			return await _context.Set<Ordre>()
-				.Include(o => o.Kunde)         // Indkluderer Kunde details
-				.Include(o => o.Betalinger)   // Inkluderer Betalinger
-				.Include(o => o.OrdreYdelse)  // Inlluderer OrdreYdelse
-				.ToListAsync();
-		}
-		public async Task<Ordre> GetWithDetailsByIdAsync(int id)
+				.Include(o => o.Kunde) // Inkluderer oplysninger om kunden, der er knyttet til hver ordre.
+                .Include(o => o.Betalinger) // Inkluderer betalingsoplysninger, der er knyttet til hver ordre.
+                .Include(o => o.OrdreYdelse) // Inkluderer ordreydelser, der er knyttet til hver ordre.
+                .ToListAsync(); // Returnerer resultaterne som en liste af ordrer.
+        }
+
+        // Henter en ordre med alle relaterede detaljer baseret på det givne ordre-ID
+        public async Task<Ordre> GetWithDetailsByIdAsync(int id)
 		{
 			return await _context.Ordrer
-				.Include(o => o.Kunde)             // Kundeoplysninger
-				.Include(o => o.Betalinger)        // Betalinger
-				.Include(o => o.OrdreYdelse)
-					.ThenInclude(oy => oy.Ydelse)  // Tilføj Ydelse-detaljer
-				.Include(o => o.OrdreYdelse)
-					.ThenInclude(oy => oy.Scooter) // Inkluder Scooter-detaljer for Ydelser
-				.Include(o => o.LejeAftale)
-					.ThenInclude(la => la.LejeScooter)
-				.Include(o => o.OrdreProdukter)
-					.ThenInclude(op => op.Produkt)
-				.FirstOrDefaultAsync(o => o.OrdreId == id);
-		}
-		public async Task<Ordre> AddAsync(Ordre ordre)
+				.Include(o => o.Kunde) // Inkluderer oplysninger om kunden, der er knyttet til ordren.
+                .Include(o => o.Betalinger) // Inkluderer betalingsoplysninger, der er knyttet til ordren.
+                .Include(o => o.OrdreYdelse) // Inkluderer ordreydelser og deres relaterede detaljer.
+                    .ThenInclude(oy => oy.Ydelse)  // Tilføjer detaljer om hver ydelse, der er inkluderet i ordren.
+                .Include(o => o.OrdreYdelse) 
+                    .ThenInclude(oy => oy.Scooter) // Inkluderer detaljer om scootere, der er knyttet til ydelserne.
+                .Include(o => o.LejeAftale) // Inkluderer oplysninger om lejeaftalen og dens relaterede scootere.
+                    .ThenInclude(la => la.LejeScooter)
+				.Include(o => o.OrdreProdukter) // Inkluderer produkter, der er knyttet til ordren, og deres detaljer.
+                    .ThenInclude(op => op.Produkt)
+				.FirstOrDefaultAsync(o => o.OrdreId == id); // Finder den første ordre, der matcher det angivne ordre-ID.
+        }
+
+        // Tilføjer en ny ordre til databasen
+        // Metoden gemmer ordren og sikrer, at ændringerne bliver gemt i databasen.
+        public async Task<Ordre> AddAsync(Ordre ordre)
 		{
-			_context.Ordrer.Add(ordre);
-			await _context.SaveChangesAsync();
-			return ordre;
-		}
+			_context.Ordrer.Add(ordre); // Tilføjer den nye ordre til databasen.
+            await _context.SaveChangesAsync(); // Gemmer ændringerne asynkront for at sikre, at ordren bliver persistent i databasen.
+            return ordre; // Returnerer den tilføjede ordre, som kan bruges til videre behandling eller visning.
+        }
+
+        // Opdaterer status for en specifik ordre baseret på dens ID.
+        // Metoden henter ordren, inkluderer dens relaterede detaljer og opdaterer statusen.
         public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
         {
-            var ordre = await _context.Ordrer // Finder ordren baseret på ID.
-                .Include(o => o.OrdreYdelse) // Inkluder arbejdsopgaver relateret til ordren.
-                .Include(o => o.OrdreProdukter) // Inkluder produkter relateret til ordren.
-                .Include(o => o.Betalinger) // Inkluder betalinger relateret til ordren.
-                .Include(o => o.LejeAftale) // Inkluder lejeaftaleoplysninger.
-                .ThenInclude(la => la.LejeScooter) // Inkluder scootere relateret til lejeaftalen.
+            var ordre = await _context.Ordrer // Henter ordren fra databasen baseret på det angivne ID og inkluderer relaterede data.
+                .Include(o => o.OrdreYdelse) // Inkluderer relaterede ordreydelser for at sikre fuld adgang til relevante data.
+                .Include(o => o.OrdreProdukter) // Inkluderer produkter knyttet til ordren.
+                .Include(o => o.Betalinger) // Inkluderer betalingsoplysninger knyttet til ordren.
+                .Include(o => o.LejeAftale) // Inkluderer lejeaftaleoplysninger for ordren.
+                .ThenInclude(la => la.LejeScooter) // Inkluderer scootere knyttet til lejeaftalen for yderligere detaljer.
                 .FirstOrDefaultAsync(o => o.OrdreId == ordreId); // Finder den første ordre, der matcher ID.
 
             if (ordre == null) // Tjekker, om ordren blev fundet.

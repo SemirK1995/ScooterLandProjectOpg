@@ -108,86 +108,142 @@ namespace ScooterLandProjectOpg.Server.PDFServices // Definerer namespace for PD
                 // Tilføjer et større mellemrum på 30 enheder til at adskille betalingssektionen fra den næste sektion.
                 yPoint += 30;
 
-                // Kundeoplysninger
+
+                // Tegner kundeoplysninger
+                // Skriver overskriften "Kundeoplysninger" på PDF'en. Teksten er formateret med en header-skrifttype og sort farve.
+                // Den placeres øverst til venstre på siden, med en XRect, der definerer placeringen og bredden af tekstområdet.
                 gfx.DrawString("Kundeoplysninger", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                // Flytter y-koordinaten 30 enheder ned for at gøre plads til yderligere indhold nedenfor.
                 yPoint += 30;
+                // Skriver kunde-ID'et, som kommer fra kundens data, med en normal skrifttype og sort farve.
+                // Den placeres på x-position 40 og den aktuelle y-position.
                 gfx.DrawString($"KundeId: {kunde.KundeId}", normalFont, darkBrush, 40, yPoint);
+                // Flytter y-koordinaten 15 enheder ned for at tilføje næste tekstlinje.
                 yPoint += 15;
+                // Skriver kundens navn, som hentes fra kundens data. Teksten vises også i venstre kolonne, 40 enheder fra venstre kant.
                 gfx.DrawString($"Kunde Navn: {kunde.Navn}", normalFont, darkBrush, 40, yPoint);
+                // Flytter y-koordinaten yderligere 15 enheder ned.
                 yPoint += 15;
+                // Skriver kundens adresse fra dataene. Den placeres med samme formatering og placering som tidligere linjer.
                 gfx.DrawString($"Adresse: {kunde.Adresse}", normalFont, darkBrush, 40, yPoint);
+                // Flytter y-koordinaten yderligere 15 enheder ned.
                 yPoint += 15;
+                // Skriver kundens telefonnummer fra dataene, med samme placering og formatering som tidligere linjer.
                 gfx.DrawString($"Telefon: {kunde.Telefonnummer}", normalFont, darkBrush, 40, yPoint);
+                // Tilføjer et større mellemrum på 30 enheder for at adskille kundeoplysninger fra næste sektion.
                 yPoint += 30;
 
+                // Tilføjer en vandret, lys grå linje for at visuelt adskille sektionerne på PDF'en.
+                // Linjen starter 40 enheder fra venstre kant og strækker sig til næsten hele sidens bredde.
                 gfx.DrawLine(XPens.LightGray, 40, yPoint, page.Width - 40, yPoint);
+                // Flytter y-koordinaten yderligere 20 enheder ned for at skabe afstand til næste sektion.
                 yPoint += 20;
 
-                // Ordre detaljer
+
+                // Tegner ordre detaljer
+                // Skriver overskriften "Ordre Detaljer" på PDF'en. Teksten er formateret med en header-skrifttype og sort farve.
+                // Den placeres øverst til venstre på siden, med en XRect, der definerer placeringen og bredden af tekstområdet.
                 gfx.DrawString("Ordre Detaljer", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                // Flytter y-koordinaten 30 enheder ned for at gøre plads til yderligere indhold nedenfor.
                 yPoint += 30;
+                // Skriver ordre-ID'et, som hentes fra ordredatabasen. Teksten vises i venstre kolonne, 40 enheder fra venstre kant.
                 gfx.DrawString($"Ordre ID: {ordre.OrdreId}", normalFont, darkBrush, 40, yPoint);
+                // Flytter y-koordinaten yderligere 15 enheder ned.
                 yPoint += 15;
+                // Skriver ordredatoen i formatet dag-måned-år. Datoen er hentet fra ordredatabasen og vises på samme måde som tidligere linjer.
                 gfx.DrawString($"Ordre Dato: {ordre.Dato?.ToString("dd-MM-yyyy")}", normalFont, darkBrush, 40, yPoint);
+                // Tilføjer et større mellemrum på 30 enheder for at adskille ordredetaljerne fra næste sektion.
                 yPoint += 30;
 
-                // Lejeaftale
+
+                // Tegner lejeaftale
+                // Kontrollerer om ordren har en tilknyttet lejeaftale. Hvis lejeaftalen ikke er null, skrives detaljerne til PDF'en.
                 if (ordre.LejeAftale != null)
                 {
+                    // Skriver overskriften "Lejeaftale Detaljer" på PDF'en. Teksten er formateret med en header-skrifttype og sort farve.
+                    // Den placeres øverst til venstre på siden, med en XRect, der definerer placeringen og bredden af tekstområdet.
                     gfx.DrawString("Lejeaftale Detaljer", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                    // Flytter y-koordinaten 30 enheder ned for at gøre plads til yderligere indhold nedenfor.
                     yPoint += 30;
+                    // Skriver lejeaftalens ID, som hentes fra lejeaftaledataene. Teksten vises i venstre kolonne, 40 enheder fra venstre kant.
                     gfx.DrawString($"LejeId: {ordre.LejeAftale.LejeId}", normalFont, darkBrush, 40, yPoint);
+                    // Flytter y-koordinaten yderligere 15 enheder ned.
                     yPoint += 15;
+                    // Skriver lejeaftalens startdato i formatet dag-måned-år. Startdatoen hentes fra lejeaftaledataene.
                     gfx.DrawString($"Startdato: {ordre.LejeAftale.StartDato:dd-MM-yyyy}", normalFont, darkBrush, 40, yPoint);
+                    // Flytter y-koordinaten yderligere 15 enheder ned.
                     yPoint += 15;
+                    // Skriver lejeaftalens slutdato i formatet dag-måned-år. Slutdatoen hentes fra lejeaftaledataene.
                     gfx.DrawString($"Slutdato: {ordre.LejeAftale.SlutDato:dd-MM-yyyy}", normalFont, darkBrush, 40, yPoint);
+                    // Flytter y-koordinaten yderligere 15 enheder ned.
                     yPoint += 15;
+                    // Skriver prisen for daglig leje af en scooter, som hentes fra lejeaftaledataene. Beløbet vises i kroner.
                     gfx.DrawString($"Daglig leje for scooter: {ordre.LejeAftale.DagligLeje} kr.", normalFont, darkBrush, 40, yPoint);
+                    // Flytter y-koordinaten yderligere 15 enheder ned.
                     yPoint += 15;
+                    // Skriver prisen per kilometer, som hentes fra lejeaftaledataene. Beløbet vises i kroner.
                     gfx.DrawString($"Kilometer Pris: {ordre.LejeAftale.KilometerPris} kr.", normalFont, darkBrush, 40, yPoint);
+                    // Flytter y-koordinaten yderligere 15 enheder ned.
                     yPoint += 15;
+                    // Skriver antallet af kørte kilometer, som hentes fra lejeaftaledataene.
                     gfx.DrawString($"Antal kørte kilometer: {ordre.LejeAftale.KortKilometer}", normalFont, darkBrush, 40, yPoint);
+                    // Flytter y-koordinaten yderligere 15 enheder ned.
                     yPoint += 15;
+                    // Skriver selvrisikobeløbet for lejeaftalen, som hentes fra lejeaftaledataene. Beløbet vises i kroner.
                     gfx.DrawString($"Selvrisiko: {ordre.LejeAftale.Selvrisiko} kr.", normalFont, darkBrush, 40, yPoint);
+                    // Tilføjer et større mellemrum på 30 enheder for at adskille lejeaftaledetaljerne fra næste sektion.
                     yPoint += 30;
                 }
 
-                // Ydelser
+                // Tegner ydelser
+                // Kontrollerer om ordren indeholder nogen produkter. Hvis listen over ordreprodukter ikke er tom, skrives detaljerne til PDF'en.
                 if (ordre.OrdreProdukter?.Any() == true)
                 {
+                    // Skriver overskriften "Produkter" på PDF'en. Teksten er formateret med en header-skrifttype og sort farve.
+                    // Den placeres øverst til venstre på siden, med en XRect, der definerer placeringen og bredden af tekstområdet.
                     gfx.DrawString("Produkter", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                    // Flytter y-koordinaten 30 enheder ned for at gøre plads til produktlisten.
                     yPoint += 30;
+                    // Itererer gennem hver produktpost i ordreprodukterne for at skrive produktdetaljerne til PDF'en.
                     foreach (var produkt in ordre.OrdreProdukter)
                     {
+                        // Skriver produkt-ID'et, produktnavnet og prisen for det aktuelle produkt. Prisen formateres med to decimaler og vises i kroner.
+                        // Teksten placeres 40 enheder fra venstre kant og på den aktuelle y-position.
                         gfx.DrawString($"- Produkt ID {produkt.ProduktId}: {produkt.Produkt.ProduktNavn}, Pris: {produkt.Pris.ToString("F2")} kr.", normalFont, darkBrush, 40, yPoint);
+                        // Flytter y-koordinaten 15 enheder ned for at gøre plads til næste produkt.
                         yPoint += 15;
                     }
+                    // Tilføjer et mindre mellemrum på 10 enheder for at adskille produktsektionen fra eventuel efterfølgende tekst.
                     yPoint += 10;
                 }
 
 
-                // Produkter
+                // Tegner produkter
+                // Kontrollerer om ordren indeholder nogen ydelser. Hvis listen over ordreydelser ikke er tom, skrives detaljerne til PDF'en.
                 if (ordre.OrdreYdelse?.Any() == true)
                 {
+                    // Skriver overskriften "Ydelser" på PDF'en. Teksten er formateret med en header-skrifttype og sort farve.
+                    // Den placeres øverst til venstre på siden, med en XRect, der definerer placeringen og bredden af tekstområdet.
                     gfx.DrawString("Ydelser", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                    // Flytter y-koordinaten 30 enheder ned for at gøre plads til efterfølgende indhold.
                     yPoint += 30;
 
-
-                    // Tegner en separatorlinje.
+                    // Tegner en separatorlinje under overskriften for at adskille sektionen visuelt.
                     gfx.DrawLine(XPens.LightGray, 40, yPoint, page.Width - 40, yPoint);
-                    // Flytter y-koordinaten ned for næste sektion.
+                    // Flytter y-koordinaten yderligere 20 enheder ned for at skabe afstand til den næste sektion.
                     yPoint += 20;
 
-
-                    // Gemmer PDF-dokumentet til MemoryStream.
+                    // Gemmer PDF-dokumentet til en MemoryStream for at forberede det til returnering som en bytearray.
                     pdf.Save(ms);
 
-                    // Returnerer PDF'en som bytearray.
+                    // Returnerer PDF-dokumentet som en bytearray, som kan sendes tilbage til klienten eller bruges videre.
                     return ms.ToArray();
                 }
                 else
                 {
-                    throw new InvalidDataException("Odren har ikke nogle ydelser. kaster exception.");
+                    // Hvis listen over ordreydelser er tom, kaster koden en InvalidDataException.
+                    // Dette angiver, at ordren ikke indeholder nogen ydelser, hvilket er en fejltilstand.
+                    throw new InvalidDataException("Ordren har ikke nogle ydelser. Kaster exception.");
                 }
             }
         }
