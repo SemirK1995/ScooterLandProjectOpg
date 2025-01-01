@@ -174,22 +174,23 @@ namespace ScooterLandProjectOpg.Server.Services // Definerer et navneområde for
         {
             return await _context.Betalinger
                 .Include(b => b.Ordre)
-                .ThenInclude(o => o.LejeAftale)
-                .ThenInclude(la => la.LejeScooter)
-                // Inkluderer lejeaftaler og tilhørende scootere.
-
+                    .ThenInclude(o => o.LejeAftale)
+                        .ThenInclude(la => la.LejeScooter)
                 .Include(b => b.Ordre)
-                .ThenInclude(o => o.OrdreYdelse)
-                .ThenInclude(oy => oy.Scooter)
-                // Inkluderer ydelser og tilhørende scootere.
-
+                    .ThenInclude(o => o.OrdreYdelse)
+                        .ThenInclude(oy => oy.Scooter)
                 .Include(b => b.Ordre)
-                .ThenInclude(o => o.OrdreProdukter)
-                .ThenInclude(op => op.Produkt)
-                // Inkluderer ordreprodukter og deres detaljer.
-
+                    .ThenInclude(o => o.OrdreYdelse)
+                        .ThenInclude(oy => oy.Ydelse)
+                .Include(b => b.Ordre)
+                    .ThenInclude(o => o.OrdreYdelse)
+                        .ThenInclude(oy => oy.Mekaniker) // Tilføj denne linje for mekanikeroplysninger
+                .Include(b => b.Ordre)
+                    .ThenInclude(o => o.Kunde)
+                .Include(b => b.Ordre) // Tilføj produkterne
+                    .ThenInclude(o => o.OrdreProdukter)
+                        .ThenInclude(op => op.Produkt)
                 .FirstOrDefaultAsync(b => b.BetalingsId == betalingsId);
-                // Finder betalingen baseret på betalings-ID.
         }
 
         // Opretter betalinger for ordrer uden eksisterende betalinger og returnerer antallet af oprettede betalinger.

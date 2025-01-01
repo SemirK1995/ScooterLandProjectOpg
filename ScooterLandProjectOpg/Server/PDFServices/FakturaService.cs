@@ -10,7 +10,7 @@ using System.Reflection.Metadata; // Importerer metadatahåndtering.
 namespace ScooterLandProjectOpg.Server.PDFServices // Definerer namespace for PDF-relaterede tjenester, der bruges i projektet.
 {
     // En serviceklasse til generering af fakturaer i PDF-format.
-    public class FakturaService 
+    public class FakturaService
     {
         private readonly ScooterLandContext _context; // Kontekst, der giver adgang til databasen via EF Core.
 
@@ -43,17 +43,20 @@ namespace ScooterLandProjectOpg.Server.PDFServices // Definerer namespace for PD
                 .FirstOrDefaultAsync(b => b.BetalingsId == betalingsId); // Finder den første betaling med det angivne betalingsID.
 
             // Kontrollerer, om betalingen eksisterer.
-            if (betaling == null) 
+            if (betaling == null)
+            {
                 // Kaster undtagelse, hvis betalingen ikke findes.
-                throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet."); 
+                throw new KeyNotFoundException($"Betaling med ID {betalingsId} blev ikke fundet.");
+            }
+             
 
             // Henter ordren fra betalingen.
-            var ordre = betaling.Ordre; 
+            var ordre = betaling.Ordre;
             // Henter kunden relateret til ordren.
-            var kunde = ordre.Kunde; 
+            var kunde = ordre.Kunde;
 
             // Opretter en MemoryStream til PDF-data.
-            using (var ms = new MemoryStream()) 
+            using (var ms = new MemoryStream())
             {
                 PdfDocument pdf = new PdfDocument(); // Opretter en ny PDF-dokument.
                 PdfPage page = pdf.AddPage(); // Tilføjer en side til dokumentet.
@@ -76,7 +79,7 @@ namespace ScooterLandProjectOpg.Server.PDFServices // Definerer namespace for PD
                 // Tilføjer datoen for fakturagenerering i øverste højre hjørne.
                 gfx.DrawString($"Dato: {DateTime.Now:dd-MM-yyyy}", normalFont, darkBrush, new XRect(0, yPoint, page.Width - 40, 0), XStringFormats.TopRight);
                 // Flytter y-koordinaten ned for næste sektion.
-                yPoint += 30; 
+                yPoint += 30;
 
 
                 // Tegner en linje som separator.
@@ -105,82 +108,87 @@ namespace ScooterLandProjectOpg.Server.PDFServices // Definerer namespace for PD
                 // Tilføjer et større mellemrum på 30 enheder til at adskille betalingssektionen fra den næste sektion.
                 yPoint += 30;
 
-				// Kundeoplysninger
-				gfx.DrawString("Kundeoplysninger", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-				yPoint += 30;
-				gfx.DrawString($"KundeId: {kunde.KundeId}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 15;
-				gfx.DrawString($"Kunde Navn: {kunde.Navn}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 15;
-				gfx.DrawString($"Adresse: {kunde.Adresse}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 15;
-				gfx.DrawString($"Telefon: {kunde.Telefonnummer}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 30;
+                // Kundeoplysninger
+                gfx.DrawString("Kundeoplysninger", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                yPoint += 30;
+                gfx.DrawString($"KundeId: {kunde.KundeId}", normalFont, darkBrush, 40, yPoint);
+                yPoint += 15;
+                gfx.DrawString($"Kunde Navn: {kunde.Navn}", normalFont, darkBrush, 40, yPoint);
+                yPoint += 15;
+                gfx.DrawString($"Adresse: {kunde.Adresse}", normalFont, darkBrush, 40, yPoint);
+                yPoint += 15;
+                gfx.DrawString($"Telefon: {kunde.Telefonnummer}", normalFont, darkBrush, 40, yPoint);
+                yPoint += 30;
 
-				gfx.DrawLine(XPens.LightGray, 40, yPoint, page.Width - 40, yPoint);
-				yPoint += 20;
+                gfx.DrawLine(XPens.LightGray, 40, yPoint, page.Width - 40, yPoint);
+                yPoint += 20;
 
-				// Ordre detaljer
-				gfx.DrawString("Ordre Detaljer", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-				yPoint += 30;
-				gfx.DrawString($"Ordre ID: {ordre.OrdreId}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 15;
-				gfx.DrawString($"Ordre Dato: {ordre.Dato?.ToString("dd-MM-yyyy")}", normalFont, darkBrush, 40, yPoint);
-				yPoint += 30;
+                // Ordre detaljer
+                gfx.DrawString("Ordre Detaljer", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                yPoint += 30;
+                gfx.DrawString($"Ordre ID: {ordre.OrdreId}", normalFont, darkBrush, 40, yPoint);
+                yPoint += 15;
+                gfx.DrawString($"Ordre Dato: {ordre.Dato?.ToString("dd-MM-yyyy")}", normalFont, darkBrush, 40, yPoint);
+                yPoint += 30;
 
-				// Lejeaftale
-				if (ordre.LejeAftale != null)
-				{
-					gfx.DrawString("Lejeaftale Detaljer", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-					yPoint += 30;
-					gfx.DrawString($"LejeId: {ordre.LejeAftale.LejeId}", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Startdato: {ordre.LejeAftale.StartDato:dd-MM-yyyy}", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Slutdato: {ordre.LejeAftale.SlutDato:dd-MM-yyyy}", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Daglig leje for scooter: {ordre.LejeAftale.DagligLeje} kr.", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Kilometer Pris: {ordre.LejeAftale.KilometerPris} kr.", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Antal kørte kilometer: {ordre.LejeAftale.KortKilometer}", normalFont, darkBrush, 40, yPoint);
-					yPoint += 15;
-					gfx.DrawString($"Selvrisiko: {ordre.LejeAftale.Selvrisiko} kr.", normalFont, darkBrush, 40, yPoint);
-					yPoint += 30;
-				}
+                // Lejeaftale
+                if (ordre.LejeAftale != null)
+                {
+                    gfx.DrawString("Lejeaftale Detaljer", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                    yPoint += 30;
+                    gfx.DrawString($"LejeId: {ordre.LejeAftale.LejeId}", normalFont, darkBrush, 40, yPoint);
+                    yPoint += 15;
+                    gfx.DrawString($"Startdato: {ordre.LejeAftale.StartDato:dd-MM-yyyy}", normalFont, darkBrush, 40, yPoint);
+                    yPoint += 15;
+                    gfx.DrawString($"Slutdato: {ordre.LejeAftale.SlutDato:dd-MM-yyyy}", normalFont, darkBrush, 40, yPoint);
+                    yPoint += 15;
+                    gfx.DrawString($"Daglig leje for scooter: {ordre.LejeAftale.DagligLeje} kr.", normalFont, darkBrush, 40, yPoint);
+                    yPoint += 15;
+                    gfx.DrawString($"Kilometer Pris: {ordre.LejeAftale.KilometerPris} kr.", normalFont, darkBrush, 40, yPoint);
+                    yPoint += 15;
+                    gfx.DrawString($"Antal kørte kilometer: {ordre.LejeAftale.KortKilometer}", normalFont, darkBrush, 40, yPoint);
+                    yPoint += 15;
+                    gfx.DrawString($"Selvrisiko: {ordre.LejeAftale.Selvrisiko} kr.", normalFont, darkBrush, 40, yPoint);
+                    yPoint += 30;
+                }
 
-				// Ydelser
-				if (ordre.OrdreProdukter?.Any() == true)
-				{
-					gfx.DrawString("Produkter", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
-					yPoint += 30;
-					foreach (var produkt in ordre.OrdreProdukter)
-					{
-						gfx.DrawString($"- Produkt ID {produkt.ProduktId}: {produkt.Produkt.ProduktNavn}, Pris: {produkt.Pris.ToString("F2")} kr.", normalFont, darkBrush, 40, yPoint);
-						yPoint += 15;
-					}
-					yPoint += 10;
-				}
+                // Ydelser
+                if (ordre.OrdreProdukter?.Any() == true)
+                {
+                    gfx.DrawString("Produkter", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
+                    yPoint += 30;
+                    foreach (var produkt in ordre.OrdreProdukter)
+                    {
+                        gfx.DrawString($"- Produkt ID {produkt.ProduktId}: {produkt.Produkt.ProduktNavn}, Pris: {produkt.Pris.ToString("F2")} kr.", normalFont, darkBrush, 40, yPoint);
+                        yPoint += 15;
+                    }
+                    yPoint += 10;
+                }
 
 
-				// Produkter
-				if (ordre.OrdreYdelse?.Any() == true)
-				{
+                // Produkter
+                if (ordre.OrdreYdelse?.Any() == true)
+                {
                     gfx.DrawString("Ydelser", headerFont, darkBrush, new XRect(40, yPoint, page.Width - 80, 0), XStringFormats.TopLeft);
                     yPoint += 30;
 
 
-                // Tegner en separatorlinje.
-                gfx.DrawLine(XPens.LightGray, 40, yPoint, page.Width - 40, yPoint);
-                // Flytter y-koordinaten ned for næste sektion.
-                yPoint += 20;
+                    // Tegner en separatorlinje.
+                    gfx.DrawLine(XPens.LightGray, 40, yPoint, page.Width - 40, yPoint);
+                    // Flytter y-koordinaten ned for næste sektion.
+                    yPoint += 20;
 
 
-                // Gemmer PDF-dokumentet til MemoryStream.
-                pdf.Save(ms); 
-                
-                // Returnerer PDF'en som bytearray.
-                return ms.ToArray(); 
+                    // Gemmer PDF-dokumentet til MemoryStream.
+                    pdf.Save(ms);
+
+                    // Returnerer PDF'en som bytearray.
+                    return ms.ToArray();
+                }
+                else
+                {
+                    throw new InvalidDataException("Odren har ikke nogle ydelser. kaster exception.");
+                }
             }
         }
     }
