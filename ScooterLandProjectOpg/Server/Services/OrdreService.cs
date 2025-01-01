@@ -18,39 +18,37 @@ namespace ScooterLandProjectOpg.Server.Services // Definerer namespace for tjene
             _context = context; // Initialiserer lokal databasekontekst.
         }
 
-        // Metode til at hente alle ordrer med detaljer.
-        public async Task<IEnumerable<Ordre>> GetAllWithDetailsAsync() 
-        {
-            return await _context.Set<Ordre>() // Brug Entity Framework til at arbejde med "Ordre" data.
-                .Include(o => o.Kunde) // Inkluderer relaterede kundeoplysninger.
-                .Include(o => o.Betalinger) // Inkluderer relaterede betalinger.
-                .Include(o => o.OrdreYdelse) // Inkluderer relaterede ordreydelser.
-                .ToListAsync(); // Konverterer resultatet til en liste.
-        }
-
-        // Metode til at hente en specifik ordre baseret på ID med detaljer.
-        public async Task<Ordre> GetWithDetailsByIdAsync(int id) 
-        {
-            return await _context.Ordrer // Brug databasen til at hente ordredata.
-                .Include(o => o.Kunde) // Inkluder relaterede kundeoplysninger.
-                .Include(o => o.Betalinger) // Inkluder betalinger for ordren.
-                .Include(o => o.OrdreYdelse)
-                    .ThenInclude(oy => oy.Ydelse) // Inkluder detaljer for hver ydelse.
-                .Include(o => o.LejeAftale) // Inkluder relaterede lejeaftaler.
-                    .ThenInclude(la => la.LejeScooter) // Inkluder relaterede scootere for lejeaftalen.
-                .FirstOrDefaultAsync(o => o.OrdreId == id); // Returnerer den første ordre, der matcher ID.
-        }
-
-        // Metode til at tilføje en ny ordre.
-        public async Task<Ordre> AddAsync(Ordre ordre) 
-        {
-            _context.Ordrer.Add(ordre); // Tilføjer ordren til databasen.
-            await _context.SaveChangesAsync(); // Gemmer ændringerne i databasen.
-            return ordre; // Returnerer den tilføjede ordre.
-        }
-
-        // Metode til at opdatere ordrestatus.
-        public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus) 
+		//Henter alle ordre med en kunde, betalinger og ordreydelse detaljer.
+		public async Task<IEnumerable<Ordre>> GetAllWithDetailsAsync()
+		{
+			return await _context.Set<Ordre>()
+				.Include(o => o.Kunde)         // Indkluderer Kunde details
+				.Include(o => o.Betalinger)   // Inkluderer Betalinger
+				.Include(o => o.OrdreYdelse)  // Inlluderer OrdreYdelse
+				.ToListAsync();
+		}
+		public async Task<Ordre> GetWithDetailsByIdAsync(int id)
+		{
+			return await _context.Ordrer
+				.Include(o => o.Kunde)             // Kundeoplysninger
+				.Include(o => o.Betalinger)        // Betalinger
+				.Include(o => o.OrdreYdelse)
+					.ThenInclude(oy => oy.Ydelse)  // Tilføj Ydelse-detaljer
+				.Include(o => o.OrdreYdelse)
+					.ThenInclude(oy => oy.Scooter) // Inkluder Scooter-detaljer for Ydelser
+				.Include(o => o.LejeAftale)
+					.ThenInclude(la => la.LejeScooter)
+				.Include(o => o.OrdreProdukter)
+					.ThenInclude(op => op.Produkt)
+				.FirstOrDefaultAsync(o => o.OrdreId == id);
+		}
+		public async Task<Ordre> AddAsync(Ordre ordre)
+		{
+			_context.Ordrer.Add(ordre);
+			await _context.SaveChangesAsync();
+			return ordre;
+		}
+        public async Task UpdateOrdreStatusAsync(int ordreId, OrdreStatus nyStatus)
         {
             var ordre = await _context.Ordrer // Finder ordren baseret på ID.
                 .Include(o => o.OrdreYdelse) // Inkluder arbejdsopgaver relateret til ordren.
