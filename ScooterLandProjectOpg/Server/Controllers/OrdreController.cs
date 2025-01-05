@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc; // Giver adgang til MVC-funktionalitet, som Cont
 using Microsoft.EntityFrameworkCore; // Muliggør brug af EF Core-funktioner, fx til databaseopslag.
 using ScooterLandProjectOpg.Client; // Inkluderer klient-relateret kode, hvis der er behov for at referere til klient-side aspekter.
 using ScooterLandProjectOpg.Server.Context; // Giver adgang til ScooterLandContext, der repræsenterer databasen.
-using ScooterLandProjectOpg.Server.Interfaces; // Importerer interfacet IOrdreRepository, som definerer datatilgang for ordrer.
+using ScooterLandProjectOpg.Server.Services.Interfaces;
 using ScooterLandProjectOpg.Shared.DTO; // Importerer data transfer objekter, fx CreateOrdreDto, der bruges til at oprette ordrer.
 using ScooterLandProjectOpg.Shared.Enum; // Giver adgang til enum-typer, eksempelvis OrdreStatus.
 using ScooterLandProjectOpg.Shared.Models; // Giver adgang til model-klasser som Ordre, Betaling, LejeAftale osv.
@@ -18,11 +18,11 @@ namespace ScooterLandProjectOpg.Server.Controllers // Angiver, at denne controll
     // Arver fra ControllerBase, hvilket giver grundlæggende funktioner til en web-API.
     public class OrdreController : ControllerBase
     {
-        private readonly IOrdreRepository _ordreRepository; // Felt til at holde en instans af IOrdreRepository, der håndterer databasekald for ordrer.
+        private readonly IOrdreService _ordreRepository; // Felt til at holde en instans af IOrdreRepository, der håndterer databasekald for ordrer.
         private readonly ScooterLandContext _context; // Databasekontekst, så vi kan lave ændringer i databasen direkte (ud over repository).
 
         // Constructor, der injicerer IOrdreRepository og ScooterLandContext.
-        public OrdreController(IOrdreRepository ordreRepository, ScooterLandContext context)
+        public OrdreController(IOrdreService ordreRepository, ScooterLandContext context)
         {
             _ordreRepository = ordreRepository;
             _context = context;

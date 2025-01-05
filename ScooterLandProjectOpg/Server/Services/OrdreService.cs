@@ -1,31 +1,48 @@
-﻿using ScooterLandProjectOpg.Server.Interfaces; // Importerer interfaces til OrdreService.
-using ScooterLandProjectOpg.Shared.Models; // Importerer modelklasser som Ordre.
+﻿using ScooterLandProjectOpg.Shared.Models; // Importerer modelklasser som Ordre.
 using Microsoft.EntityFrameworkCore; // Importerer Entity Framework Core til databaseinteraktion.
 using ScooterLandProjectOpg.Server.Context; // Importerer databasekonteksten til interaktion med databasen.
-using ScooterLandProjectOpg.Shared.Enum; // Importerer enums som OrdreStatus.
+using ScooterLandProjectOpg.Shared.Enum;
+using ScooterLandProjectOpg.Server.Services.Interfaces;
+using ScooterLandProjectOpg.Server.Repositories.Interfaces; // Importerer enums som OrdreStatus.
 
 namespace ScooterLandProjectOpg.Server.Services // Definerer namespace for tjenestelogik.
 {
     // Implementerer IOrdreRepository og arver fra Repository<Ordre>.
-    public class OrdreService : Repository<Ordre>, IOrdreRepository 
+    public class OrdreService : Repository<Ordre>, IOrdreService 
     {
         // Felt til at holde databasekonteksten.
         private readonly ScooterLandContext _context; 
+        private readonly IOrdreRepository _ordreRepository; 
+        
 
         // Constructor, der initialiserer databasekonteksten og sender den til basisklassen.
-        public OrdreService(ScooterLandContext context) : base(context) 
+        public OrdreService(ScooterLandContext context, IOrdreRepository ordreRepository) : base(context) 
         {
             _context = context; // Initialiserer lokal databasekontekst.
+            _ordreRepository = ordreRepository;
         }
 
 		//Henter alle ordre med en kunde, betalinger og ordreydelse detaljer
 		public async Task<IEnumerable<Ordre>> GetAllWithDetailsAsync()
 		{
-			return await _context.Set<Ordre>()
-				.Include(o => o.Kunde) // Inkluderer oplysninger om kunden, der er knyttet til hver ordre.
-                .Include(o => o.Betalinger) // Inkluderer betalingsoplysninger, der er knyttet til hver ordre.
-                .Include(o => o.OrdreYdelse) // Inkluderer ordreydelser, der er knyttet til hver ordre.
-                .ToListAsync(); // Returnerer resultaterne som en liste af ordrer.
+            return await _ordreRepository.GetAllOrders();
+        }
+
+        public async Task<Ordre> GetOrderById(int id)
+        {
+            if (id < 0)
+            {
+                throw new InvalidDataException("Id'et er ikke gyldigt)");
+            }
+
+            Ordre ordre = await _ordreRepository.GetOrderById(id);
+
+            if (ordre == null)
+            {
+                throw new KeyNotFoundException($"Der findes ikke en ordre med id: {id}");
+            }
+
+            return ordre;
         }
 
         // Henter en ordre med alle relaterede detaljer baseret på det givne ordre-ID

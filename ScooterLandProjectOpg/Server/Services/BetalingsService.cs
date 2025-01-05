@@ -3,7 +3,8 @@ using ScooterLandProjectOpg.Server.Interfaces; // Importerer interface-kontrakte
 using ScooterLandProjectOpg.Shared.Models; // Importerer delte modeller, som repræsenterer databasen og dataobjekter.
 using Microsoft.EntityFrameworkCore; // Importerer Entity Framework Core til databaseoperationer.
 using ScooterLandProjectOpg.Shared.Enum; // Importerer enums til at repræsentere faste værdier som BetalingsMetodeStatus og OrdreStatus.
-using ScooterLandProjectOpg.Shared.DTO; // Importerer DTO'er til at overføre data mellem applikationslag.
+using ScooterLandProjectOpg.Shared.DTO;
+using ScooterLandProjectOpg.Server.Services.Interfaces; // Importerer DTO'er til at overføre data mellem applikationslag.
 
 namespace ScooterLandProjectOpg.Server.Services // Definerer et navneområde for denne service, som hører til Server-delen af applikationen.
 {
@@ -15,9 +16,9 @@ namespace ScooterLandProjectOpg.Server.Services // Definerer et navneområde for
         private readonly ScooterLandContext _context;
 
         // Lokalt felt til ordre-repositoriet, som bruges til at opdatere ordrestatuser.
-        private readonly IOrdreRepository _ordreRepository;
+        private readonly IOrdreService _ordreRepository;
 
-        public BetalingsService(ScooterLandContext context, IOrdreRepository ordreRepository) : base(context)
+        public BetalingsService(ScooterLandContext context, IOrdreService ordreRepository) : base(context)
         {
             // Initialiserer databasekonteksten.
             _context = context;

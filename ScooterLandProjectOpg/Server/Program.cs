@@ -3,7 +3,10 @@ using Microsoft.EntityFrameworkCore; // Importerer Entity Framework Core til dat
 using ScooterLandProjectOpg.Server.Context; // Importerer databasekonteksten for projektet.
 using ScooterLandProjectOpg.Server.Interfaces; // Importerer interfaces for dependency injection.
 using ScooterLandProjectOpg.Server.PDFServices; // Importerer PDF-relaterede tjenester.
-using ScooterLandProjectOpg.Server.Services; // Importerer implementeringer af repositories og services.
+using ScooterLandProjectOpg.Server.Repositories;
+using ScooterLandProjectOpg.Server.Repositories.Interfaces;
+using ScooterLandProjectOpg.Server.Services;
+using ScooterLandProjectOpg.Server.Services.Interfaces; // Importerer implementeringer af repositories og services.
 
 // Dependency Injection (DI) er en programmeringsteknik, der gør en klasse uafhængig af sine afhængigheder.
 // Det betyder, at en klasse ikke selv opretter eller styrer sine nødvendige objekter (afhængigheder), men i stedet får dem leveret udefra, typisk via en container.
@@ -28,10 +31,11 @@ builder.Services.AddScoped<IKundeScooterRepository, KundeScooterService>(); // K
 builder.Services.AddScoped<ILejeAftaleRepository, LejeAftaleService>(); // LejeAftale repository.
 builder.Services.AddScoped<ILejeScooterRepository, LejeScooterService>(); // LejeScooter repository.
 builder.Services.AddScoped<IMekanikerRepository, MekanikerService>(); // Mekaniker repository.
-builder.Services.AddScoped<IOrdreRepository, OrdreService>(); // Ordre repository.
+builder.Services.AddScoped<IOrdreService, OrdreService>(); // Ordre repository.
 builder.Services.AddScoped<IOrdreYdelseRepository, OrdreYdelseService>(); // OrdreYdelse repository.
 builder.Services.AddScoped<IYdelseRepository, YdelseService>(); // Ydelse repository.
 builder.Services.AddScoped<IProduktRepository, ProduktService>(); // Produkt repository.
+builder.Services.AddScoped<IOrdreRepository, OrdreRepository>(); // Produkt repository.
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>)); // Generisk repository for alle modeller.
 
 // Tilføjer FakturaService som en transient service, da det er en separat tjeneste til generering af fakturaer.
